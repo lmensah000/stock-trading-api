@@ -1,0 +1,12 @@
+GET https://api.schwabapi.com/trader/v1/accounts
+Authorization: Bearer I0.b2F1dGgyLmNkYy5zY2h3YWIuY29t.1gcJCtldZ-LrttQUHEAVTVW40R2OLmPnXvoq7bJ3oO4@
+
+POST https://api.schwabapi.com/v1/oauth/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=authorization_code&
+code=C0.b2F1dGgyLmJkYy5zY2h3YWIuY29t.vaL9cg_RzsAqXiSnHWSXOVDwc1YNiaihHV4u3qKocec%40&
+client_id=1wzwOrhivb2PkR1UCAUVTKYqC4MTNYlj&
+redirect_uri=https://api.tos.com/tosClient/trader/&
+client_secret=cTiI09z3TPYoVY6t
+
