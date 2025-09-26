@@ -1,7 +1,8 @@
-package com.moneyteam.service;
+package com.moneyteam.service.impl;
 
 import com.moneyteam.model.User;
 import com.moneyteam.repository.UserRepository;
+import com.moneyteam.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
