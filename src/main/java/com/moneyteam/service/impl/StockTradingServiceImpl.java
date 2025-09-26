@@ -1,10 +1,14 @@
-package com.moneyteam.service;
+package com.moneyteam.service.impl;
 
 import com.moneyteam.model.Options;
 import com.moneyteam.model.Stock;
 import com.moneyteam.model.StockTradeRequest;
 
 import com.moneyteam.model.User;
+import com.moneyteam.service.PurchaseTrade;
+import com.moneyteam.service.StockApiService;
+import com.moneyteam.service.StockStrategies;
+import com.moneyteam.service.StockTradingService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
