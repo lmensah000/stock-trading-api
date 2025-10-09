@@ -1,5 +1,5 @@
 
-package com.moneyteam.model;
+package com.moneyteam.model.enums;
 
 public enum TradeType {
     STOCK,

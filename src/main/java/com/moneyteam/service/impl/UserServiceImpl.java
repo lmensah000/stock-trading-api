@@ -4,6 +4,10 @@ import com.moneyteam.model.User;
 import com.moneyteam.repository.UserRepository;
 import com.moneyteam.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
+import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -12,17 +16,23 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public User authenticateUser(String username, String password) {
+//find by user then fill in user and password?
+        Optional<User> userOptional = userRepository.findByUsernameAndPassword(username, password);
         // Logic for authenticating the user based on the provided username and password
-        this.username;
-        this.password;
+//        this.username;
+//        this.password;
 
         // Retrieve user details from the userRepository
         // Return the authenticated user or throw an exception if authentication fails
+        return userOptional.orElseThrow(() -> new RuntimeException("Invalid Credentials"));
     }
 
     @Override
+    @Transactional
     public void registerUser(User user) {
+        userRepository.save(user);
         // Logic for registering a new user
         // Save the user details to the userRepository
     }
