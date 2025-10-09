@@ -1,12 +1,20 @@
 package com.moneyteam.repository;
 
+import com.moneyteam.model.User;
+
+import java.util.List;
+import java.util.Optional;
+
 // UserRepository.java
 public interface UserRepository {
-    User findById(Long id);
-    
-    User findByUsername(String username);
-    
-    User findByEmail(String email);
+    Optional<User> findById(Long id);
+
+    Optional<User> findByUsername(String username);
+
+    Optional<User> findByUsernameAndPassword(String username, String password);
+
+
+    Optional<User> findByEmail(String email);
     
     List<User> findAll();
     

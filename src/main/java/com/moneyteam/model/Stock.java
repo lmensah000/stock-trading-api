@@ -1,10 +1,15 @@
 package com.moneyteam.model;
 
+import javax.persistence.*;
+import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@Entity
+@Table(name = "stocks")
 public class Stock {
     // Instance variables
     @JsonProperty(required = true)
+    @Id
     private String stockTicker;
     private String stockName;
     private String sector;
@@ -18,6 +23,11 @@ public class Stock {
     private Double close;
     private Double last;
     private Double markChange;
+
+    @ElementCollection
+    @CollectionTable(name = "stock_historical_data", joinColumns = @JoinColumn(name = "stock_symbol"))
+    @Column(name = "price")
+    private List<Double> historicalData;
 
     public Stock() {}
     // Constructor

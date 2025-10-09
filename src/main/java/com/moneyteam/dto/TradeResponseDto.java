@@ -1,6 +1,7 @@
 package com.moneyteam.dto;
 
-import com.moneyteam.model.TradeType;
+import com.moneyteam.model.enums.TradeStatus;
+import com.moneyteam.model.enums.TradeType;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -9,7 +10,7 @@ public class TradeResponseDto {
     private Long id;
     private TradeType tradeType;
     private String symbol;
-    private Integer quantity;
+    private Double quantity;
     private BigDecimal price;
     private LocalDateTime executionDate;
     private TradeStatus status;
@@ -23,11 +24,11 @@ public class TradeResponseDto {
         this.id = id;
     }
 
-    public Integer getQuantity() {
+    public Double getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(Integer quantity) {
+    public void setQuantity(Double quantity) {
         this.quantity = quantity;
     }
 
@@ -53,14 +54,6 @@ public class TradeResponseDto {
 
     public void setSymbol(String symbol) {
         this.symbol = symbol;
-    }
-
-    public Integer getQuanitty() {
-        return quanitty;
-    }
-
-    public void setQuanitty(Integer quanitty) {
-        this.quanitty = quanitty;
     }
 
     public BigDecimal getPrice() {
