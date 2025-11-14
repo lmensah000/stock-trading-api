@@ -1,4 +1,3 @@
-/Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/model/TradeStatus.java
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/model/KeyMetrics.java
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/model/Trade.java
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/model/Crypto.java
@@ -9,6 +8,8 @@
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/model/Order.java
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/repository/StockTradeRepository.java
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/service/impl/UserServiceImpl.java
+/Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/model/enums/TradeStatus.java
+/Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/model/enums/TradeType.java
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/repository/UserRepository.java
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/controller/StockController.java
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/model/Options.java
@@ -24,7 +25,9 @@
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/dto/TradeRequestDto.java
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/CheckInSectionController.java
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/Television.java
+/Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/dto/LoginRequest.java
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/model/User.java
+/Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/exception/GlobalExceptionHandler.java
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/model/Watchlist.java
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/service/ThinkOrSwimClient.java
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/controller/TradeController.java
@@ -34,17 +37,17 @@
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/dto/TradeResponseDto.java
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/model/RiskManagement.java
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/view/UserInterface.java
+/Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/dto/UserRegistrationRequest.java
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/service/TradeService.java
-/Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/model/TradeType.java
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/controller/StockApiService.java
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/controller/StockTradingController.java
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/model/OrderType.java
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/model/TechnicalAnalysis.java
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/service/impl/StockTradingServiceImpl.java
-/Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/model/OptionTradeRequest.java
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/repository/TradeRepository.java
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/practice/Anything.java
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/service/StockTradingService.java
+/Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/model/OptionsTradeRequest.java
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/service/StockApiService.java
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/practice/LinkedList.java
 /Users/Lawrence/Desktop/L.Mensah/School/CITY TECH/Computer Systems/CST 3613/2021 CLass work/Moneyteam/src/main/java/com/moneyteam/service/UserService.java

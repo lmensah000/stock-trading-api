@@ -17,7 +17,7 @@ public class User {
         User.userName = userName;
     }
 
-    public static String getPassword() {
+    public static String getPassWord() {
         return passWord;
     }
 
@@ -66,6 +66,8 @@ public class User {
         User.sell = sell;
     }
 
+    public User() {};
+    
     public User(String userName, String passWord, String login, String placeHolder, String buy, String sell, String email) {
         this.userName = userName;
         this.passWord = passWord;

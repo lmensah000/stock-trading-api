@@ -55,7 +55,7 @@ public class StockStrategiesImpl {
 
     public static boolean shouldBuy(String stockTicker) {
         // Replace this with your actual trading strategy logic
-        double stockPrice = Stock.getLast(stockTicker);
+        double stockPrice = Stock.getLast();
 
         // Simple moving average strategy: Buy if the price is above a threshold
         return stockPrice > 50;
@@ -63,7 +63,7 @@ public class StockStrategiesImpl {
 
     public static boolean shouldSell(String stockTicker) {
         // Replace this with your actual trading strategy logic
-        double stockPrice = Stock.getLast(stockTicker);
+        double stockPrice = Stock.getLast();
 
         // Simple moving average strategy: Sell if the price is below a threshold
         return stockPrice < 40;

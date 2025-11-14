@@ -1,9 +1,7 @@
 package com.moneyteam.controller;
 
 import com.moneyteam.model.*;
-import com.moneyteam.service.PurchaseTrade;
-import com.moneyteam.service.StockStrategies;
-import com.moneyteam.service.StockTradingService;
+import com.moneyteam.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +16,9 @@ public class StockTradingController {
 
     @Autowired
     private StockTradingService stockTradingService;
+
+    @Autowired
+    private UserService userService;
 
     @PostMapping("/trade/stock")
     //find way to map user executed trade to execute Trade variable fpr global use.

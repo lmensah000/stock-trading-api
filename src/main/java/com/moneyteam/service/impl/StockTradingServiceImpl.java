@@ -10,6 +10,7 @@ import com.moneyteam.service.StockApiService;
 import com.moneyteam.service.StockStrategies;
 import com.moneyteam.service.StockTradingService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class StockTradingServiceImpl implements StockTradingService {

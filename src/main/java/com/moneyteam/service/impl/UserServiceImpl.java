@@ -5,8 +5,8 @@ import com.moneyteam.repository.UserRepository;
 import com.moneyteam.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.Optional;
 
 @Service
@@ -37,6 +37,32 @@ public class UserServiceImpl implements UserService {
         // Save the user details to the userRepository
     }
 
+    //update user
+    @Override
+    @Transactional
+    public void updateUser(User existingUser, User newUser) {
+        userRepository.update(existingUser);
+        existingUser.setUserName(newUser.getUserName());;
+        existingUser.setPassWord(newUser.getPassWord());//
+        existingUser.setEmail(newUser.getEmail());
+
+        userRepository.save(existingUser);// Logic for registering a new user
+        // Save the user details to the userRepository
+    }
+
+    //delete user
+    @Override
+    @Transactional
+    public void deleteUser(User user) {
+        userRepository.delete(user);
+        // Logic for registering a new user
+        // Save the user details to the userRepository
+    }
+
+    @Override
+    public User getUserById(Long userId) {
+        return null;
+    }
     // Implement other methods for managing user-specific data
 }
 

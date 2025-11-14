@@ -4,13 +4,13 @@ public class TechnicalAnalysis {
     public  String stockTicker;
     public  String stockName;
     public  String sector;
-    public  long marketCapAmount;
-    public  int volume;
-    public  double sizzle_Index;
-    public  int numberOfShares;
-    public  double open;
-    public double close;
-    public double last;
+    public static long marketCapAmount;
+    public static int volume;
+    public static double sizzle_Index;
+    public static int numberOfShares;
+    public static double open;
+    public static double close;
+    public static double last;
 
     public  String getStockTicker() {
         return stockTicker;

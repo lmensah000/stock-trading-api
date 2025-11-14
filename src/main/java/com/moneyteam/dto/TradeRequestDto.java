@@ -2,17 +2,24 @@ package com.moneyteam.dto;
 
 import com.moneyteam.model.enums.TradeStatus;
 import com.moneyteam.model.enums.TradeType;
-import org.jetbrains.annotations.NotNull;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.DecimalMin;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class TradeRequestDto {
-    @NotNull private TradeType tradeType;
+    @NotNull
+    private TradeType tradeType;
     @NotBlank private String symbol;
     @NotNull
     @Positive private Double quantity;
-    @NotNull @DecimalMin(value = "0.0, inclusive =false") private BigDecimal price;
+    @NotNull @DecimalMin(value = "0.0", inclusive =false) private BigDecimal price;
     @NotNull private LocalDateTime executionDate;
     @NotNull private Long userId;
 
