@@ -11,14 +11,12 @@ import com.moneyteam.repository.StockTradeRepository;
 import com.moneyteam.repository.TradeRepository;
 import com.moneyteam.service.TradeService;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-
-import javax.transaction.Transactional;
 
 //private static final Logger log = LoggerFactory.getLogger(TradeServiceImpl.class);
 
@@ -70,8 +68,8 @@ public class TradeServiceImpl implements TradeService {
         }
 
     @Override
-    public List<TradeResponseDto> listByStatus(TradeType tradeType) {
-        return tradeRepository.findByStatus(tradeType)
+    public List<TradeResponseDto> listByStatus(TradeStatus status) {
+        return tradeRepository.findByStatus(status)
                 .stream().map(TradeMapper::toDto).toList();
     }
 

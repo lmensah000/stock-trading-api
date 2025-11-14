@@ -14,6 +14,9 @@ public interface TradeService {
     Optional<TradeResponseDto> getById(Long id);
     List<TradeResponseDto> listByUser(Long userId);
     List<TradeResponseDto> listByType(TradeType tradeType);
+
+    List<TradeResponseDto> listByStatus(TradeStatus status);
+
     List<TradeResponseDto> listBySymbol(String symbol);
     List<TradeResponseDto> listBetween(LocalDateTime start, LocalDateTime end);
     TradeResponseDto updateStatus(Long id, TradeStatus newStatus);
