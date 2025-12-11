@@ -80,8 +80,8 @@ def fetch_stock_data(ticker):
 
 
 if __name__ == "__main__":
-    ticker_symbol = input("Enter stock ticker symbol: ").upper()
-    stock_data = fetch_stock_data(ticker_symbol)
+    ticker_stockTicker = input("Enter stock ticker stockTicker: ").upper()
+    stock_data = fetch_stock_data(ticker_stockTicker)
 
     if stock_data:
         print("\nKey Metrics:")

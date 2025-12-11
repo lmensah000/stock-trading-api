@@ -6,6 +6,8 @@ import com.moneyteam.model.enums.TradeStatus;
 import com.moneyteam.model.enums.TradeType;
 import com.moneyteam.service.TradeService;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +16,13 @@ import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Slf4j
+//— includes endpoints
+//✔ /trade/place
+//✔ /trade/history/{userId}
+//✔ /trade/positions/{userId}
+//✔ /trade/{tradeId}
+//✔ /trade/cancel/{tradeId}
+
 @RestController
 @RequestMapping("/api/trades")
 public class TradeController {
@@ -25,9 +33,11 @@ public class TradeController {
     public TradeController(TradeService tradeService)
     { this.tradeService = tradeService; }
 
+    private static final Logger log = LoggerFactory.getLogger(TradeController.class);
+
     @PostMapping("create")
     public ResponseEntity<TradeResponseDto> create(@Valid @RequestBody TradeRequestDto dto) {
-        log.info("Received trade creation request for symbol: {}", dto.getSymbol());
+        log.info("Received trade creation request for stockTicker: {}", dto.getStockTicker());
         TradeResponseDto response = tradeService.create(dto);
         log.info("Trade successfully created: {}", response);
         return ResponseEntity.ok(response);
@@ -42,22 +52,22 @@ public class TradeController {
 
     @GetMapping
     public ResponseEntity<?> search(
-            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) Long userTradeId,
             @RequestParam(required = false) TradeType tradeType,
-            @RequestParam(required = false) String symbol,
+            @RequestParam(required = false) String stockTicker,
             @RequestParam(required = false) TradeStatus status,
             @RequestParam(required = false) LocalDateTime start,
             @RequestParam(required = false) LocalDateTime end) {
 
-        log.info("Search request - userId={}, type={}, symbol={}, status={}, start={}, end={}",
-                userId, tradeType, symbol, status, start, end);
+        log.info("Search request - userId={}, type={}, stockTicker={}, status={}, start={}, end={}",
+                userTradeId, tradeType, stockTicker, status, start, end);
 
-                if (userId != null)
-                    return ResponseEntity.ok(tradeService.listByUser((userId)));
+                if (userTradeId != null)
+                    return ResponseEntity.ok(tradeService.listByUser((userTradeId)));
                 if (tradeType != null)
                     return ResponseEntity.ok(tradeService.listByType(tradeType));
-                if (symbol != null)
-                    return ResponseEntity.ok(tradeService.listBySymbol(symbol));
+                if (stockTicker != null)
+                    return ResponseEntity.ok(tradeService.listByStockTicker(stockTicker));
                 if (status != null)
                     return ResponseEntity.ok(tradeService.listByStatus(status));
                 if (status != null)

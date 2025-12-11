@@ -2,13 +2,15 @@ package com.moneyteam.controller;
 
 import com.moneyteam.model.*;
 import com.moneyteam.service.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 //BotController: This class acts as the central controller for the trading bot.
-// It receives user input from the UserInterface, interacts with the Model classes to execute
+// It receives users input from the UserInterface, interacts with the Model classes to execute
 // trading strategies, and updates the View accordingly. It coordinates the
 // flow of data and actions between the Model and View components.
 
@@ -20,10 +22,13 @@ public class StockTradingController {
     @Autowired
     private UserService userService;
 
+    private static final Logger log = LoggerFactory.getLogger(StockTradingController.class);
+
+
     @PostMapping("/trade/stock")
-    //find way to map user executed trade to execute Trade variable fpr global use.
+    //find way to map users executed trade to execute Trade variable fpr global use.
     public ResponseEntity<?> executeStockTrade(@RequestBody StockTradeRequest tradeRequest) {
-        // Retrieve user, stock, and strategy information from the tradeRequest
+        // Retrieve users, stock, and strategy information from the tradeRequest
         // Call the appropriate method in the stockTradingService to execute the trade
         // Return the response to the client
         try {
@@ -70,13 +75,13 @@ public class StockTradingController {
                 return ResponseEntity.badRequest().body("Trading strategy is required.");
             }
 
-            // Retrieve user, options, and strategy information from the tradeRequest
-            User user = userService.getUserById(tradeRequest.getUserId());
+            // Retrieve users, options, and strategy information from the tradeRequest
+            User users = userService.getUserById(tradeRequest.getUserId());
             Options options = tradeRequest.getOptions();
             StockStrategies strategy = tradeRequest.getStrategy();
 
             // Call the service to execute the options trade
-            stockTradingService.executeOptionsTrade(user, options, strategy);
+            stockTradingService.executeOptionsTrade(users, options, strategy);
 
             // Return success response
             return ResponseEntity.ok("Options trade executed successfully.");
@@ -89,7 +94,7 @@ public class StockTradingController {
 
 //    @PostMapping("/trade/option")
 //    public ResponseEntity<?> executeOptionTrade(@RequestBody OptionTradeRequest tradeRequest) {
-//        // Retrieve user, stock, and strategy information from the tradeRequest
+//        // Retrieve users, stock, and strategy information from the tradeRequest
 //        // Call the appropriate method in the stockTradingService to execute the trade
 //        // Return the response to the client
 //        try {

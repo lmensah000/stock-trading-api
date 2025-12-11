@@ -3,5 +3,7 @@ package com.moneyteam.model.enums;
 
 public enum TradeType {
     STOCK,
-    OPTION
+    OPTION,
+    BUY,
+    SELL
 }

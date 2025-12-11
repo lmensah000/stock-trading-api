@@ -9,12 +9,12 @@ import java.time.LocalDateTime;
 public class TradeResponseDto {
     private Long id;
     private TradeType tradeType;
-    private String symbol;
+    private String stockTicker;
     private Double quantity;
     private BigDecimal price;
     private LocalDateTime executionDate;
     private TradeStatus status;
-    private Long userId;
+    private Long userTradeId;
 
     public Long getId() {
         return id;
@@ -48,12 +48,12 @@ public class TradeResponseDto {
         this.tradeType = tradeType;
     }
 
-    public String getSymbol() {
-        return symbol;
+    public String getStockTicker() {
+        return stockTicker;
     }
 
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
+    public void setStockTicker(String stockTicker) {
+        this.stockTicker = stockTicker;
     }
 
     public BigDecimal getPrice() {
@@ -73,10 +73,10 @@ public class TradeResponseDto {
     }
 
     public Long getUserId() {
-        return userId;
+        return userTradeId;
     }
 
     public void setUserId(Long userId) {
-        this.userId = userId;
+        this.userTradeId = userId;
     }
 }

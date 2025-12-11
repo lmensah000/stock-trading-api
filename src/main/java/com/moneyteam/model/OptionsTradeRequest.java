@@ -6,18 +6,18 @@ public class OptionsTradeRequest {
     private String stockTicker;
     private int quantity;
     private String tradeType; // "BUY" or "SELL"
-    private Long userId;
+    private Long userTradeId;
 
     private Options options;
     private StockStrategies strategy;
 
 
     public Long getUserId() {
-        return userId;
+        return userTradeId;
     }
 
     public void setUserId(Long userId) {
-        this.userId = userId;
+        this.userTradeId = userId;
     }
 
     public String getTradeType() {

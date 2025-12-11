@@ -3,6 +3,7 @@ com/moneyteam/service/UserService.class
 com/moneyteam/model/RiskManagement.class
 com/moneyteam/repository/TradeRepository.class
 com/moneyteam/controller/StockController.class
+com/moneyteam/config/SecurityConfig.class
 com/moneyteam/service/PurchaseTrade.class
 com/moneyteam/mapper/TradeMapper.class
 com/moneyteam/controller/StockTradingController.class
@@ -33,10 +34,13 @@ com/moneyteam/dto/TradeRequestDto.class
 com/moneyteam/model/Trade.class
 com/moneyteam/service/PythonIntegration.class
 practice/Anything$Node.class
+com/moneyteam/Television.class
 com/moneyteam/model/OptionType.class
+com/moneyteam/repository/PositionRepository.class
 com/moneyteam/repository/OptionsTradeRepository.class
 com/moneyteam/model/enums/TradeType.class
 com/moneyteam/controller/UserController.class
+com/moneyteam/service/impl/StockApiServiceImpl.class
 practice/LinkedList$Node.class
 com/moneyteam/service/StockDataClient.class
 com/moneyteam/controller/StockController$1.class

@@ -25,7 +25,7 @@ public class PurchaseTrade {
         this.stockPrice = stockPrice;
     }
 
-    public void executeStockTrade(User user, Stock stock, StockStrategies strategy) {
+    public void executeStockTrade(User users, Stock stock, StockStrategies strategy) {
         // Logic for executing a stock trade based on the provided strategy
         // Use the stockApiService to interact with the API for trading
     }
