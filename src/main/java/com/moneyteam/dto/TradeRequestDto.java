@@ -16,12 +16,12 @@ import org.slf4j.LoggerFactory;
 public class TradeRequestDto {
     @NotNull
     private TradeType tradeType;
-    @NotBlank private String symbol;
+    @NotBlank private String stockTicker;
     @NotNull
     @Positive private Double quantity;
     @NotNull @DecimalMin(value = "0.0", inclusive =false) private BigDecimal price;
     @NotNull private LocalDateTime executionDate;
-    @NotNull private Long userId;
+    @NotNull private Long userTradeId;
 
     public TradeStatus getStatus() {
         return status;
@@ -41,12 +41,12 @@ public class TradeRequestDto {
         this.tradeType = tradeType;
     }
 
-    public String getSymbol() {
-        return symbol;
+    public String getStockTicker() {
+        return stockTicker;
     }
 
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
+    public void setStockTicker(String stockTicker) {
+        this.stockTicker = stockTicker;
     }
 
     public Double getQuantity() {
@@ -74,10 +74,10 @@ public class TradeRequestDto {
     }
 
     public Long getUserId() {
-        return userId;
+        return userTradeId;
     }
 
     public void setUserId(Long userId) {
-        this.userId = userId;
+        this.userTradeId = userId;
     }
 }

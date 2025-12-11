@@ -1,9 +1,11 @@
 package com.moneyteam.model;
 
+import com.moneyteam.model.enums.TradeType;
+
 public class StockTradeRequest {
     private String stockTicker;
     private int quantity;
-    private String tradeType; // "BUY" or "SELL"
+    private TradeType tradeType; // "BUY" or "SELL"
     private Long userId;
 
     // Getters and setters
@@ -23,11 +25,11 @@ public class StockTradeRequest {
         this.quantity = quantity;
     }
 
-    public String getTradeType() {
+    public TradeType getTradeType() {
         return tradeType;
     }
 
-    public void setTradeType(String tradeType) {
+    public void setTradeType(TradeType tradeType) {
         this.tradeType = tradeType;
     }
 

@@ -1,6 +1,6 @@
 def linear_search(list, target):
     """
-    Returns the index position of the tarfer of found, else returns None
+    Returns the index positions of the tarfer of found, else returns None
     :param list:
     :param target:
     :return:

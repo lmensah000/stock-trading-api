@@ -9,8 +9,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "trades", indexes = {
-        @Index(name = "idx_trade_user", columnList = "userId"),
-        @Index(name = "idx_trade_symbol", columnList = "symbol"),
+        @Index(name = "idx_trade_user", columnList = "user_id"),
+        @Index(name = "idx_trade_stockTicker", columnList = "stockTicker"),
         @Index(name = "idx_trade_date", columnList = "executionDate")
 })
 public class   Trade {
@@ -19,23 +19,79 @@ public class   Trade {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long userId;
+    @Column(name = "user_id") // explicitly maps to DB column
+    private Long userTradeId;
 
-    private String symbol;
+    @Column(name = "stockTicker", nullable = false)
+    private String stockTicker;
+
+    @Column(name = "position_id")
+    private Long positionId;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "trade_type")
     private TradeType tradeType; // STOCK, OPTION
 
     @Enumerated(EnumType.STRING)
-    private TradeStatus status;  // PENDING, EXECUTED, FAILED
+    private TradeStatus status;  // PENDING, EXECUTED, FAILED, CANCELLED
 
     private Double quantity;
     private BigDecimal price;
 
+    @Column(name = "execution_date")
     private LocalDateTime executionDate;
+
+    public Long getUserTradeId() {
+        return userTradeId;
+    }
+
+    public void setUserTradeId(Long userTradeId) {
+        this.userTradeId = userTradeId;
+    }
+
+    public Long getPositionId() {
+        return positionId;
+    }
+
+    public void setPositionId(Long positionId) {
+        this.positionId = positionId;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Position getPositions() {
+        return positions;
+    }
+
+    public void setPositions(Position positions) {
+        this.positions = positions;
+    }
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @OneToOne(mappedBy = "trade", cascade = CascadeType.ALL)
     private OptionTradeDetails optionDetails;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    private User users;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "stockTicker", referencedColumnName = "stockTicker", insertable = false, updatable = false)
+    private Stock stock;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "position_id", insertable = false, updatable = false)
+    private Position positions;
+
+    public Trade() {};
 
     public Long getId() {
         return id;
@@ -46,19 +102,19 @@ public class   Trade {
     }
 
     public Long getUserId() {
-        return userId;
+        return userTradeId;
     }
 
     public void setUserId(Long userId) {
-        this.userId = userId;
+        this.userTradeId = userId;
     }
 
-    public String getSymbol() {
-        return symbol;
+    public String getStockTicker() {
+        return stockTicker;
     }
 
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
+    public void setStockTicker(String stockTicker) {
+        this.stockTicker = stockTicker;
     }
 
     public TradeType getTradeType() {
@@ -108,5 +164,28 @@ public class   Trade {
     public void setOptionDetails(OptionTradeDetails optionDetails) {
         this.optionDetails = optionDetails;
     }
-// Getters and setters
+
+    public User getUsers() {
+        return users;
+    }
+
+    public void setUsers(User users) {
+        this.users = users;
+    }
+
+    public Stock getStock() {
+        return stock;
+    }
+
+    public void setStock(Stock stock) {
+        this.stock = stock;
+    }
+
+    public Position getPosition() {
+        return positions;
+    }
+
+    public void setPosition(Position positions) {
+        this.positions = positions;
+    }
 }

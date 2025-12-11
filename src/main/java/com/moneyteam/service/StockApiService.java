@@ -7,8 +7,9 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Optional;
 
-public class StockApiService {
+public abstract class StockApiService {
     private HttpClient httpClient = HttpClient.newHttpClient();
 
 //    public void executeTrade(TradeRequest tradeRequest) {
@@ -77,6 +78,8 @@ public class StockApiService {
         }
     }
 
+    public abstract Optional<Stock> fetchStockDetails(String stockTicker);
+
     // You can add more methods to fetch additional stock information or perform other operations
 }
 /*Interacting with an API involves making HTTP requests to the API endpoints and processing the responses.
@@ -89,7 +92,7 @@ We then send the request to the API endpoint and receive the response. You can p
 handle errors, and take appropriate actions based on the API's specifications.
 
 Remember, the examples provided are simplified and may need to be adapted to fit your specific requirements and the
-APIs you are using. It's important to refer to the documentation of the user service, stock trading API, and
+APIs you are using. It's important to refer to the documentation of the users service, stock trading API, and
 any other relevant APIs for more detailed information.
 
  */

@@ -1,0 +1,180 @@
+{
+  "name": "MoneyTeam Algorithmic Trading App",
+  "desc": "Development Roadmap for Lawrence Mensah’s Trading Platform",
+  "labels": [
+    {"name": "backend", "color": "blue"},
+    {"name": "database", "color": "red"},
+    {"name": "api", "color": "green"},
+    {"name": "security", "color": "yellow"},
+    {"name": "trading", "color": "purple"},
+    {"name": "future", "color": "orange"}
+  ],
+  "lists": [
+    {"name": "🛠 BACKLOG", "closed": false},
+    {"name": "🚧 IN PROGRESS", "closed": false},
+    {"name": "✅ READY FOR DEVELOPMENT", "closed": false},
+    {"name": "🔬 FUTURE FEATURES", "closed": false},
+    {"name": "🐛 BUGS & ISSUES", "closed": false},
+    {"name": "📚 DOCUMENTATION", "closed": false},
+    {"name": "🏁 COMPLETE", "closed": false}
+  ],
+  "cards": [
+    {
+      "name": "User Management Module",
+      "idList": "0",
+      "labels": ["backend", "security"],
+      "desc": "User registration, login, profiles, validation. JWT + BCrypt."
+    },
+    {
+      "name": "Trading Engine",
+      "idList": "0",
+      "labels": ["trading"],
+      "desc": "Trade creation, execution pipeline, status management, error handling."
+    },
+    {
+      "name": "Market Data Module",
+      "idList": "0",
+      "labels": ["api"],
+      "desc": "Yahoo Finance integration, price polling, caching."
+    },
+    {
+      "name": "Algorithmic Strategy Engine",
+      "idList": "0",
+      "labels": ["trading"],
+      "desc": "Strategy interface, backtests, momentum, mean reversion."
+    },
+    {
+      "name": "Risk Management Module",
+      "idList": "0",
+      "labels": ["trading"],
+      "desc": "Stop loss, take profit, max positions sizes."
+    },
+    {
+      "name": "Analytics + Visualization",
+      "idList": "0",
+      "labels": ["backend"],
+      "desc": "Performance dashboards, P/L history, charts."
+    },
+    {
+      "name": "Infrastructure + DevOps",
+      "idList": "0",
+      "labels": ["backend"],
+      "desc": "Docker, CI/CD, Prod vs Dev profiles, Flyway migrations."
+    },
+    {
+      "name": "User Module Stabilization",
+      "idList": "1",
+      "labels": ["backend"],
+      "desc": "Validation fixes, clean entity mapping, consistent DTOs."
+    },
+    {
+      "name": "Trade Module Foundations",
+      "idList": "1",
+      "labels": ["backend", "trading"],
+      "desc": "Trade entity, repos, DTO mapper, unit tests."
+    },
+    {
+      "name": "Exception Handling Upgrade",
+      "idList": "1",
+      "labels": ["backend"],
+      "desc": "GlobalExceptionHandler v2, error codes, logging."
+    },
+    {
+      "name": "JWT Security Suite",
+      "idList": "2",
+      "labels": ["security"],
+      "desc": "Stateless auth, tokens, refresh tokens."
+    },
+    {
+      "name": "Options Module",
+      "idList": "2",
+      "labels": ["trading"],
+      "desc": "CALL/PUT mapping, strike, expiration, relation to trades."
+    },
+    {
+      "name": "Position Calculator",
+      "idList": "2",
+      "labels": ["trading"],
+      "desc": "Avg cost, real/unrealized P/L, positions updating engine."
+    },
+    {
+      "name": "Postman Test Suite",
+      "idList": "2",
+      "labels": ["backend"],
+      "desc": "Full workflow tests: register, login, trade, watchlist."
+    },
+    {
+      "name": "Machine Learning Engine",
+      "idList": "3",
+      "labels": ["future"],
+      "desc": "Predictive modeling, RL systems."
+    },
+    {
+      "name": "Broker API Integrations",
+      "idList": "3",
+      "labels": ["api", "future"],
+      "desc": "ThinkOrSwim, Alpaca, Robinhood API integrations."
+    },
+    {
+      "name": "Web UI (Angular)",
+      "idList": "3",
+      "labels": ["future"],
+      "desc": "Trading dashboard UI."
+    },
+    {
+      "name": "Sentiment Analysis Module",
+      "idList": "3",
+      "labels": ["future"],
+      "desc": "Twitter, Reddit, stock sentiment aggregator."
+    },
+    {
+      "name": "Fix Table Naming Mismatch",
+      "idList": "4",
+      "labels": ["database"],
+      "desc": "users vs user, trade vs trades."
+
+    },
+    {
+      "name": "Spring Security Auto-Password Issue",
+      "idList": "4",
+      "labels": ["security"],
+      "desc": "Disable default Spring password generation."
+    },
+    {
+      "name": "OptionsTradeRepository Errors",
+      "idList": "4",
+      "labels": ["backend"],
+      "desc": "Fix missing field property names in entities."
+    },
+    {
+      "name": "SQL Schema vs Entities Cleanup",
+      "idList": "4",
+      "labels": ["database"],
+      "desc": "Ensure all tables match Java entities exactly."
+    },
+    {
+      "name": "UML Diagrams",
+      "idList": "5",
+      "labels": ["backend"],
+      "desc": "User, Trade, Position, Stock, Option diagrams."
+    },
+    {
+      "name": "API Documentation",
+      "idList": "5",
+      "labels": ["backend"],
+      "desc": "Swagger/OpenAPI integration."
+    },
+    {
+      "name": "User Registration",
+      "idList": "6",
+      "labels": ["backend"],
+      "desc": "Completed user creation + validation + repository mapping."
+    },
+    {
+      "name": "Database Connection Fixes",
+      "idList": "6",
+      "labels": ["database"],
+      "desc": "MySQL env vars, driver config."
+    }
+  ]
+}

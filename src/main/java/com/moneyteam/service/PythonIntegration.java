@@ -6,8 +6,8 @@ import java.io.InputStreamReader;
 public class PythonIntegration {
     public static void main(String[] args) {
         try {
-            String tickerSymbol = "AAPL"; // Example ticker
-            ProcessBuilder pb = new ProcessBuilder("python", "stock_data_api.py", tickerSymbol);
+            String ticker = "AAPL"; // Example ticker
+            ProcessBuilder pb = new ProcessBuilder("python", "stock_data_api.py", ticker);
             Process process = pb.start();
 
             // Read the script output

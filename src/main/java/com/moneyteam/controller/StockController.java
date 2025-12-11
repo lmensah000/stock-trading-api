@@ -3,22 +3,28 @@ package com.moneyteam.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moneyteam.model.Stock;
 import com.moneyteam.model.StockTradeRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
 //BotController: This class acts as the central controller for the trading bot.
-// It receives user input from the UserInterface, interacts with the Model classes to execute
+// It receives users input from the UserInterface, interacts with the Model classes to execute
 // trading strategies, and updates the View accordingly. It coordinates the
 // flow of data and actions between the Model and View components.
-
+@RequestMapping("/api")
 public class StockController {
+
+    private static final Logger log = LoggerFactory.getLogger(StockController.class);
 
     @PostMapping("/stock")
     public ResponseEntity<?> executeStockTrade(@RequestBody StockTradeRequest tradeRequest) {
-        // Retrieve user, stock, and strategy information from the tradeRequest
+        // Retrieve users, stock, and strategy information from the tradeRequest
         // Call the appropriate method in the stockTradingService to execute the trade
         // Return the response to the client
 

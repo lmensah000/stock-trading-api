@@ -79,9 +79,9 @@ public class FundamentalAnalysis {
     }
 
     // Perform Analysis
-//    public void performAnalysis(String tickerSymbol) {
-//        FinancialStatements financialStatements = stock.getFinancialStatements(tickerSymbol);
-//        KeyMetrics keyMetrics = stock.getKeyMetrics(tickerSymbol);
+//    public void performAnalysis(String tickerStockTicker) {
+//        FinancialStatements financialStatements = stock.getFinancialStatements(tickerStockTicker);
+//        KeyMetrics keyMetrics = stock.getKeyMetrics(tickerStockTicker);
 //
 //        double earningsPerShare = financialStatements.getEarningsPerShare();
 //        double revenue = financialStatements.getRevenue();

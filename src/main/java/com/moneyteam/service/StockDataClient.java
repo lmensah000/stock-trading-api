@@ -69,7 +69,7 @@ public class StockDataClient {
     }
 
 //    public static void main(String[] args) {
-//        // Get ticker input from the user
+//        // Get ticker input from the users
 //        Scanner scanner = new Scanner(System.in);
 //        System.out.print("Enter stock ticker: ");
 //        String ticker = scanner.nextLine();

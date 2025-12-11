@@ -1,91 +1,136 @@
 package com.moneyteam.model;
 
-public class User {
-    private static String userName;
-    private static String passWord;
-    private static String login;
-    private static String placeOrder;
-    private static String buy;
-    private static String sell;
-    private static String email;
+import javax.persistence.*;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.List;
 
-    public static String getUserName() {
+@Entity
+@Table(name = "users")
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "user_name", nullable = false, unique = true)
+    private String userName;
+
+    @Column(name = "pass_word",nullable = false)
+    private String passWord;
+
+    @Column(name = "created_at", updatable = false)
+    private Timestamp createdAt;
+
+    @Column(unique = true)
+    private String email;
+
+    @OneToMany(mappedBy = "users", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Trade> trades;
+
+    @OneToMany(mappedBy = "users", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Position> positions;
+
+    @OneToMany(mappedBy = "users", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Watchlist> watchlists;
+
+    public String getUserName() {
         return userName;
     }
 
-    public static void setUserName(String userName) {
-        User.userName = userName;
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
-    public static String getPassWord() {
+    public String getPassWord() {
         return passWord;
     }
 
-    public static void setPassWord(String passWord) {
-        User.passWord = passWord;
+    public void setPassWord(String passWord) {
+        this.passWord = passWord;
     }
 
-    public static String placeOrder() {
-        return placeOrder;
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = new Timestamp(System.currentTimeMillis());
     }
 
-    public static void placeOrder(String placeOrder) {
-        User.placeOrder = placeOrder;
-    }
+    //    public String placeOrder() {
+//        return placeOrder;
+//    }
+//
+//    public void placeOrder(String placeOrder) {
+//        this.placeOrder = placeOrder;
+//    }
 
-    public static String getBuy() {
-        return buy;
-    }
+//    public String getBuy() {
+//        return buy;
+//    }
+//
+//    public void setBuy(String buy) {
+//        this.buy = buy;
+//    }
 
-    public static void setBuy(String buy) {
-        User.buy = buy;
-    }
-
-    public static String getEmail() {
+    public String getEmail() {
         return email;
     }
 
-    public static void setEmail(String email) {
-        User.email = email;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public String getLogin(String email, String passWord){
-        return login;
+
+//    public String getSell() {
+//        return sell;
+//    }
+//
+//    public void setSell(String sell) {
+//        this.sell = sell;
+//    }
+
+    public Long getId() {
+        return id;
     }
 
-    public static void login(String email, String passWord) {
-        User.email = email;
-        User.passWord = passWord;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public static String getSell() {
-        return sell;
-    }
+//    public String getPlaceOrder() {
+//        return placeOrder;
+//    }
+//
+//    public void setPlaceOrder(String placeOrder) {
+//        this.placeOrder = placeOrder;
+//    }
 
-    public static void setSell(String sell) {
-        User.sell = sell;
-    }
+//    public List<Trade> getTrades() {
+//        return trades;
+//    }
+//
+//    public void setTrades(List<Trade> trades) {
+//        this.trades = trades;
+//    }
 
     public User() {};
     
-    public User(String userName, String passWord, String login, String placeHolder, String buy, String sell, String email) {
+    public User(String userName, String passWord, String email, Timestamp createdAt) {
         this.userName = userName;
         this.passWord = passWord;
-        this.login = login;
-        this.placeOrder =placeHolder;
-        this.buy =buy;
-        this.sell = sell;
+//        this.placeOrder =placeHolder;
+//        this.buy =buy;
+//        this.sell = sell;
         this.email= email;
     }
 
     @Override
     public String toString() {
         return "User{" +
-                "userName" + userName +
-                "passWord" + passWord +
-                "buy" + buy +
-                "sell" + sell +
-                "email" + email +
+                "id=" + id +
+                ", userName" + userName + '\'' +
+                ", passWord" + passWord + '\'' +
+                ", email" + email + '\'' +
+                ", createdAt" + createdAt + '\'' +
                 "}";
     }
 }

@@ -18,7 +18,7 @@ import java.lang.reflect.Method;
 
 //trading strategy logic based on stock, crypto
 public class StockStrategiesImpl {
-    private User user;
+    private User users;
     private TechnicalAnalysis technicalAnalysis;
     private FundamentalAnalysis fundamentalAnalysis;
     private Stock stock;

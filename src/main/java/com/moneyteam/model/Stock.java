@@ -10,19 +10,54 @@ public class Stock {
     // Instance variables
     @JsonProperty(required = true)
     @Id
+    @Column(name = "stock_ticker")
     private String stockTicker;
+
+    @Column(name = "stock_name")
     private String stockName;
     private String sector;
+
+    @Column(name = "market_cap_amount")
     private Double marketCapAmount;
     private Integer volume;
+
+    @Column(name = "sizzle_index")
     private Double sizzleIndex;
+
     private Double ask;
     private Double bid;
+
+    @Column(name = "number_of_share")
     private Integer numberOfShares;
+
+    @Column(name = "open_price")
     private Double open;
+
+    @Column(name = "close_price")
     private Double close;
+
+    @Column(name = "last_price")
     private static Double last;
+
+    @Column(name = "mark_change")
     private Double markChange;
+
+    @ElementCollection
+    @CollectionTable(name = "stock_historical_data", joinColumns = @JoinColumn(name = "stock_stockTicker"))
+    @Column(name = "price")
+    private List<Double> historicalData;
+
+    @OneToMany(mappedBy = "stocks")
+    private List<Position> positions;
+
+    @OneToMany(mappedBy = "stocks")
+    private List<Trade> trades;
+
+    @ManyToOne
+    private OptionTradeDetails optionTradeDetails;
+
+    @ManyToMany
+    private List<Watchlist> watchlists;
 
     public List<Double> getHistoricalData() {
         return historicalData;
@@ -96,10 +131,13 @@ public class Stock {
         this.sizzleIndex = sizzleIndex;
     }
 
-    @ElementCollection
-    @CollectionTable(name = "stock_historical_data", joinColumns = @JoinColumn(name = "stock_symbol"))
-    @Column(name = "price")
-    private List<Double> historicalData;
+    public List<Trade> getTrades() {
+        return trades;
+    }
+
+    public void setTrades(List<Trade> trades) {
+        this.trades = trades;
+    }
 
     public Stock() {}
     // Constructor
