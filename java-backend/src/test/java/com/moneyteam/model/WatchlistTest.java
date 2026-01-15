@@ -36,60 +36,69 @@ public class WatchlistTest {
     }
 
     @Test
+    @DisplayName("Should set and get user ID")
+    void testSetAndGetUserId() {
+        Long userId = 1L;
+        watchlist.setUserId(userId);
+        assertEquals(userId, watchlist.getUserId());
+    }
+
+    @Test
     @DisplayName("Should set and get user reference")
     void testSetAndGetUser() {
         User user = new User();
         user.setId(1L);
-        user.setUsername("testuser");
+        user.setUserName("testuser");
         watchlist.setUsers(user);
         
         assertNotNull(watchlist.getUsers());
-        assertEquals("testuser", watchlist.getUsers().getUsername());
+        assertEquals("testuser", watchlist.getUsers().getUserName());
     }
 
     @Test
-    @DisplayName("Should add stock to watchlist")
-    void testAddStockToWatchlist() {
-        List<String> stocks = new ArrayList<>();
-        stocks.add("AAPL");
-        stocks.add("MSFT");
+    @DisplayName("Should add stocks to watchlist")
+    void testAddStocksToWatchlist() {
+        List<Stock> stocks = new ArrayList<>();
+        
+        Stock aapl = new Stock();
+        aapl.setStockTicker("AAPL");
+        aapl.setStockName("Apple Inc.");
+        
+        Stock msft = new Stock();
+        msft.setStockTicker("MSFT");
+        msft.setStockName("Microsoft Corp.");
+        
+        stocks.add(aapl);
+        stocks.add(msft);
         watchlist.setStocks(stocks);
         
         assertEquals(2, watchlist.getStocks().size());
-        assertTrue(watchlist.getStocks().contains("AAPL"));
-        assertTrue(watchlist.getStocks().contains("MSFT"));
     }
 
     @Test
-    @DisplayName("Should remove stock from watchlist")
-    void testRemoveStockFromWatchlist() {
-        List<String> stocks = new ArrayList<>();
-        stocks.add("AAPL");
-        stocks.add("MSFT");
-        stocks.add("GOOGL");
-        watchlist.setStocks(stocks);
-        
-        watchlist.getStocks().remove("MSFT");
-        
-        assertEquals(2, watchlist.getStocks().size());
-        assertFalse(watchlist.getStocks().contains("MSFT"));
-    }
-
-    @Test
-    @DisplayName("Should check if stock exists in watchlist")
+    @DisplayName("Should check stock exists in watchlist")
     void testStockExistsInWatchlist() {
-        List<String> stocks = new ArrayList<>();
-        stocks.add("AAPL");
+        List<Stock> stocks = new ArrayList<>();
+        
+        Stock aapl = new Stock();
+        aapl.setStockTicker("AAPL");
+        stocks.add(aapl);
+        
         watchlist.setStocks(stocks);
         
-        assertTrue(watchlist.getStocks().contains("AAPL"));
-        assertFalse(watchlist.getStocks().contains("TSLA"));
+        boolean exists = watchlist.getStocks().stream()
+                .anyMatch(s -> "AAPL".equals(s.getStockTicker()));
+        assertTrue(exists);
+        
+        boolean notExists = watchlist.getStocks().stream()
+                .anyMatch(s -> "TSLA".equals(s.getStockTicker()));
+        assertFalse(notExists);
     }
 
     @Test
     @DisplayName("Should handle empty watchlist")
     void testEmptyWatchlist() {
-        List<String> stocks = new ArrayList<>();
+        List<Stock> stocks = new ArrayList<>();
         watchlist.setStocks(stocks);
         
         assertTrue(watchlist.getStocks().isEmpty());
@@ -97,31 +106,49 @@ public class WatchlistTest {
     }
 
     @Test
-    @DisplayName("Should prevent duplicate stocks")
-    void testPreventDuplicateStocks() {
-        List<String> stocks = new ArrayList<>();
-        stocks.add("AAPL");
+    @DisplayName("Should remove stock from watchlist")
+    void testRemoveStockFromWatchlist() {
+        List<Stock> stocks = new ArrayList<>();
         
-        // Check before adding duplicate
-        if (!stocks.contains("AAPL")) {
-            stocks.add("AAPL");
-        }
+        Stock aapl = new Stock();
+        aapl.setStockTicker("AAPL");
         
+        Stock msft = new Stock();
+        msft.setStockTicker("MSFT");
+        
+        stocks.add(aapl);
+        stocks.add(msft);
         watchlist.setStocks(stocks);
+        
+        // Remove MSFT
+        watchlist.getStocks().removeIf(s -> "MSFT".equals(s.getStockTicker()));
+        
         assertEquals(1, watchlist.getStocks().size());
+        boolean msfExists = watchlist.getStocks().stream()
+                .anyMatch(s -> "MSFT".equals(s.getStockTicker()));
+        assertFalse(msfExists);
     }
 
     @Test
     @DisplayName("Should get watchlist size")
     void testGetWatchlistSize() {
-        List<String> stocks = new ArrayList<>();
-        stocks.add("AAPL");
-        stocks.add("MSFT");
-        stocks.add("GOOGL");
-        stocks.add("AMZN");
-        stocks.add("NVDA");
-        watchlist.setStocks(stocks);
+        List<Stock> stocks = new ArrayList<>();
         
+        String[] tickers = {"AAPL", "MSFT", "GOOGL", "AMZN", "NVDA"};
+        for (String ticker : tickers) {
+            Stock stock = new Stock();
+            stock.setStockTicker(ticker);
+            stocks.add(stock);
+        }
+        
+        watchlist.setStocks(stocks);
         assertEquals(5, watchlist.getStocks().size());
+    }
+
+    @Test
+    @DisplayName("Should handle null stocks list")
+    void testNullStocksList() {
+        watchlist.setStocks(null);
+        assertNull(watchlist.getStocks());
     }
 }
