@@ -106,5 +106,5 @@ private static final String BASE_URL = "https://api.tdameritrade.com/v1";
 // You can add another request in your .http file for refreshing the token:
 //code=C0.b2F1dGgyLmJkYy5zY2h3YWIuY29t.
 // BKdhgk5QOKSIAjfzRyGEx3k_unhXd7wA-uhw0ERp0ec%40&
-// session=1cfb17b7-d756-41a7-a243-cfdbaf2e594d
+// session=tradesmart-48
 // i65MMXbiaOuoGAsN4dQDf1SsUvIgDjHL
