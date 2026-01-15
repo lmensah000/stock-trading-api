@@ -225,17 +225,17 @@ export default function Goals() {
                     </div>
                   )}
                   
-                  <h3 className="text-2xl font-bold uppercase mb-2">{goal.title}</h3>
+                  <h3 className="text-2xl font-bold uppercase mb-2 text-[#5C4A42]">{goal.title}</h3>
                   <p className="text-[#8B7355] mb-4">{goal.description}</p>
                   
                   <div className="mb-4">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-white font-bold">
+                      <span className="text-[#5C4A42] font-bold">
                         {goal.current_value} / {goal.target_value} {goal.unit}
                       </span>
                       <span className="text-[#D4A574] font-bold">{progress.toFixed(0)}%</span>
                     </div>
-                    <Progress value={progress} className="h-2 bg-[#27272A]" />
+                    <Progress value={progress} className="h-2 bg-[#E8E3DC]" />
                   </div>
                   
                   {goal.deadline && (
