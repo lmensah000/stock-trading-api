@@ -25,34 +25,16 @@ public class StockApiServiceTest {
     void setUp() {
         mockStockData = new HashMap<>();
         
-        Stock aapl = new Stock();
-        aapl.setTicker("AAPL");
-        aapl.setName("Apple Inc.");
-        aapl.setPrice(185.92);
-        aapl.setChange(1.67);
-        aapl.setChangePercent(0.91);
-        aapl.setVolume(48234521L);
-        aapl.setMarketCap(2890000000000.0);
+        Stock aapl = new Stock("AAPL", "Apple Inc.", "Technology", 2890000000000.0, 
+                48234521, 1.5, 186.00, 185.50, 1000000, 182.50, 185.92, 185.92, 1.67);
         mockStockData.put("AAPL", aapl);
 
-        Stock msft = new Stock();
-        msft.setTicker("MSFT");
-        msft.setName("Microsoft Corp.");
-        msft.setPrice(378.91);
-        msft.setChange(2.87);
-        msft.setChangePercent(0.76);
-        msft.setVolume(21456789L);
-        msft.setMarketCap(2810000000000.0);
+        Stock msft = new Stock("MSFT", "Microsoft Corp.", "Technology", 2810000000000.0, 
+                21456789, 1.3, 379.00, 378.50, 500000, 376.00, 378.91, 378.91, 2.87);
         mockStockData.put("MSFT", msft);
 
-        Stock googl = new Stock();
-        googl.setTicker("GOOGL");
-        googl.setName("Alphabet Inc.");
-        googl.setPrice(141.80);
-        googl.setChange(1.55);
-        googl.setChangePercent(1.10);
-        googl.setVolume(25678234L);
-        googl.setMarketCap(1780000000000.0);
+        Stock googl = new Stock("GOOGL", "Alphabet Inc.", "Technology", 1780000000000.0, 
+                25678234, 1.2, 142.00, 141.50, 750000, 140.00, 141.80, 141.80, 1.55);
         mockStockData.put("GOOGL", googl);
     }
 
@@ -62,9 +44,8 @@ public class StockApiServiceTest {
         Stock stock = mockStockData.get("AAPL");
         
         assertNotNull(stock);
-        assertEquals("AAPL", stock.getTicker());
-        assertEquals("Apple Inc.", stock.getName());
-        assertEquals(185.92, stock.getPrice());
+        assertEquals("AAPL", stock.getStockTicker());
+        assertEquals("Apple Inc.", stock.getStockName());
     }
 
     @Test
@@ -78,20 +59,10 @@ public class StockApiServiceTest {
     @DisplayName("Should calculate price change correctly")
     void testCalculatePriceChange() {
         Stock stock = mockStockData.get("AAPL");
-        Double previousClose = stock.getPrice() - stock.getChange();
+        Double markChange = stock.getMarkChange();
         
-        Double calculatedChange = stock.getPrice() - previousClose;
-        assertEquals(stock.getChange(), calculatedChange, 0.01);
-    }
-
-    @Test
-    @DisplayName("Should calculate change percent correctly")
-    void testCalculateChangePercent() {
-        Stock stock = mockStockData.get("AAPL");
-        Double previousClose = stock.getPrice() - stock.getChange();
-        Double expectedPercent = (stock.getChange() / previousClose) * 100;
-        
-        assertEquals(stock.getChangePercent(), expectedPercent, 0.1);
+        assertNotNull(markChange);
+        assertEquals(1.67, markChange, 0.01);
     }
 
     @Test
@@ -108,7 +79,7 @@ public class StockApiServiceTest {
     @DisplayName("Should format market cap correctly")
     void testFormatMarketCap() {
         Stock stock = mockStockData.get("AAPL");
-        Double marketCap = stock.getMarketCap();
+        Double marketCap = stock.getMarketCapAmount();
         
         // Should be in trillions
         assertTrue(marketCap > 1e12);
@@ -130,20 +101,16 @@ public class StockApiServiceTest {
     @DisplayName("Should identify positive stock change")
     void testPositiveStockChange() {
         Stock stock = mockStockData.get("AAPL");
-        assertTrue(stock.getChange() >= 0);
-        assertTrue(stock.getChangePercent() >= 0);
+        assertTrue(stock.getMarkChange() >= 0);
     }
 
     @Test
     @DisplayName("Should identify negative stock change")
     void testNegativeStockChange() {
-        Stock negativeStock = new Stock();
-        negativeStock.setTicker("TEST");
-        negativeStock.setChange(-5.25);
-        negativeStock.setChangePercent(-2.75);
+        Stock negativeStock = new Stock("TEST", "Test Stock", "Test", 0.0, 
+                0, 0.0, 0.0, 0.0, 0, 0.0, 0.0, 0.0, -5.25);
         
-        assertTrue(negativeStock.getChange() < 0);
-        assertTrue(negativeStock.getChangePercent() < 0);
+        assertTrue(negativeStock.getMarkChange() < 0);
     }
 
     @Test
@@ -153,7 +120,7 @@ public class StockApiServiceTest {
         Stock stock = mockStockData.get(ticker.toUpperCase());
         
         assertNotNull(stock);
-        assertEquals("AAPL", stock.getTicker());
+        assertEquals("AAPL", stock.getStockTicker());
     }
 
     @Test
@@ -164,15 +131,31 @@ public class StockApiServiceTest {
     }
 
     @Test
-    @DisplayName("Should sort stocks by change percent")
-    void testSortByChangePercent() {
+    @DisplayName("Should sort stocks by change")
+    void testSortByChange() {
         Stock[] stocks = mockStockData.values().toArray(new Stock[0]);
         
-        // Sort by change percent descending
+        // Sort by change descending
         java.util.Arrays.sort(stocks, (a, b) -> 
-            Double.compare(Math.abs(b.getChangePercent()), Math.abs(a.getChangePercent())));
+            Double.compare(Math.abs(b.getMarkChange()), Math.abs(a.getMarkChange())));
         
-        // First should have highest absolute change percent
-        assertTrue(Math.abs(stocks[0].getChangePercent()) >= Math.abs(stocks[1].getChangePercent()));
+        // First should have highest absolute change
+        assertTrue(Math.abs(stocks[0].getMarkChange()) >= Math.abs(stocks[1].getMarkChange()));
+    }
+
+    @Test
+    @DisplayName("Should validate sector information")
+    void testSectorInformation() {
+        Stock stock = mockStockData.get("AAPL");
+        assertEquals("Technology", stock.getSector());
+    }
+
+    @Test
+    @DisplayName("Should validate bid-ask spread")
+    void testBidAskSpread() {
+        Stock stock = mockStockData.get("AAPL");
+        assertNotNull(stock.getBid());
+        assertNotNull(stock.getAsk());
+        assertTrue(stock.getAsk() > stock.getBid());
     }
 }
