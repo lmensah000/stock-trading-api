@@ -333,7 +333,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 
 async def award_points(user_id: str, points: int, transaction_type: str, description: str):
     """Helper function to award points to user"""
-    await db.users.update_one({"id": user_id}, {"$inc": {"points": points}})
+    await db.users.update_one({"id": user_id}, {"$inc": {"points": points, "xp": points}})
     
     transaction = PointsTransaction(
         user_id=user_id,
@@ -344,6 +344,102 @@ async def award_points(user_id: str, points: int, transaction_type: str, descrip
     doc = transaction.model_dump()
     doc['created_at'] = doc['created_at'].isoformat()
     await db.points_transactions.insert_one(doc)
+    
+    # Check for level up
+    await check_level_up(user_id)
+
+# Level progression system
+LEVEL_SYSTEM = [
+    {"level": 1, "name": "Seedling", "xp_required": 0, "avatar_stage": 1, "points_reward": 0},
+    {"level": 2, "name": "Sprout", "xp_required": 100, "avatar_stage": 2, "points_reward": 50},
+    {"level": 3, "name": "Budding", "xp_required": 250, "avatar_stage": 3, "points_reward": 75},
+    {"level": 4, "name": "Blooming", "xp_required": 500, "avatar_stage": 4, "points_reward": 100},
+    {"level": 5, "name": "Flourishing", "xp_required": 1000, "avatar_stage": 5, "points_reward": 150},
+    {"level": 6, "name": "Thriving", "xp_required": 2000, "avatar_stage": 6, "points_reward": 200},
+    {"level": 7, "name": "Radiant", "xp_required": 3500, "avatar_stage": 7, "points_reward": 300},
+    {"level": 8, "name": "Transcendent", "xp_required": 5000, "avatar_stage": 8, "points_reward": 500},
+]
+
+BADGE_SYSTEM = [
+    {"id": "first_workout", "name": "First Steps", "description": "Completed your first workout", "icon": "🏃", "points_reward": 25, "requirement": "1_workout"},
+    {"id": "workout_warrior", "name": "Workout Warrior", "description": "Completed 10 workouts", "icon": "💪", "points_reward": 100, "requirement": "10_workouts"},
+    {"id": "fitness_master", "name": "Fitness Master", "description": "Completed 50 workouts", "icon": "🏆", "points_reward": 500, "requirement": "50_workouts"},
+    {"id": "goal_crusher", "name": "Goal Crusher", "description": "Completed 5 goals", "icon": "🎯", "points_reward": 200, "requirement": "5_goals"},
+    {"id": "meal_planner", "name": "Meal Planner", "description": "Generated 10 meal plans", "icon": "🍽️", "points_reward": 150, "requirement": "10_meals"},
+    {"id": "social_butterfly", "name": "Social Butterfly", "description": "Shared 5 achievements", "icon": "🦋", "points_reward": 100, "requirement": "5_shares"},
+    {"id": "referral_champion", "name": "Referral Champion", "description": "Referred 5 friends", "icon": "🌟", "points_reward": 300, "requirement": "5_referrals"},
+    {"id": "consistency_king", "name": "Consistency King", "description": "7-day workout streak", "icon": "👑", "points_reward": 250, "requirement": "7_day_streak"},
+    {"id": "team_player", "name": "Team Player", "description": "Won a group challenge", "icon": "🤝", "points_reward": 200, "requirement": "group_win"},
+]
+
+async def check_level_up(user_id: str):
+    """Check if user leveled up and award bonus"""
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    current_xp = user.get('xp', 0)
+    current_level = user.get('level', 1)
+    
+    # Find next level
+    for level_data in LEVEL_SYSTEM:
+        if current_xp >= level_data['xp_required'] and level_data['level'] > current_level:
+            await db.users.update_one(
+                {"id": user_id},
+                {"$set": {
+                    "level": level_data['level'],
+                    "avatar_stage": level_data['avatar_stage']
+                }}
+            )
+            
+            # Award level up bonus
+            if level_data['points_reward'] > 0:
+                await award_points(user_id, level_data['points_reward'], "level_up", f"Reached level {level_data['level']}: {level_data['name']}")
+            
+            # Create achievement
+            achievement = Achievement(
+                user_id=user_id,
+                title=f"Level {level_data['level']}: {level_data['name']}",
+                description=f"Reached level {level_data['level']}!",
+                type="level_up",
+                icon="⭐"
+            )
+            doc = achievement.model_dump()
+            doc['created_at'] = doc['created_at'].isoformat()
+            await db.achievements.insert_one(doc)
+            
+            break
+
+async def check_and_award_badge(user_id: str, badge_id: str):
+    """Check and award badge to user"""
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    
+    # Check if user already has this badge
+    if badge_id in user.get('badges', []):
+        return
+    
+    # Find badge details
+    badge = next((b for b in BADGE_SYSTEM if b['id'] == badge_id), None)
+    if not badge:
+        return
+    
+    # Award badge
+    await db.users.update_one(
+        {"id": user_id},
+        {"$push": {"badges": badge_id}}
+    )
+    
+    # Award points
+    await award_points(user_id, badge['points_reward'], "badge_earned", f"Earned badge: {badge['name']}")
+    
+    # Create achievement
+    achievement = Achievement(
+        user_id=user_id,
+        title=f"Badge Earned: {badge['name']}",
+        description=badge['description'],
+        type="badge",
+        icon=badge['icon']
+    )
+    doc = achievement.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    await db.achievements.insert_one(doc)
 
 # ============= AUTH ROUTES =============
 
