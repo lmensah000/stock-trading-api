@@ -250,7 +250,7 @@ export default function Goals() {
                         type="number"
                         placeholder="Update progress"
                         data-testid={`update-progress-${goal.id}`}
-                        className="bg-[#FAF9F7] border-[#D4C4B0] text-white focus:border-[#D4A574]"
+                        className="bg-[#FAF9F7] border-[#D4C4B0] text-[#5C4A42] focus:border-[#D4A574]"
                         onKeyPress={(e) => {
                           if (e.key === 'Enter') {
                             updateProgress(goal.id, e.target.value);
@@ -262,7 +262,7 @@ export default function Goals() {
                         <Button
                           onClick={() => markComplete(goal.id)}
                           data-testid={`complete-goal-${goal.id}`}
-                          className="bg-[#D4A574] text-black font-bold uppercase hover:bg-[#B3E600] whitespace-nowrap"
+                          className="bg-[#D4A574] text-white font-bold uppercase hover:bg-[#C19563] whitespace-nowrap"
                         >
                           <TrendingUp className="w-4 h-4 mr-2" />
                           COMPLETE
