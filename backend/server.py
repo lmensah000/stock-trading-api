@@ -44,6 +44,8 @@ class User(BaseModel):
     email: EmailStr
     name: str
     password_hash: str
+    points: int = 0
+    total_workouts: int = 0
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class UserCreate(BaseModel):
@@ -59,6 +61,8 @@ class UserResponse(BaseModel):
     id: str
     email: str
     name: str
+    points: int
+    total_workouts: int
     created_at: datetime
 
 class TokenResponse(BaseModel):
@@ -116,7 +120,7 @@ class GroupGoal(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
     description: str
-    members: List[str]  # user IDs
+    members: List[str]
     target_value: float
     current_value: float = 0.0
     unit: str
@@ -147,7 +151,7 @@ class WeightEntry(BaseModel):
     user_id: str
     weight: float
     unit: str = "kg"
-    source: str = "manual"  # manual, scale_api
+    source: str = "manual"
     notes: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
@@ -160,12 +164,92 @@ class FitnessData(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     user_id: str
-    source: str  # apple_health, google_fit, manual
+    source: str
     steps: Optional[int] = None
     calories_burned: Optional[int] = None
     distance: Optional[float] = None
     active_minutes: Optional[int] = None
     date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+# NEW MODELS FOR ENHANCED FEATURES
+
+class WorkoutVideo(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    description: str
+    category: str
+    difficulty: str
+    duration_minutes: int
+    video_url: str
+    thumbnail_url: str
+    points_reward: int = 10
+
+class WorkoutLog(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    workout_video_id: Optional[str] = None
+    workout_type: str
+    duration_minutes: int
+    calories_burned: Optional[int] = None
+    notes: Optional[str] = None
+    points_earned: int = 10
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class WorkoutLogCreate(BaseModel):
+    workout_video_id: Optional[str] = None
+    workout_type: str
+    duration_minutes: int
+    calories_burned: Optional[int] = None
+    notes: Optional[str] = None
+
+class PointsTransaction(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    points: int
+    transaction_type: str
+    description: str
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ShopItem(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: str
+    category: str
+    price_points: int
+    image_url: str
+    stock: int = 100
+
+class RewardPurchase(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    shop_item_id: str
+    item_name: str
+    points_spent: int
+    status: str = "pending"
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class RewardPurchaseCreate(BaseModel):
+    shop_item_id: str
+
+class Achievement(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    title: str
+    description: str
+    type: str
+    icon: str
+    shared: bool = False
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ShareAchievement(BaseModel):
+    achievement_id: str
+    platform: str
 
 # ============= AUTH UTILITIES =============
 
@@ -196,6 +280,20 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid authentication")
 
+async def award_points(user_id: str, points: int, transaction_type: str, description: str):
+    """Helper function to award points to user"""
+    await db.users.update_one({"id": user_id}, {"$inc": {"points": points}})
+    
+    transaction = PointsTransaction(
+        user_id=user_id,
+        points=points,
+        transaction_type=transaction_type,
+        description=description
+    )
+    doc = transaction.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    await db.points_transactions.insert_one(doc)
+
 # ============= AUTH ROUTES =============
 
 @api_router.post("/auth/register", response_model=TokenResponse)
@@ -219,6 +317,8 @@ async def register(user_data: UserCreate):
         id=user.id,
         email=user.email,
         name=user.name,
+        points=user.points,
+        total_workouts=user.total_workouts,
         created_at=user.created_at
     )
     
@@ -242,6 +342,8 @@ async def login(credentials: UserLogin):
         id=user['id'],
         email=user['email'],
         name=user['name'],
+        points=user.get('points', 0),
+        total_workouts=user.get('total_workouts', 0),
         created_at=user['created_at']
     )
     
@@ -283,10 +385,9 @@ Format as JSON with keys: meal_name, ingredients (array), instructions, calories
         user_message = UserMessage(text=prompt)
         response = await chat.send_message(user_message)
         
-        # Parse the response and save to database
         import json
+        import re
         try:
-            # Extract JSON from response
             response_text = response.strip()
             if "```json" in response_text:
                 response_text = response_text.split("```json")[1].split("```")[0]
@@ -295,14 +396,11 @@ Format as JSON with keys: meal_name, ingredients (array), instructions, calories
             
             meal_data = json.loads(response_text)
             
-            # Parse calories and protein, extracting numeric values from strings like "580 kcal" or "25g"
             def extract_number(value):
                 if value is None:
                     return None
                 if isinstance(value, (int, float)):
                     return int(value)
-                # Extract first number from string
-                import re
                 match = re.search(r'\d+', str(value))
                 return int(match.group()) if match else None
             
@@ -321,7 +419,6 @@ Format as JSON with keys: meal_name, ingredients (array), instructions, calories
             
             return meal_plan
         except json.JSONDecodeError:
-            # If parsing fails, return raw response
             return {"raw_response": response, "message": "Meal plan generated but formatting needs adjustment"}
             
     except Exception as e:
@@ -385,6 +482,20 @@ async def update_goal(goal_id: str, update_data: GoalUpdate, current_user: dict 
         goal['created_at'] = datetime.fromisoformat(goal['created_at'])
     if goal.get('deadline') and isinstance(goal['deadline'], str):
         goal['deadline'] = datetime.fromisoformat(goal['deadline'])
+    
+    if update_data.status == 'completed':
+        await award_points(current_user['id'], 50, "goal_completed", f"Completed goal: {goal['title']}")
+        
+        achievement = Achievement(
+            user_id=current_user['id'],
+            title=f"Goal Achieved: {goal['title']}",
+            description=f"Completed goal: {goal['description']}",
+            type="goal_completion",
+            icon="trophy"
+        )
+        doc = achievement.model_dump()
+        doc['created_at'] = doc['created_at'].isoformat()
+        await db.achievements.insert_one(doc)
     
     return Goal(**goal)
 
@@ -452,11 +563,12 @@ async def update_group_progress(group_id: str, progress: float, current_user: di
         {"$inc": {"current_value": progress}}
     )
     
+    await award_points(current_user['id'], 20, "group_progress", f"Added progress to {group['name']}")
+    
     return {"message": "Progress updated", "progress_added": progress}
 
 @api_router.get("/groups/{group_id}/messages", response_model=List[Message])
 async def get_messages(group_id: str, current_user: dict = Depends(get_current_user)):
-    # Verify user is member
     group = await db.group_goals.find_one({"id": group_id}, {"_id": 0})
     if not group or current_user['id'] not in group['members']:
         raise HTTPException(status_code=403, detail="Access denied")
@@ -474,7 +586,6 @@ async def get_messages(group_id: str, current_user: dict = Depends(get_current_u
 
 @api_router.post("/groups/{group_id}/messages", response_model=Message)
 async def send_message(group_id: str, message_data: MessageCreate, current_user: dict = Depends(get_current_user)):
-    # Verify user is member
     group = await db.group_goals.find_one({"id": group_id}, {"_id": 0})
     if not group or current_user['id'] not in group['members']:
         raise HTTPException(status_code=403, detail="Access denied")
@@ -522,11 +633,174 @@ async def get_weight_entries(current_user: dict = Depends(get_current_user)):
     
     return entries
 
+# ============= WORKOUT ROUTES =============
+
+@api_router.get("/workouts/videos")
+async def get_workout_videos(category: Optional[str] = None):
+    query = {"category": category} if category else {}
+    videos = await db.workout_videos.find(query, {"_id": 0}).to_list(100)
+    return videos
+
+@api_router.post("/workouts/log", response_model=WorkoutLog)
+async def log_workout(workout_data: WorkoutLogCreate, current_user: dict = Depends(get_current_user)):
+    points_earned = max(10, workout_data.duration_minutes // 10 * 5)
+    
+    workout_log = WorkoutLog(
+        user_id=current_user['id'],
+        workout_video_id=workout_data.workout_video_id,
+        workout_type=workout_data.workout_type,
+        duration_minutes=workout_data.duration_minutes,
+        calories_burned=workout_data.calories_burned,
+        notes=workout_data.notes,
+        points_earned=points_earned
+    )
+    
+    doc = workout_log.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    await db.workout_logs.insert_one(doc)
+    
+    await db.users.update_one(
+        {"id": current_user['id']},
+        {"$inc": {"total_workouts": 1}}
+    )
+    
+    await award_points(current_user['id'], points_earned, "workout_completed", f"Completed {workout_data.workout_type} workout")
+    
+    return workout_log
+
+@api_router.get("/workouts/logs", response_model=List[WorkoutLog])
+async def get_workout_logs(current_user: dict = Depends(get_current_user)):
+    logs = await db.workout_logs.find(
+        {"user_id": current_user['id']},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    
+    for log in logs:
+        if isinstance(log['created_at'], str):
+            log['created_at'] = datetime.fromisoformat(log['created_at'])
+    
+    return logs
+
+# ============= POINTS & REWARDS ROUTES =============
+
+@api_router.get("/points/balance")
+async def get_points_balance(current_user: dict = Depends(get_current_user)):
+    return {"points": current_user.get('points', 0)}
+
+@api_router.get("/points/transactions")
+async def get_points_transactions(current_user: dict = Depends(get_current_user)):
+    transactions = await db.points_transactions.find(
+        {"user_id": current_user['id']},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(50)
+    
+    for txn in transactions:
+        if isinstance(txn['created_at'], str):
+            txn['created_at'] = datetime.fromisoformat(txn['created_at'])
+    
+    return transactions
+
+@api_router.get("/shop/items")
+async def get_shop_items(category: Optional[str] = None):
+    query = {"category": category} if category else {}
+    items = await db.shop_items.find(query, {"_id": 0}).to_list(100)
+    return items
+
+@api_router.post("/shop/purchase", response_model=RewardPurchase)
+async def purchase_reward(purchase_data: RewardPurchaseCreate, current_user: dict = Depends(get_current_user)):
+    item = await db.shop_items.find_one({"id": purchase_data.shop_item_id}, {"_id": 0})
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    
+    user_points = current_user.get('points', 0)
+    if user_points < item['price_points']:
+        raise HTTPException(status_code=400, detail="Insufficient points")
+    
+    purchase = RewardPurchase(
+        user_id=current_user['id'],
+        shop_item_id=item['id'],
+        item_name=item['name'],
+        points_spent=item['price_points']
+    )
+    
+    doc = purchase.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    await db.reward_purchases.insert_one(doc)
+    
+    await db.users.update_one(
+        {"id": current_user['id']},
+        {"$inc": {"points": -item['price_points']}}
+    )
+    
+    transaction = PointsTransaction(
+        user_id=current_user['id'],
+        points=-item['price_points'],
+        transaction_type="reward_purchase",
+        description=f"Purchased {item['name']}"
+    )
+    txn_doc = transaction.model_dump()
+    txn_doc['created_at'] = txn_doc['created_at'].isoformat()
+    await db.points_transactions.insert_one(txn_doc)
+    
+    return purchase
+
+@api_router.get("/shop/purchases")
+async def get_purchases(current_user: dict = Depends(get_current_user)):
+    purchases = await db.reward_purchases.find(
+        {"user_id": current_user['id']},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(50)
+    
+    for purchase in purchases:
+        if isinstance(purchase['created_at'], str):
+            purchase['created_at'] = datetime.fromisoformat(purchase['created_at'])
+    
+    return purchases
+
+# ============= ACHIEVEMENTS & SOCIAL SHARING =============
+
+@api_router.get("/achievements")
+async def get_achievements(current_user: dict = Depends(get_current_user)):
+    achievements = await db.achievements.find(
+        {"user_id": current_user['id']},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    
+    for achievement in achievements:
+        if isinstance(achievement['created_at'], str):
+            achievement['created_at'] = datetime.fromisoformat(achievement['created_at'])
+    
+    return achievements
+
+@api_router.post("/achievements/share")
+async def share_achievement(share_data: ShareAchievement, current_user: dict = Depends(get_current_user)):
+    achievement = await db.achievements.find_one(
+        {"id": share_data.achievement_id, "user_id": current_user['id']},
+        {"_id": 0}
+    )
+    if not achievement:
+        raise HTTPException(status_code=404, detail="Achievement not found")
+    
+    await db.achievements.update_one(
+        {"id": share_data.achievement_id},
+        {"$set": {"shared": True}}
+    )
+    
+    await award_points(current_user['id'], 5, "social_share", "Shared achievement on social media")
+    
+    share_url = f"https://innate.fitness/share/{share_data.achievement_id}"
+    
+    return {
+        "message": "Achievement shared",
+        "platform": share_data.platform,
+        "share_url": share_url,
+        "points_earned": 5
+    }
+
 # ============= FITNESS INTEGRATION ROUTES =============
 
 @api_router.post("/fitness/sync")
 async def sync_fitness_data(current_user: dict = Depends(get_current_user)):
-    """Infrastructure ready for Apple/Google Fitness integration"""
     return {
         "message": "Fitness integration endpoint ready",
         "status": "infrastructure_prepared",
@@ -535,7 +809,6 @@ async def sync_fitness_data(current_user: dict = Depends(get_current_user)):
 
 @api_router.get("/fitness/data")
 async def get_fitness_data(current_user: dict = Depends(get_current_user)):
-    """Get fitness data - ready for integration"""
     fitness_data = await db.fitness_data.find(
         {"user_id": current_user['id']},
         {"_id": 0}
@@ -545,7 +818,6 @@ async def get_fitness_data(current_user: dict = Depends(get_current_user)):
 
 @api_router.get("/fitness/scale/connect")
 async def connect_scale(current_user: dict = Depends(get_current_user)):
-    """Infrastructure for digital scale API (Withings/Fitbit Aria)"""
     return {
         "message": "Scale API integration ready",
         "instructions": "Add SCALE_API_KEY and SCALE_API_SECRET to .env",
@@ -556,26 +828,26 @@ async def connect_scale(current_user: dict = Depends(get_current_user)):
 
 @api_router.get("/dashboard/stats")
 async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
-    # Get latest weight
     latest_weight = await db.weight_entries.find_one(
         {"user_id": current_user['id']},
         {"_id": 0},
         sort=[("created_at", -1)]
     )
     
-    # Count active goals
     active_goals = await db.goals.count_documents({
         "user_id": current_user['id'],
         "status": "active"
     })
     
-    # Count group memberships
     group_count = await db.group_goals.count_documents({
         "members": current_user['id']
     })
     
-    # Count meal plans
     meal_count = await db.meal_plans.count_documents({
+        "user_id": current_user['id']
+    })
+    
+    workout_count = await db.workout_logs.count_documents({
         "user_id": current_user['id']
     })
     
@@ -584,8 +856,57 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
         "weight_unit": latest_weight.get('unit') if latest_weight else "kg",
         "active_goals": active_goals,
         "group_memberships": group_count,
-        "meal_plans": meal_count
+        "meal_plans": meal_count,
+        "total_workouts": workout_count,
+        "points": current_user.get('points', 0)
     }
+
+# ============= SEED DATA ENDPOINT =============
+
+@api_router.post("/seed/shop")
+async def seed_shop_data():
+    """Seed initial shop items"""
+    existing = await db.shop_items.count_documents({})
+    if existing > 0:
+        return {"message": "Shop already seeded"}
+    
+    shop_items = [
+        {"name": "Innate Performance T-Shirt", "category": "apparel", "price_points": 500, "image_url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab", "stock": 100},
+        {"name": "Premium Whey Protein (2kg)", "category": "supplements", "price_points": 800, "image_url": "https://images.unsplash.com/photo-1579722820308-d74e571900a9", "stock": 50},
+        {"name": "Innate Hoodie", "category": "apparel", "price_points": 1000, "image_url": "https://images.unsplash.com/photo-1556821840-3a63f95609a7", "stock": 75},
+        {"name": "Protein Bar Box (12 pack)", "category": "nutrition", "price_points": 300, "image_url": "https://images.unsplash.com/photo-1607623488620-5c79a6545351", "stock": 200},
+        {"name": "Creatine Monohydrate", "category": "supplements", "price_points": 400, "image_url": "https://images.unsplash.com/photo-1610497889054-b77df9e67d87", "stock": 100},
+        {"name": "Innate Joggers", "category": "apparel", "price_points": 700, "image_url": "https://images.unsplash.com/photo-1555689502-c4b22d76c56f", "stock": 60},
+        {"name": "Pre-Workout Energy Drink", "category": "drinks", "price_points": 250, "image_url": "https://images.unsplash.com/photo-1622543925917-763c34f1f161", "stock": 150},
+        {"name": "Resistance Bands Set", "category": "equipment", "price_points": 600, "image_url": "https://images.unsplash.com/photo-1598289431512-b97b0917affc", "stock": 80}
+    ]
+    
+    for item_data in shop_items:
+        item = ShopItem(id=str(uuid.uuid4()), **item_data)
+        await db.shop_items.insert_one(item.model_dump())
+    
+    return {"message": "Shop seeded successfully", "items_added": len(shop_items)}
+
+@api_router.post("/seed/workouts")
+async def seed_workout_videos():
+    """Seed initial workout videos"""
+    existing = await db.workout_videos.count_documents({})
+    if existing > 0:
+        return {"message": "Workouts already seeded"}
+    
+    workout_videos = [
+        {"title": "Full Body HIIT", "category": "HIIT", "difficulty": "Intermediate", "duration_minutes": 30, "video_url": "https://youtube.com/watch?v=sample1", "thumbnail_url": "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b", "description": "High-intensity interval training for full body", "points_reward": 30},
+        {"title": "Yoga Flow for Beginners", "category": "Yoga", "difficulty": "Beginner", "duration_minutes": 20, "video_url": "https://youtube.com/watch?v=sample2", "thumbnail_url": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b", "description": "Gentle yoga flow for flexibility", "points_reward": 20},
+        {"title": "Strength Training - Upper Body", "category": "Strength", "difficulty": "Advanced", "duration_minutes": 45, "video_url": "https://youtube.com/watch?v=sample3", "thumbnail_url": "https://images.unsplash.com/photo-1534438327276-14e5300c3a48", "description": "Build upper body strength", "points_reward": 45},
+        {"title": "Core Workout", "category": "Core", "difficulty": "Intermediate", "duration_minutes": 15, "video_url": "https://youtube.com/watch?v=sample4", "thumbnail_url": "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b", "description": "Strengthen your core muscles", "points_reward": 15},
+        {"title": "Cardio Blast", "category": "Cardio", "difficulty": "Intermediate", "duration_minutes": 25, "video_url": "https://youtube.com/watch?v=sample5", "thumbnail_url": "https://images.unsplash.com/photo-1518611012118-696072aa579a", "description": "High-energy cardio session", "points_reward": 25}
+    ]
+    
+    for video_data in workout_videos:
+        video = WorkoutVideo(id=str(uuid.uuid4()), **video_data)
+        await db.workout_videos.insert_one(video.model_dump())
+    
+    return {"message": "Workouts seeded successfully", "videos_added": len(workout_videos)}
 
 # Include the router in the main app
 app.include_router(api_router)
@@ -598,7 +919,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
