@@ -497,6 +497,12 @@ async def login(credentials: UserLogin):
         name=user['name'],
         points=user.get('points', 0),
         total_workouts=user.get('total_workouts', 0),
+        level=user.get('level', 1),
+        xp=user.get('xp', 0),
+        avatar_stage=user.get('avatar_stage', 1),
+        badges=user.get('badges', []),
+        onboarding_completed=user.get('onboarding_completed', False),
+        referral_code=user.get('referral_code', ''),
         created_at=user['created_at']
     )
     
