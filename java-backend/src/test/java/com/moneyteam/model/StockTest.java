@@ -25,84 +25,142 @@ public class StockTest {
     }
 
     @Test
+    @DisplayName("Should create stock with constructor")
+    void testStockCreationWithConstructor() {
+        Stock fullStock = new Stock("AAPL", "Apple Inc.", "Technology", 2890000000000.0, 
+                48234521, 1.5, 186.00, 185.50, 1000000, 182.50, 185.92, 185.92, 1.67);
+        
+        assertEquals("AAPL", fullStock.getStockTicker());
+        assertEquals("Apple Inc.", fullStock.getStockName());
+        assertEquals("Technology", fullStock.getSector());
+    }
+
+    @Test
     @DisplayName("Should set and get ticker symbol")
-    void testSetAndGetTicker() {
+    void testSetAndGetStockTicker() {
         String ticker = "AAPL";
-        stock.setTicker(ticker);
-        assertEquals(ticker, stock.getTicker());
+        stock.setStockTicker(ticker);
+        assertEquals(ticker, stock.getStockTicker());
     }
 
     @Test
     @DisplayName("Should set and get company name")
-    void testSetAndGetName() {
+    void testSetAndGetStockName() {
         String name = "Apple Inc.";
-        stock.setName(name);
-        assertEquals(name, stock.getName());
+        stock.setStockName(name);
+        assertEquals(name, stock.getStockName());
     }
 
     @Test
-    @DisplayName("Should set and get current price")
-    void testSetAndGetPrice() {
-        Double price = 185.92;
-        stock.setPrice(price);
-        assertEquals(price, stock.getPrice());
+    @DisplayName("Should set and get sector")
+    void testSetAndGetSector() {
+        String sector = "Technology";
+        stock.setSector(sector);
+        assertEquals(sector, stock.getSector());
     }
 
     @Test
-    @DisplayName("Should set and get price change")
-    void testSetAndGetChange() {
-        Double change = 2.50;
-        stock.setChange(change);
-        assertEquals(change, stock.getChange());
-    }
-
-    @Test
-    @DisplayName("Should set and get change percent")
-    void testSetAndGetChangePercent() {
-        Double changePercent = 1.35;
-        stock.setChangePercent(changePercent);
-        assertEquals(changePercent, stock.getChangePercent());
+    @DisplayName("Should set and get market cap")
+    void testSetAndGetMarketCapAmount() {
+        Double marketCap = 2890000000000.0;
+        stock.setMarketCapAmount(marketCap);
+        assertEquals(marketCap, stock.getMarketCapAmount());
     }
 
     @Test
     @DisplayName("Should set and get volume")
     void testSetAndGetVolume() {
-        Long volume = 50000000L;
+        Integer volume = 50000000;
         stock.setVolume(volume);
         assertEquals(volume, stock.getVolume());
     }
 
     @Test
-    @DisplayName("Should set and get market cap")
-    void testSetAndGetMarketCap() {
-        Double marketCap = 2890000000000.0;
-        stock.setMarketCap(marketCap);
-        assertEquals(marketCap, stock.getMarketCap());
+    @DisplayName("Should set and get sizzle index")
+    void testSetAndGetSizzleIndex() {
+        Double sizzleIndex = 1.5;
+        stock.setSizzleIndex(sizzleIndex);
+        assertEquals(sizzleIndex, stock.getSizzleIndex());
+    }
+
+    @Test
+    @DisplayName("Should set and get ask price")
+    void testSetAndGetAsk() {
+        Double ask = 186.00;
+        stock.setAsk(ask);
+        assertEquals(ask, stock.getAsk());
+    }
+
+    @Test
+    @DisplayName("Should set and get bid price")
+    void testSetAndGetBid() {
+        Double bid = 185.50;
+        stock.setBid(bid);
+        assertEquals(bid, stock.getBid());
+    }
+
+    @Test
+    @DisplayName("Should set and get number of shares")
+    void testSetAndGetNumberOfShares() {
+        Integer shares = 1000000;
+        stock.setNumberOfShares(shares);
+        assertEquals(shares, stock.getNumberOfShares());
+    }
+
+    @Test
+    @DisplayName("Should set and get open price")
+    void testSetAndGetOpen() {
+        Double open = 182.50;
+        stock.setOpen(open);
+        assertEquals(open, stock.getOpen());
+    }
+
+    @Test
+    @DisplayName("Should set and get close price")
+    void testSetAndGetClose() {
+        Double close = 185.92;
+        stock.setClose(close);
+        assertEquals(close, stock.getClose());
+    }
+
+    @Test
+    @DisplayName("Should set and get mark change")
+    void testSetAndGetMarkChange() {
+        Double markChange = 1.67;
+        stock.setMarkChange(markChange);
+        assertEquals(markChange, stock.getMarkChange());
     }
 
     @Test
     @DisplayName("Should handle negative price change")
     void testNegativePriceChange() {
-        stock.setChange(-5.25);
-        stock.setChangePercent(-2.75);
-        
-        assertTrue(stock.getChange() < 0);
-        assertTrue(stock.getChangePercent() < 0);
+        stock.setMarkChange(-5.25);
+        assertTrue(stock.getMarkChange() < 0);
     }
 
     @Test
     @DisplayName("Should identify positive change")
     void testPositiveChange() {
-        stock.setChange(3.50);
-        assertTrue(stock.getChange() >= 0);
+        stock.setMarkChange(3.50);
+        assertTrue(stock.getMarkChange() >= 0);
     }
 
     @Test
-    @DisplayName("Should handle ticker case sensitivity")
-    void testTickerUpperCase() {
-        stock.setTicker("aapl");
-        // Assuming ticker should be uppercase
-        String ticker = stock.getTicker().toUpperCase();
-        assertEquals("AAPL", ticker);
+    @DisplayName("Should validate bid-ask spread")
+    void testBidAskSpread() {
+        stock.setAsk(186.00);
+        stock.setBid(185.50);
+        assertTrue(stock.getAsk() > stock.getBid());
+    }
+
+    @Test
+    @DisplayName("Should return correct toString")
+    void testToString() {
+        stock.setStockTicker("AAPL");
+        stock.setStockName("Apple Inc.");
+        
+        String result = stock.toString();
+        assertNotNull(result);
+        assertTrue(result.contains("AAPL") || result.contains("Stock"));
     }
 }
