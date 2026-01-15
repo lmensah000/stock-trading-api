@@ -33,22 +33,16 @@ public class StockControllerTest {
 
     @BeforeEach
     void setUp() {
-        testStock = new Stock();
-        testStock.setTicker("AAPL");
-        testStock.setName("Apple Inc.");
-        testStock.setPrice(185.92);
-        testStock.setChange(1.67);
-        testStock.setChangePercent(0.91);
-        testStock.setVolume(48234521L);
-        testStock.setMarketCap(2890000000000.0);
+        testStock = new Stock("AAPL", "Apple Inc.", "Technology", 2890000000000.0, 
+                48234521, 1.5, 186.00, 185.50, 1000000, 182.50, 185.92, 185.92, 1.67);
     }
 
     @Test
     @DisplayName("Should get stock quote for valid ticker")
     void testGetStockQuote() {
         assertNotNull(testStock);
-        assertEquals("AAPL", testStock.getTicker());
-        assertEquals(185.92, testStock.getPrice());
+        assertEquals("AAPL", testStock.getStockTicker());
+        assertEquals(185.92, Stock.getLast(), 0.01);
     }
 
     @Test
@@ -61,20 +55,18 @@ public class StockControllerTest {
     @Test
     @DisplayName("Should get stock fundamentals")
     void testGetStockFundamentals() {
-        assertNotNull(testStock.getMarketCap());
-        assertTrue(testStock.getMarketCap() > 0);
+        assertNotNull(testStock.getMarketCapAmount());
+        assertTrue(testStock.getMarketCapAmount() > 0);
     }
 
     @Test
     @DisplayName("Should get market movers")
     void testGetMarketMovers() {
-        Stock stock2 = new Stock();
-        stock2.setTicker("NVDA");
-        stock2.setChangePercent(2.5);
+        Stock stock2 = new Stock("NVDA", "NVIDIA Corp.", "Technology", 1200000000000.0, 
+                30000000, 2.0, 480.00, 479.00, 500000, 470.00, 478.00, 478.00, 8.00);
 
-        Stock stock3 = new Stock();
-        stock3.setTicker("TSLA");
-        stock3.setChangePercent(1.8);
+        Stock stock3 = new Stock("TSLA", "Tesla Inc.", "Automotive", 600000000000.0, 
+                25000000, 1.8, 255.00, 254.00, 400000, 250.00, 254.00, 254.00, 4.00);
 
         List<Stock> movers = Arrays.asList(testStock, stock2, stock3);
         
@@ -82,66 +74,53 @@ public class StockControllerTest {
     }
 
     @Test
-    @DisplayName("Should sort movers by change percent")
-    void testSortMoversByChangePercent() {
-        Stock stock1 = new Stock();
-        stock1.setTicker("A");
-        stock1.setChangePercent(1.0);
-
-        Stock stock2 = new Stock();
-        stock2.setTicker("B");
-        stock2.setChangePercent(3.0);
-
-        Stock stock3 = new Stock();
-        stock3.setTicker("C");
-        stock3.setChangePercent(2.0);
+    @DisplayName("Should sort movers by change")
+    void testSortMoversByChange() {
+        Stock stock1 = new Stock("A", "Stock A", "Sector", 0.0, 0, 0.0, 0.0, 0.0, 0, 0.0, 0.0, 0.0, 1.0);
+        Stock stock2 = new Stock("B", "Stock B", "Sector", 0.0, 0, 0.0, 0.0, 0.0, 0, 0.0, 0.0, 0.0, 3.0);
+        Stock stock3 = new Stock("C", "Stock C", "Sector", 0.0, 0, 0.0, 0.0, 0.0, 0, 0.0, 0.0, 0.0, 2.0);
 
         List<Stock> movers = Arrays.asList(stock1, stock2, stock3);
         movers.sort((a, b) -> Double.compare(
-            Math.abs(b.getChangePercent()), 
-            Math.abs(a.getChangePercent())
+            Math.abs(b.getMarkChange()), 
+            Math.abs(a.getMarkChange())
         ));
 
-        assertEquals("B", movers.get(0).getTicker());
-        assertEquals("C", movers.get(1).getTicker());
-        assertEquals("A", movers.get(2).getTicker());
+        assertEquals("B", movers.get(0).getStockTicker());
+        assertEquals("C", movers.get(1).getStockTicker());
+        assertEquals("A", movers.get(2).getStockTicker());
     }
 
     @Test
     @DisplayName("Should validate stock response structure")
     void testStockResponseStructure() {
-        assertNotNull(testStock.getTicker());
-        assertNotNull(testStock.getName());
-        assertNotNull(testStock.getPrice());
-        assertNotNull(testStock.getChange());
-        assertNotNull(testStock.getChangePercent());
+        assertNotNull(testStock.getStockTicker());
+        assertNotNull(testStock.getStockName());
+        assertNotNull(testStock.getSector());
         assertNotNull(testStock.getVolume());
     }
 
     @Test
     @DisplayName("Should identify positive change")
     void testPositiveChange() {
-        assertTrue(testStock.getChange() >= 0);
-        assertTrue(testStock.getChangePercent() >= 0);
+        assertTrue(testStock.getMarkChange() >= 0);
     }
 
     @Test
     @DisplayName("Should identify negative change")
     void testNegativeChange() {
-        Stock negativeStock = new Stock();
-        negativeStock.setChange(-2.50);
-        negativeStock.setChangePercent(-1.35);
+        Stock negativeStock = new Stock("NEG", "Negative Stock", "Sector", 0.0, 
+                0, 0.0, 0.0, 0.0, 0, 0.0, 0.0, 0.0, -2.50);
 
-        assertTrue(negativeStock.getChange() < 0);
-        assertTrue(negativeStock.getChangePercent() < 0);
+        assertTrue(negativeStock.getMarkChange() < 0);
     }
 
     @Test
     @DisplayName("Should search stocks by query")
     void testSearchStocks() {
         String query = "AAPL";
-        boolean matches = testStock.getTicker().contains(query.toUpperCase()) ||
-                         testStock.getName().toUpperCase().contains(query.toUpperCase());
+        boolean matches = testStock.getStockTicker().contains(query.toUpperCase()) ||
+                         testStock.getStockName().toUpperCase().contains(query.toUpperCase());
         assertTrue(matches);
     }
 
@@ -156,14 +135,15 @@ public class StockControllerTest {
     @Test
     @DisplayName("Should format price correctly")
     void testFormatPrice() {
-        String formattedPrice = String.format("$%.2f", testStock.getPrice());
+        String formattedPrice = String.format("$%.2f", Stock.getLast());
         assertEquals("$185.92", formattedPrice);
     }
 
     @Test
-    @DisplayName("Should format percent correctly")
-    void testFormatPercent() {
-        String formattedPercent = String.format("%+.2f%%", testStock.getChangePercent());
-        assertEquals("+0.91%", formattedPercent);
+    @DisplayName("Should validate bid-ask spread")
+    void testBidAskSpread() {
+        assertNotNull(testStock.getBid());
+        assertNotNull(testStock.getAsk());
+        assertTrue(testStock.getAsk() > testStock.getBid());
     }
 }
