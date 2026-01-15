@@ -275,7 +275,51 @@ export default function Goals() {
             })
           )}
         </div>
+
+        {/* Achievements Section */}
+        {achievements.length > 0 && (
+          <div className="mt-12">
+            <h2 className="text-3xl font-black uppercase mb-6 text-[#5C4A42]">
+              YOUR ACHIEVEMENTS <Trophy className="inline w-8 h-8 text-[#D4A574]" />
+            </h2>
+            <div className="grid md:grid-cols-3 gap-4">
+              {achievements.map((achievement) => (
+                <motion.div
+                  key={achievement.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="warm-card p-6 rounded-lg text-center"
+                >
+                  <div className="text-4xl mb-3">🏆</div>
+                  <h3 className="font-bold text-[#5C4A42] mb-2">{achievement.title}</h3>
+                  <p className="text-sm text-[#8B7355] mb-4">{achievement.description}</p>
+                  <Button
+                    onClick={() => {
+                      setSelectedAchievement(achievement);
+                      setShareModalOpen(true);
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="border-[#D4A574] text-[#D4A574] hover:bg-[#D4A574] hover:text-white"
+                  >
+                    <Share2 className="w-4 h-4 mr-2" />
+                    SHARE (+5 pts)
+                  </Button>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
+      
+      <ShareModal 
+        achievement={selectedAchievement}
+        open={shareModalOpen}
+        onClose={() => {
+          setShareModalOpen(false);
+          fetchAchievements();
+        }}
+      />
     </div>
   );
 }
