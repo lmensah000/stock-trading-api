@@ -349,22 +349,25 @@ async def get_stock_quote(ticker: str):
 @app.get("/api/stocks/fundamentals/{ticker}", response_model=FundamentalData)
 async def get_fundamentals(ticker: str):
     try:
-        stock = yf.Ticker(ticker.upper())
-        info = stock.info
+        info = get_stock_info(ticker.upper())
         
         if not info:
             raise HTTPException(status_code=404, detail=f"Stock {ticker} not found")
         
-        # Get financial data
+        # Get financial data - may not be available in demo mode
+        revenue = net_income = total_assets = total_liabilities = None
         try:
+            stock = yf.Ticker(ticker.upper())
             financials = stock.financials
             balance_sheet = stock.balance_sheet
-            revenue = financials.loc["Total Revenue"].iloc[0] if "Total Revenue" in financials.index else None
-            net_income = financials.loc["Net Income"].iloc[0] if "Net Income" in financials.index else None
-            total_assets = balance_sheet.loc["Total Assets"].iloc[0] if "Total Assets" in balance_sheet.index else None
-            total_liabilities = balance_sheet.loc["Total Liabilities Net Minority Interest"].iloc[0] if "Total Liabilities Net Minority Interest" in balance_sheet.index else None
+            if not financials.empty:
+                revenue = financials.loc["Total Revenue"].iloc[0] if "Total Revenue" in financials.index else None
+                net_income = financials.loc["Net Income"].iloc[0] if "Net Income" in financials.index else None
+            if not balance_sheet.empty:
+                total_assets = balance_sheet.loc["Total Assets"].iloc[0] if "Total Assets" in balance_sheet.index else None
+                total_liabilities = balance_sheet.loc["Total Liabilities Net Minority Interest"].iloc[0] if "Total Liabilities Net Minority Interest" in balance_sheet.index else None
         except:
-            revenue = net_income = total_assets = total_liabilities = None
+            pass
         
         return FundamentalData(
             ticker=ticker.upper(),
@@ -384,6 +387,8 @@ async def get_fundamentals(ticker: str):
             profit_margin=info.get("profitMargins"),
             roe=info.get("returnOnEquity")
         )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=404, detail=f"Error fetching fundamental data: {str(e)}")
 
