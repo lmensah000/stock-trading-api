@@ -577,6 +577,9 @@ async def execute_trade(trade: TradeRequest, current_user: dict = Depends(get_cu
 @app.get("/api/trades", response_model=List[TradeResponse])
 async def get_trades(current_user: dict = Depends(get_current_user)):
     trades = await db.trades.find({"user_id": current_user["_id"]}).sort("execution_date", -1).to_list(100)
+    # Map _id to id for Pydantic model compatibility
+    for trade in trades:
+        trade["id"] = trade["_id"]
     return [TradeResponse(**trade) for trade in trades]
 
 @app.delete("/api/trades/{trade_id}")
