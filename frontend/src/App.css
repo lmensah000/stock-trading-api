@@ -1,0 +1,202 @@
+/* Additional App-specific styles */
+
+/* Custom scrollbar for the entire app */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #2F3336 #1E2124;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #1E2124;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #2F3336;
+  border-radius: 3px;
+}
+
+/* Gradient text effect */
+.gradient-text {
+  background: linear-gradient(135deg, #00C805 0%, #00FF88 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glassmorphism card effect */
+.glass-card {
+  background: rgba(30, 33, 36, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Hover lift effect */
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Button press effect */
+.btn-press:active {
+  transform: scale(0.98);
+}
+
+/* Loading skeleton */
+.skeleton {
+  background: linear-gradient(90deg, #1E2124 25%, #2F3336 50%, #1E2124 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Glow effect */
+.glow-green {
+  box-shadow: 0 0 20px rgba(0, 200, 5, 0.3);
+}
+
+.glow-red {
+  box-shadow: 0 0 20px rgba(255, 80, 0, 0.3);
+}
+
+/* Number animation */
+.number-animate {
+  transition: all 0.3s ease;
+}
+
+/* Tooltip styles */
+.tooltip {
+  position: relative;
+}
+
+.tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 12px;
+  background: #1E2124;
+  border: 1px solid #2F3336;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  z-index: 100;
+}
+
+.tooltip:hover::after {
+  opacity: 1;
+  visibility: visible;
+  bottom: calc(100% + 8px);
+}
+
+/* Chart container */
+.chart-container {
+  position: relative;
+}
+
+.chart-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(to bottom, #1E2124, transparent);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Input focus glow */
+input:focus {
+  box-shadow: 0 0 0 2px rgba(0, 200, 5, 0.2);
+}
+
+/* Table row hover */
+.table-row-hover:hover {
+  background: rgba(0, 200, 5, 0.05);
+}
+
+/* Status badges */
+.badge-success {
+  background: rgba(0, 200, 5, 0.2);
+  color: #00C805;
+}
+
+.badge-error {
+  background: rgba(255, 80, 0, 0.2);
+  color: #FF5000;
+}
+
+.badge-warning {
+  background: rgba(255, 193, 7, 0.2);
+  color: #FFC107;
+}
+
+.badge-info {
+  background: rgba(33, 150, 243, 0.2);
+  color: #2196F3;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  main {
+    margin-left: 0 !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+}
+
+/* Accessibility - focus visible */
+*:focus-visible {
+  outline: 2px solid #00C805;
+  outline-offset: 2px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
