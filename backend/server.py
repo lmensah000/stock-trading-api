@@ -264,6 +264,44 @@ class ShareAchievement(BaseModel):
     achievement_id: str
     platform: str
 
+# NEW GAMIFICATION MODELS
+
+class Badge(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str
+    name: str
+    description: str
+    icon: str
+    points_reward: int
+    requirement: str
+
+class Level(BaseModel):
+    level: int
+    name: str
+    xp_required: int
+    avatar_stage: int
+    points_reward: int
+
+class Referral(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    referrer_id: str
+    referee_id: str
+    referee_email: str
+    status: str = "pending"
+    onboarded: bool = False
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class ReferralCreate(BaseModel):
+    referral_code: str
+
+class GroupGoalRanking(BaseModel):
+    user_id: str
+    user_name: str
+    contribution: float
+    rank: int
+    points_earned: int
+
 # ============= AUTH UTILITIES =============
 
 def hash_password(password: str) -> str:
