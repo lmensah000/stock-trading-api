@@ -30,8 +30,9 @@ app.add_middleware(
 
 # Database connection
 MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017")
+MONGO_DB_NAME = os.environ.get("MONGO_DB_NAME", "moneyteam")
 client = AsyncIOMotorClient(MONGO_URL)
-db = client.moneyteam
+db = client[MONGO_DB_NAME]
 
 # JWT Configuration
 JWT_SECRET = os.environ.get("JWT_SECRET", "your-super-secret-jwt-key")
