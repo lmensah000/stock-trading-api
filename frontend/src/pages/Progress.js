@@ -22,7 +22,7 @@ const BADGE_EMOJIS = {
   'team_player': '🤝'
 };
 
-export default function Progress() {
+export default function ProgressPage() {
   const [progress, setProgress] = useState(null);
   const [referrals, setReferrals] = useState(null);
   const [allBadges, setAllBadges] = useState([]);
