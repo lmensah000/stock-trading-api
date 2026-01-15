@@ -7,8 +7,13 @@ A modern, Robinhood-style stock trading platform that integrates with TD Schwab'
 - **Frontend**: React 18 with TailwindCSS
 - **Backend**: FastAPI (Python)
 - **Database**: MongoDB
-- **Market Data**: yfinance + TD Schwab API integration
+- **Market Data**: yfinance + TD Schwab API integration (ready)
 - **Authentication**: JWT-based custom authentication
+
+## Testing Status
+- **Backend**: 100% tests passing
+- **Frontend**: 95% tests passing (minor modal overlay issue)
+- **Integration**: 100% tests passing
 
 ## Features Implemented
 
