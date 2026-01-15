@@ -825,7 +825,50 @@ async def log_workout(workout_data: WorkoutLogCreate, current_user: dict = Depen
     
     await award_points(current_user['id'], points_earned, "workout_completed", f"Completed {workout_data.workout_type} workout")
     
+    # Check for workout badges
+    total_workouts = current_user.get('total_workouts', 0) + 1
+    if total_workouts == 1:
+        await check_and_award_badge(current_user['id'], "first_workout")
+    elif total_workouts == 10:
+        await check_and_award_badge(current_user['id'], "workout_warrior")
+    elif total_workouts == 50:
+        await check_and_award_badge(current_user['id'], "fitness_master")
+    
+    # Check referral onboarding
+    await check_referral_onboarding_helper(current_user['id'])
+    
     return workout_log
+
+async def check_referral_onboarding_helper(user_id: str):
+    """Helper to check referral onboarding completion"""
+    workout_count = await db.workout_logs.count_documents({"user_id": user_id})
+    meal_count = await db.meal_plans.count_documents({"user_id": user_id})
+    goal_count = await db.goals.count_documents({"user_id": user_id})
+    
+    if workout_count >= 1 and meal_count >= 1 and goal_count >= 1:
+        referral = await db.referrals.find_one(
+            {"referee_id": user_id, "onboarded": False},
+            {"_id": 0}
+        )
+        
+        if referral:
+            await db.referrals.update_one(
+                {"id": referral['id']},
+                {"$set": {"onboarded": True, "status": "completed"}}
+            )
+            
+            user = await db.users.find_one({"id": user_id}, {"_id": 0})
+            await award_points(referral['referrer_id'], 200, "referral", f"Friend {user.get('name', 'Someone')} completed onboarding")
+            await award_points(user_id, 50, "referred", "Completed onboarding via referral")
+            
+            referrer_referral_count = await db.referrals.count_documents({
+                "referrer_id": referral['referrer_id'],
+                "onboarded": True
+            })
+            
+            if referrer_referral_count == 5:
+                await check_and_award_badge(referral['referrer_id'], "referral_champion")
+
 
 @api_router.get("/workouts/logs", response_model=List[WorkoutLog])
 async def get_workout_logs(current_user: dict = Depends(get_current_user)):
