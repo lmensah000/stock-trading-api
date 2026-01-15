@@ -558,9 +558,12 @@ async def get_positions(current_user: dict = Depends(get_current_user)):
     result = []
     for pos in positions:
         try:
-            stock = yf.Ticker(pos["stock_ticker"])
-            info = stock.info
-            current_price = info.get("regularMarketPrice", info.get("currentPrice", pos["average_price"]))
+            info = get_stock_info(pos["stock_ticker"])
+            if info:
+                current_price = info.get("regularMarketPrice", info.get("currentPrice", pos["average_price"]))
+            else:
+                current_price = pos["average_price"]
+            
             market_value = pos["total_quantity"] * current_price
             cost_basis = pos["total_quantity"] * pos["average_price"]
             unrealized_pnl = market_value - cost_basis
