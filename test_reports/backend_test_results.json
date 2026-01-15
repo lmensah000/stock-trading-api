@@ -1,0 +1,118 @@
+{
+  "summary": {
+    "total_tests": 18,
+    "passed_tests": 17,
+    "success_rate": 94.44444444444444,
+    "timestamp": "2026-01-15T03:37:42.394959"
+  },
+  "detailed_results": [
+    {
+      "test": "User Registration",
+      "status": "PASS",
+      "details": "Status: 200",
+      "timestamp": "2026-01-15T03:37:36.591744"
+    },
+    {
+      "test": "User Login",
+      "status": "PASS",
+      "details": "Status: 200",
+      "timestamp": "2026-01-15T03:37:36.853528"
+    },
+    {
+      "test": "Get User Profile",
+      "status": "PASS",
+      "details": "Status: 200, Response: {'id': '6cf47f7e-bf06-463f-bde8-ce87684ef518', 'email': 'test_user_033736@voltfit.com', 'name': 'Test User', 'created_at': '2026-01-15T03:37:36.573873Z'}",
+      "timestamp": "2026-01-15T03:37:36.892155"
+    },
+    {
+      "test": "Dashboard Stats",
+      "status": "PASS",
+      "details": "Status: 200, Response: {'latest_weight': None, 'weight_unit': 'kg', 'active_goals': 0, 'group_memberships': 0, 'meal_plans': 0}",
+      "timestamp": "2026-01-15T03:37:36.969554"
+    },
+    {
+      "test": "Generate Meal Plan",
+      "status": "FAIL",
+      "details": "Expected 200, got 520. Response: {\"detail\":\"Failed to generate meal plan: 2 validation errors for MealPlan\\ncalories\\n  Input should be a valid integer, unable to parse string as an integer [type=int_parsing, input_value='580 kcal', ",
+      "timestamp": "2026-01-15T03:37:41.829855"
+    },
+    {
+      "test": "Get Meal Plans",
+      "status": "PASS",
+      "details": "Status: 200",
+      "timestamp": "2026-01-15T03:37:41.886258"
+    },
+    {
+      "test": "Create Personal Goal",
+      "status": "PASS",
+      "details": "Status: 200",
+      "timestamp": "2026-01-15T03:37:41.936340"
+    },
+    {
+      "test": "Get Personal Goals",
+      "status": "PASS",
+      "details": "Status: 200",
+      "timestamp": "2026-01-15T03:37:41.972830"
+    },
+    {
+      "test": "Update Goal Progress",
+      "status": "PASS",
+      "details": "Status: 200",
+      "timestamp": "2026-01-15T03:37:42.017287"
+    },
+    {
+      "test": "Create Group Goal",
+      "status": "PASS",
+      "details": "Status: 200",
+      "timestamp": "2026-01-15T03:37:42.063546"
+    },
+    {
+      "test": "Get Group Goals",
+      "status": "PASS",
+      "details": "Status: 200",
+      "timestamp": "2026-01-15T03:37:42.102529"
+    },
+    {
+      "test": "Send Group Message",
+      "status": "PASS",
+      "details": "Status: 200",
+      "timestamp": "2026-01-15T03:37:42.147487"
+    },
+    {
+      "test": "Get Group Messages",
+      "status": "PASS",
+      "details": "Status: 200",
+      "timestamp": "2026-01-15T03:37:42.189712"
+    },
+    {
+      "test": "Add Weight Entry",
+      "status": "PASS",
+      "details": "Status: 200",
+      "timestamp": "2026-01-15T03:37:42.251226"
+    },
+    {
+      "test": "Get Weight Entries",
+      "status": "PASS",
+      "details": "Status: 200",
+      "timestamp": "2026-01-15T03:37:42.288547"
+    },
+    {
+      "test": "Fitness Sync Endpoint",
+      "status": "PASS",
+      "details": "Status: 200, Response: {'message': 'Fitness integration endpoint ready', 'status': 'infrastructure_prepared', 'supported_sources': ['apple_health', 'google_fit', 'withings_scale']}",
+      "timestamp": "2026-01-15T03:37:42.321819"
+    },
+    {
+      "test": "Get Fitness Data",
+      "status": "PASS",
+      "details": "Status: 200",
+      "timestamp": "2026-01-15T03:37:42.356559"
+    },
+    {
+      "test": "Scale Connection Endpoint",
+      "status": "PASS",
+      "details": "Status: 200, Response: {'message': 'Scale API integration ready', 'instructions': 'Add SCALE_API_KEY and SCALE_API_SECRET to .env', 'supported_scales': ['Withings Body+', 'Fitbit Aria', 'QardioBase']}",
+      "timestamp": "2026-01-15T03:37:42.394195"
+    }
+  ]
+}
