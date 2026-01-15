@@ -9,11 +9,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-//BotController: This class acts as the central controller for the trading bot.
-// It receives users input from the UserInterface, interacts with the Model classes to execute
-// trading strategies, and updates the View accordingly. It coordinates the
-// flow of data and actions between the Model and View components.
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
 
+/**
+ * REST Controller for stock and options trading operations.
+ */
+@RestController
+@RequestMapping("/api/trading")
 public class StockTradingController {
 
     @Autowired
