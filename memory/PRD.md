@@ -11,9 +11,10 @@ A modern, Robinhood-style stock trading platform that integrates with TD Schwab'
 - **Authentication**: JWT-based custom authentication
 
 ## Testing Status
-- **Backend**: 100% tests passing
-- **Frontend**: 95% tests passing (minor modal overlay issue)
-- **Integration**: 100% tests passing
+- **Backend Unit Tests**: 59 tests passing (100%)
+- **Integration Tests**: 15 tests passing (100%)  
+- **Frontend Tests**: 49 tests passing (100%)
+- **Total Tests**: 123 tests
 
 ## Features Implemented
 
