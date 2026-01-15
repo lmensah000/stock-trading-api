@@ -295,12 +295,12 @@ export default function GroupGoals({ user }) {
                     </div>
                   </div>
                   
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 mb-4">
                     <Input
                       type="number"
                       placeholder="Add your progress"
                       data-testid="add-progress-input"
-                      className="bg-[#FAF9F7] border-[#D4C4B0] text-white focus:border-[#D4A574]"
+                      className="bg-[#FAF9F7] border-[#D4C4B0] text-[#5C4A42] focus:border-[#D4A574]"
                       onKeyPress={(e) => {
                         if (e.key === 'Enter') {
                           updateGroupProgress(selectedGroup.id, e.target.value);
@@ -309,12 +309,69 @@ export default function GroupGoals({ user }) {
                       }}
                     />
                     <Button
-                      className="bg-[#D4A574] text-black font-bold uppercase hover:bg-[#B3E600] whitespace-nowrap"
+                      onClick={(e) => {
+                        const input = e.target.closest('.flex').querySelector('input');
+                        if (input.value) {
+                          updateGroupProgress(selectedGroup.id, input.value);
+                          input.value = '';
+                        }
+                      }}
+                      className="bg-[#D4A574] text-white font-bold uppercase hover:bg-[#C19563] whitespace-nowrap"
                       data-testid="update-group-progress-btn"
                     >
                       <TrendingUp className="w-4 h-4" />
                     </Button>
                   </div>
+                  
+                  {/* Complete Goal Button */}
+                  {selectedGroup.current_value >= selectedGroup.target_value && (
+                    <Button
+                      onClick={() => completeGroupGoal(selectedGroup.id)}
+                      className="w-full bg-gradient-to-r from-[#D4A574] to-[#8B7355] text-white font-bold uppercase hover:opacity-90"
+                      data-testid="complete-group-goal-btn"
+                    >
+                      🏆 COMPLETE GOAL & DISTRIBUTE REWARDS
+                    </Button>
+                  )}
+                  
+                  {/* Leaderboard */}
+                  {rankings.length > 0 && (
+                    <div className="mt-4 bg-[#FAF9F7] p-4 rounded-lg">
+                      <h3 className="text-sm font-bold uppercase text-[#5C4A42] mb-3 flex items-center gap-2">
+                        🏅 LEADERBOARD
+                      </h3>
+                      <div className="space-y-2">
+                        {rankings.map((ranking, idx) => (
+                          <div
+                            key={ranking.user_id}
+                            className={`flex items-center justify-between p-2 rounded ${\n                              ranking.user_id === user?.id ? 'bg-[#D4A574] text-white' : 'bg-white'\n                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className="text-2xl font-black w-8">
+                                {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`}
+                              </span>
+                              <span className="font-bold">{ranking.user_name}</span>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm font-bold">{ranking.contribution} pts</p>
+                              <p className="text-xs opacity-80">
+                                Rank #{ranking.rank}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      {selectedGroup.current_value >= selectedGroup.target_value && (
+                        <div className="mt-3 text-xs text-[#8B7355] bg-white p-2 rounded">
+                          <p className="font-bold">Rewards on completion:</p>
+                          <p>🥇 1st: 300 pts | 🥈 2nd: 200 pts | 🥉 3rd: 150 pts</p>
+                          <p className="text-[#D4A574] font-bold mt-1">
+                            {rankings.length === selectedGroup.members.length ? '✨ All members bonus: +100 pts each!' : ''}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Messages */}
