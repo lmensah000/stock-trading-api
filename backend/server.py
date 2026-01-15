@@ -882,6 +882,10 @@ async def get_td_schwab_auth_url():
 
 # ==================== HEALTH CHECK ====================
 
+@app.get("/")
+async def root():
+    return {"message": "MoneyTeam Stock Trading API", "version": "2.0", "status": "running"}
+
 @app.get("/api/health")
 async def health_check():
     return {"status": "healthy", "timestamp": datetime.utcnow().isoformat()}
