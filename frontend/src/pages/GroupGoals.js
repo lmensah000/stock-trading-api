@@ -344,7 +344,7 @@ export default function GroupGoals({ user }) {
                         {rankings.map((ranking, idx) => (
                           <div
                             key={ranking.user_id}
-                            className={`flex items-center justify-between p-2 rounded ${\n                              ranking.user_id === user?.id ? 'bg-[#D4A574] text-white' : 'bg-white'\n                            }`}
+                            className={`flex items-center justify-between p-2 rounded ${ranking.user_id === user?.id ? 'bg-[#D4A574] text-white' : 'bg-white'}`}
                           >
                             <div className="flex items-center gap-3">
                               <span className="text-2xl font-black w-8">
