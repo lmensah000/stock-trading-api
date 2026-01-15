@@ -1,8 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Home, Target, Users, Utensils, Weight, User, LogOut, Dumbbell, Award } from 'lucide-react';
+import { Home, Target, Users, Utensils, Weight, User, LogOut, Dumbbell, Award, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const LOGO_URL = 'https://customer-assets.emergentagent.com/job_smart-fitness-102/artifacts/xmes01dq_Photoroom_20251009_212303.PNG';
+const AVATAR_EMOJIS = ['🌱', '🌿', '🪴', '🌸', '🌺', '🌻', '✨', '🌟'];
 
 export const Navbar = () => {
   const navigate = useNavigate();
@@ -68,6 +69,15 @@ export const Navbar = () => {
             
             <div className="h-6 w-px bg-[#D4C4B0]"></div>
             
+            {/* Level & Avatar */}
+            <Link to="/progress">
+              <Button variant="ghost" size="sm" className="text-[#8B7355] hover:text-[#5C4A42] hover:bg-[#FAF9F7]" data-testid="nav-progress">
+                <span className="text-xl mr-1">{AVATAR_EMOJIS[(user.avatar_stage || 1) - 1]}</span>
+                <span className="text-xs font-bold">LV {user.level || 1}</span>
+              </Button>
+            </Link>
+            
+            {/* Points Badge */}
             <div className="flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-[#D4A574] to-[#8B7355] text-white rounded-full">
               <Award className="w-4 h-4" />
               <span className="font-bold text-sm">{user.points || 0}</span>
