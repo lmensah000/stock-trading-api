@@ -97,8 +97,8 @@ export default function Goals() {
       
       <div className="max-w-7xl mx-auto px-4 py-8" data-testid="goals-page">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tight">
-            YOUR <span className="text-volt">GOALS</span>
+          <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tight text-[#5C4A42]">
+            YOUR <span className="text-[#D4A574]">GOALS</span>
           </h1>
           
           <Dialog open={open} onOpenChange={setOpen}>
