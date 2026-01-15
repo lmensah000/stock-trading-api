@@ -11,13 +11,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import org.springframework.web.bind.annotation.RestController;
+
 import java.util.List;
 
-//BotController: This class acts as the central controller for the trading bot.
-// It receives users input from the UserInterface, interacts with the Model classes to execute
-// trading strategies, and updates the View accordingly. It coordinates the
-// flow of data and actions between the Model and View components.
-@RequestMapping("/api")
+/**
+ * REST Controller for stock-related operations.
+ */
+@RestController
+@RequestMapping("/api/stocks")
 public class StockController {
 
     private static final Logger log = LoggerFactory.getLogger(StockController.class);
