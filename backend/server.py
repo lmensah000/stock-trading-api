@@ -653,6 +653,17 @@ async def update_goal(goal_id: str, update_data: GoalUpdate, current_user: dict 
     if update_data.status == 'completed':
         await award_points(current_user['id'], 50, "goal_completed", f"Completed goal: {goal['title']}")
         
+        # Check for goal crusher badge
+        completed_goals = await db.goals.count_documents({
+            "user_id": current_user['id'],
+            "status": "completed"
+        })
+        if completed_goals == 5:
+            await check_and_award_badge(current_user['id'], "goal_crusher")
+        
+        # Check referral onboarding
+        await check_referral_onboarding_helper(current_user['id'])
+        
         achievement = Achievement(
             user_id=current_user['id'],
             title=f"Goal Achieved: {goal['title']}",
