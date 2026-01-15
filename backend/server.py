@@ -466,6 +466,12 @@ async def register(user_data: UserCreate):
         name=user.name,
         points=user.points,
         total_workouts=user.total_workouts,
+        level=user.level,
+        xp=user.xp,
+        avatar_stage=user.avatar_stage,
+        badges=user.badges,
+        onboarding_completed=user.onboarding_completed,
+        referral_code=user.referral_code,
         created_at=user.created_at
     )
     
