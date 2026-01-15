@@ -46,6 +46,13 @@ class User(BaseModel):
     password_hash: str
     points: int = 0
     total_workouts: int = 0
+    level: int = 1
+    xp: int = 0
+    avatar_stage: int = 1
+    badges: List[str] = []
+    onboarding_completed: bool = False
+    referral_code: str = Field(default_factory=lambda: str(uuid.uuid4())[:8].upper())
+    referred_by: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class UserCreate(BaseModel):
