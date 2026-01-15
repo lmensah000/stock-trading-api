@@ -11,6 +11,8 @@ import Goals from "@/pages/Goals";
 import GroupGoals from "@/pages/GroupGoals";
 import WeightTracking from "@/pages/WeightTracking";
 import Profile from "@/pages/Profile";
+import Workouts from "@/pages/Workouts";
+import Shop from "@/pages/Shop";
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token'));
@@ -35,10 +37,12 @@ function App() {
           <Route path="/login" element={<Login setToken={setToken} setUser={setUser} />} />
           <Route path="/register" element={<Register setToken={setToken} setUser={setUser} />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard user={user} /></ProtectedRoute>} />
+          <Route path="/workouts" element={<ProtectedRoute><Workouts /></ProtectedRoute>} />
           <Route path="/meals" element={<ProtectedRoute><MealPlanning /></ProtectedRoute>} />
           <Route path="/goals" element={<ProtectedRoute><Goals /></ProtectedRoute>} />
           <Route path="/groups" element={<ProtectedRoute><GroupGoals user={user} /></ProtectedRoute>} />
           <Route path="/weight" element={<ProtectedRoute><WeightTracking /></ProtectedRoute>} />
+          <Route path="/shop" element={<ProtectedRoute><Shop /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile user={user} /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
