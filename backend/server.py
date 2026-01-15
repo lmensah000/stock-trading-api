@@ -709,8 +709,10 @@ async def get_market_movers():
     movers = []
     for ticker in popular_tickers:
         try:
-            stock = yf.Ticker(ticker)
-            info = stock.info
+            info = get_stock_info(ticker)
+            if not info:
+                continue
+                
             current_price = info.get("regularMarketPrice", info.get("currentPrice", 0))
             previous_close = info.get("previousClose", 0)
             change = current_price - previous_close if previous_close else 0
@@ -724,7 +726,8 @@ async def get_market_movers():
                 "change_percent": round(change_percent, 2),
                 "volume": info.get("volume", 0)
             })
-        except:
+        except Exception as e:
+            print(f"Error getting mover {ticker}: {e}")
             continue
     
     # Sort by absolute change percent
