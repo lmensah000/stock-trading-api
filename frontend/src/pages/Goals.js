@@ -111,40 +111,40 @@ export default function Goals() {
                 NEW GOAL
               </Button>
             </DialogTrigger>
-            <DialogContent className="warm-card border border-[#D4C4B0] text-white">
+            <DialogContent className="bg-white border border-[#D4C4B0] text-[#5C4A42]">
               <DialogHeader>
-                <DialogTitle className="text-2xl font-bold uppercase">CREATE GOAL</DialogTitle>
+                <DialogTitle className="text-2xl font-bold uppercase text-[#5C4A42]">CREATE GOAL</DialogTitle>
               </DialogHeader>
               <form onSubmit={createGoal} className="space-y-4" data-testid="goal-form">
                 <div>
-                  <Label className="text-white uppercase text-xs font-bold tracking-widest mb-2 block">
+                  <Label className="text-[#5C4A42] uppercase text-xs font-bold tracking-widest mb-2 block">
                     Goal Title
                   </Label>
                   <Input
                     data-testid="goal-title-input"
                     value={newGoal.title}
                     onChange={(e) => setNewGoal({ ...newGoal, title: e.target.value })}
-                    className="bg-[#FAF9F7] border-[#D4C4B0] text-white focus:border-[#D4A574]"
+                    className="bg-[#FAF9F7] border-[#D4C4B0] text-[#5C4A42] focus:border-[#D4A574]"
                     required
                   />
                 </div>
                 
                 <div>
-                  <Label className="text-white uppercase text-xs font-bold tracking-widest mb-2 block">
+                  <Label className="text-[#5C4A42] uppercase text-xs font-bold tracking-widest mb-2 block">
                     Description
                   </Label>
                   <Textarea
                     data-testid="goal-description-input"
                     value={newGoal.description}
                     onChange={(e) => setNewGoal({ ...newGoal, description: e.target.value })}
-                    className="bg-[#FAF9F7] border-[#D4C4B0] text-white focus:border-[#D4A574]"
+                    className="bg-[#FAF9F7] border-[#D4C4B0] text-[#5C4A42] focus:border-[#D4A574]"
                     required
                   />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label className="text-white uppercase text-xs font-bold tracking-widest mb-2 block">
+                    <Label className="text-[#5C4A42] uppercase text-xs font-bold tracking-widest mb-2 block">
                       Target Value
                     </Label>
                     <Input
@@ -152,12 +152,12 @@ export default function Goals() {
                       type="number"
                       value={newGoal.target_value}
                       onChange={(e) => setNewGoal({ ...newGoal, target_value: e.target.value })}
-                      className="bg-[#FAF9F7] border-[#D4C4B0] text-white focus:border-[#D4A574]"
+                      className="bg-[#FAF9F7] border-[#D4C4B0] text-[#5C4A42] focus:border-[#D4A574]"
                       required
                     />
                   </div>
                   <div>
-                    <Label className="text-white uppercase text-xs font-bold tracking-widest mb-2 block">
+                    <Label className="text-[#5C4A42] uppercase text-xs font-bold tracking-widest mb-2 block">
                       Unit
                     </Label>
                     <Input
@@ -165,14 +165,14 @@ export default function Goals() {
                       value={newGoal.unit}
                       onChange={(e) => setNewGoal({ ...newGoal, unit: e.target.value })}
                       placeholder="kg, reps, km"
-                      className="bg-[#FAF9F7] border-[#D4C4B0] text-white focus:border-[#D4A574]"
+                      className="bg-[#FAF9F7] border-[#D4C4B0] text-[#5C4A42] focus:border-[#D4A574]"
                       required
                     />
                   </div>
                 </div>
                 
                 <div>
-                  <Label className="text-white uppercase text-xs font-bold tracking-widest mb-2 block">
+                  <Label className="text-[#5C4A42] uppercase text-xs font-bold tracking-widest mb-2 block">
                     Deadline (Optional)
                   </Label>
                   <Input
@@ -180,14 +180,14 @@ export default function Goals() {
                     type="date"
                     value={newGoal.deadline}
                     onChange={(e) => setNewGoal({ ...newGoal, deadline: e.target.value })}
-                    className="bg-[#FAF9F7] border-[#D4C4B0] text-white focus:border-[#D4A574]"
+                    className="bg-[#FAF9F7] border-[#D4C4B0] text-[#5C4A42] focus:border-[#D4A574]"
                   />
                 </div>
                 
                 <Button
                   type="submit"
                   data-testid="submit-goal-btn"
-                  className="w-full bg-[#D4A574] text-black font-bold uppercase hover:bg-[#B3E600]"
+                  className="w-full bg-[#D4A574] text-white font-bold uppercase hover:bg-[#C19563]"
                 >
                   CREATE GOAL
                 </Button>
