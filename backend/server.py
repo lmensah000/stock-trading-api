@@ -70,6 +70,12 @@ class UserResponse(BaseModel):
     name: str
     points: int
     total_workouts: int
+    level: int
+    xp: int
+    avatar_stage: int
+    badges: List[str]
+    onboarding_completed: bool
+    referral_code: str
     created_at: datetime
 
 class TokenResponse(BaseModel):
