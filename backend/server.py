@@ -175,6 +175,65 @@ def format_dollar(value):
         return None
     return round(value, 2)
 
+# Cache for stock data to reduce API calls
+stock_cache = {}
+CACHE_DURATION = 60  # seconds
+
+def get_cached_stock(ticker):
+    """Get stock data from cache or fetch fresh"""
+    import time
+    ticker = ticker.upper()
+    now = time.time()
+    
+    if ticker in stock_cache:
+        cached_data, timestamp = stock_cache[ticker]
+        if now - timestamp < CACHE_DURATION:
+            return cached_data
+    
+    try:
+        stock = yf.Ticker(ticker)
+        info = stock.info
+        if info and len(info) > 5:  # Valid data check
+            stock_cache[ticker] = (info, now)
+            return info
+    except Exception as e:
+        print(f"Error fetching {ticker}: {e}")
+    
+    # Return cached data even if expired, as fallback
+    if ticker in stock_cache:
+        return stock_cache[ticker][0]
+    
+    return None
+
+# Sample stock data for demo when API is rate-limited
+DEMO_STOCKS = {
+    "AAPL": {"shortName": "Apple Inc.", "regularMarketPrice": 185.92, "previousClose": 184.25, "volume": 48234521, "marketCap": 2890000000000, "trailingPE": 28.5, "dividendYield": 0.0055, "fiftyTwoWeekHigh": 199.62, "fiftyTwoWeekLow": 164.08, "open": 184.80, "dayHigh": 186.45, "dayLow": 184.20, "sector": "Technology", "industry": "Consumer Electronics", "trailingEps": 6.52, "priceToBook": 47.2, "beta": 1.28},
+    "MSFT": {"shortName": "Microsoft Corp.", "regularMarketPrice": 378.91, "previousClose": 376.04, "volume": 21456789, "marketCap": 2810000000000, "trailingPE": 35.2, "dividendYield": 0.0078, "fiftyTwoWeekHigh": 420.82, "fiftyTwoWeekLow": 309.45, "open": 376.50, "dayHigh": 379.80, "dayLow": 375.90, "sector": "Technology", "industry": "Software", "trailingEps": 10.76, "priceToBook": 12.8, "beta": 0.89},
+    "GOOGL": {"shortName": "Alphabet Inc.", "regularMarketPrice": 141.80, "previousClose": 140.25, "volume": 25678234, "marketCap": 1780000000000, "trailingPE": 24.8, "dividendYield": 0, "fiftyTwoWeekHigh": 155.24, "fiftyTwoWeekLow": 115.83, "open": 140.60, "dayHigh": 142.30, "dayLow": 140.10, "sector": "Technology", "industry": "Internet Content", "trailingEps": 5.72, "priceToBook": 6.5, "beta": 1.05},
+    "AMZN": {"shortName": "Amazon.com Inc.", "regularMarketPrice": 178.25, "previousClose": 176.80, "volume": 45234567, "marketCap": 1850000000000, "trailingPE": 62.5, "dividendYield": 0, "fiftyTwoWeekHigh": 201.20, "fiftyTwoWeekLow": 118.35, "open": 177.10, "dayHigh": 179.00, "dayLow": 176.50, "sector": "Consumer Cyclical", "industry": "Internet Retail", "trailingEps": 2.85, "priceToBook": 8.2, "beta": 1.16},
+    "NVDA": {"shortName": "NVIDIA Corp.", "regularMarketPrice": 495.22, "previousClose": 488.50, "volume": 52345678, "marketCap": 1220000000000, "trailingPE": 65.8, "dividendYield": 0.0004, "fiftyTwoWeekHigh": 614.00, "fiftyTwoWeekLow": 222.97, "open": 490.00, "dayHigh": 498.50, "dayLow": 488.00, "sector": "Technology", "industry": "Semiconductors", "trailingEps": 7.53, "priceToBook": 42.5, "beta": 1.72},
+    "TSLA": {"shortName": "Tesla Inc.", "regularMarketPrice": 248.50, "previousClose": 245.80, "volume": 118456789, "marketCap": 790000000000, "trailingPE": 72.4, "dividendYield": 0, "fiftyTwoWeekHigh": 299.29, "fiftyTwoWeekLow": 138.80, "open": 246.20, "dayHigh": 250.30, "dayLow": 244.80, "sector": "Consumer Cyclical", "industry": "Auto Manufacturers", "trailingEps": 3.43, "priceToBook": 15.8, "beta": 2.05},
+    "META": {"shortName": "Meta Platforms Inc.", "regularMarketPrice": 355.64, "previousClose": 352.18, "volume": 16789234, "marketCap": 920000000000, "trailingPE": 27.3, "dividendYield": 0, "fiftyTwoWeekHigh": 395.89, "fiftyTwoWeekLow": 229.85, "open": 353.00, "dayHigh": 357.20, "dayLow": 351.80, "sector": "Technology", "industry": "Internet Content", "trailingEps": 13.03, "priceToBook": 7.8, "beta": 1.25},
+    "JPM": {"shortName": "JPMorgan Chase & Co.", "regularMarketPrice": 172.45, "previousClose": 171.20, "volume": 8456234, "marketCap": 498000000000, "trailingPE": 11.2, "dividendYield": 0.0248, "fiftyTwoWeekHigh": 185.60, "fiftyTwoWeekLow": 135.19, "open": 171.80, "dayHigh": 173.10, "dayLow": 171.00, "sector": "Financial Services", "industry": "Banks", "trailingEps": 15.40, "priceToBook": 1.65, "beta": 1.08},
+    "V": {"shortName": "Visa Inc.", "regularMarketPrice": 265.80, "previousClose": 264.15, "volume": 5678234, "marketCap": 545000000000, "trailingPE": 29.8, "dividendYield": 0.0076, "fiftyTwoWeekHigh": 293.07, "fiftyTwoWeekLow": 227.68, "open": 264.50, "dayHigh": 266.40, "dayLow": 263.80, "sector": "Financial Services", "industry": "Credit Services", "trailingEps": 8.92, "priceToBook": 13.2, "beta": 0.95},
+    "WMT": {"shortName": "Walmart Inc.", "regularMarketPrice": 162.35, "previousClose": 161.08, "volume": 7234567, "marketCap": 437000000000, "trailingPE": 28.4, "dividendYield": 0.0138, "fiftyTwoWeekHigh": 169.94, "fiftyTwoWeekLow": 147.69, "open": 161.50, "dayHigh": 163.00, "dayLow": 161.00, "sector": "Consumer Defensive", "industry": "Discount Stores", "trailingEps": 5.72, "priceToBook": 6.8, "beta": 0.52},
+}
+
+def get_stock_info(ticker):
+    """Get stock info with fallback to demo data"""
+    ticker = ticker.upper()
+    
+    # Try cache first
+    info = get_cached_stock(ticker)
+    if info:
+        return info
+    
+    # Fall back to demo data
+    if ticker in DEMO_STOCKS:
+        return DEMO_STOCKS[ticker]
+    
+    return None
+
 # ==================== AUTH ENDPOINTS ====================
 
 @app.post("/api/auth/register", response_model=TokenResponse)
