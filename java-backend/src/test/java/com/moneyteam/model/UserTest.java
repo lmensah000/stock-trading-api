@@ -5,8 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.time.LocalDateTime;
-
 /**
  * Unit tests for User model.
  */
@@ -36,10 +34,10 @@ public class UserTest {
 
     @Test
     @DisplayName("Should set and get username")
-    void testSetAndGetUsername() {
+    void testSetAndGetUserName() {
         String username = "testuser";
-        user.setUsername(username);
-        assertEquals(username, user.getUsername());
+        user.setUserName(username);
+        assertEquals(username, user.getUserName());
     }
 
     @Test
@@ -52,25 +50,17 @@ public class UserTest {
 
     @Test
     @DisplayName("Should set and get password")
-    void testSetAndGetPassword() {
+    void testSetAndGetPassWord() {
         String password = "securepassword123";
-        user.setPassword(password);
-        assertEquals(password, user.getPassword());
-    }
-
-    @Test
-    @DisplayName("Should set and get created timestamp")
-    void testSetAndGetCreatedAt() {
-        LocalDateTime now = LocalDateTime.now();
-        user.setCreatedAt(now);
-        assertEquals(now, user.getCreatedAt());
+        user.setPassWord(password);
+        assertEquals(password, user.getPassWord());
     }
 
     @Test
     @DisplayName("Should handle null username")
     void testNullUsername() {
-        user.setUsername(null);
-        assertNull(user.getUsername());
+        user.setUserName(null);
+        assertNull(user.getUserName());
     }
 
     @Test
@@ -84,11 +74,21 @@ public class UserTest {
     @DisplayName("Should return correct toString")
     void testToString() {
         user.setId(1L);
-        user.setUsername("testuser");
+        user.setUserName("testuser");
         user.setEmail("test@example.com");
         
         String result = user.toString();
         assertNotNull(result);
         assertTrue(result.contains("testuser") || result.contains("User"));
+    }
+
+    @Test
+    @DisplayName("Should create user with constructor")
+    void testUserCreationWithConstructor() {
+        User newUser = new User("testuser", "password123", "test@example.com", null);
+        
+        assertEquals("testuser", newUser.getUserName());
+        assertEquals("password123", newUser.getPassWord());
+        assertEquals("test@example.com", newUser.getEmail());
     }
 }
