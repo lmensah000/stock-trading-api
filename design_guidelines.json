@@ -1,0 +1,159 @@
+{
+  "design_system": {
+    "name": "VoltFit Performance System",
+    "archetype": "The Performance Pro",
+    "theme_strategy": "dark_mode_only",
+    "emotional_tone": "High-Voltage, Tactical, Precision, Communal",
+    "visual_style": "Cyber-Athletic",
+    "description": "A dark, high-contrast aesthetic inspired by elite sports data centers and night-time city runs. It uses deep obsidian backgrounds with electric neon accents to create a sense of energy and focus."
+  },
+  "typography": {
+    "font_family": {
+      "heading": "Barlow Condensed, sans-serif",
+      "body": "Manrope, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "google_fonts_import": "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Manrope:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap",
+    "usage_rules": {
+      "headings": "Uppercase, tracking-tight, font-black (800/900). Use for all section titles and key metrics.",
+      "body": "Regular or Medium weight. High legibility. Use for lists, descriptions, and chat.",
+      "labels": "Uppercase, tracking-widest, text-xs, font-bold. Use for chart axes and small UI tags."
+    }
+  },
+  "colors": {
+    "palette": {
+      "background": {
+        "default": "#09090B",
+        "paper": "#18181B",
+        "subtle": "#27272A"
+      },
+      "primary": {
+        "main": "#CCFF00",
+        "hover": "#B3E600",
+        "foreground": "#000000"
+      },
+      "secondary": {
+        "main": "#00E0FF",
+        "foreground": "#000000"
+      },
+      "accent": {
+        "main": "#FF3300",
+        "foreground": "#FFFFFF"
+      },
+      "text": {
+        "primary": "#FFFFFF",
+        "secondary": "#A1A1AA",
+        "muted": "#52525B"
+      },
+      "border": {
+        "default": "#27272A",
+        "active": "#3F3F46"
+      }
+    },
+    "gradients": {
+      "primary_glow": "linear-gradient(135deg, #CCFF00 0%, #00E0FF 100%)",
+      "dark_overlay": "linear-gradient(to bottom, rgba(9,9,11,0) 0%, rgba(9,9,11,1) 100%)"
+    }
+  },
+  "layout": {
+    "grid_system": "Bento Grid (Mode B: High Density)",
+    "spacing": {
+      "container_padding": "p-4 md:p-8 lg:p-12",
+      "gap": "gap-4 md:gap-6",
+      "section_spacing": "py-16 md:py-24"
+    },
+    "border_radius": {
+      "default": "rounded-sm",
+      "card": "rounded-md",
+      "button": "rounded-sm"
+    },
+    "container_width": "max-w-7xl mx-auto"
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-[#CCFF00] text-black font-bold uppercase tracking-wide hover:bg-[#B3E600] shadow-[0_0_15px_rgba(204,255,0,0.3)] transition-all duration-300",
+      "secondary": "bg-transparent border border-[#27272A] text-white hover:border-[#CCFF00] hover:text-[#CCFF00] uppercase tracking-wide",
+      "ghost": "text-[#A1A1AA] hover:text-white hover:bg-[#27272A]"
+    },
+    "cards": {
+      "default": "bg-[#18181B] border border-[#27272A] hover:border-[#3F3F46] transition-colors duration-300",
+      "glass": "bg-black/40 backdrop-blur-xl border border-white/10",
+      "highlight": "bg-[#18181B] border border-[#CCFF00]/50 shadow-[0_0_20px_rgba(204,255,0,0.1)]"
+    },
+    "inputs": {
+      "default": "bg-[#09090B] border border-[#27272A] text-white focus:border-[#CCFF00] focus:ring-1 focus:ring-[#CCFF00] placeholder:text-[#52525B]"
+    }
+  },
+  "visual_enhancers": {
+    "textures": "Use subtle noise overlays (opacity 0.03) on solid backgrounds to prevent banding.",
+    "shadows": "Use colored shadows for primary elements: shadow-[0_4px_20px_rgba(204,255,0,0.15)]",
+    "borders": "1px solid borders are preferred over shadows for separation in dark mode.",
+    "icons": "Lucide React (default). Use stroke-width={1.5} for a technical look."
+  },
+  "media": {
+    "image_urls": {
+      "meal_prep": "https://images.unsplash.com/photo-1614649672657-ffdb5981901f",
+      "social_group": "https://images.unsplash.com/photo-1750698544858-c139cc7a2885",
+      "digital_scale": "https://images.unsplash.com/photo-1618939291225-8d558ea4369f",
+      "smart_watch": "https://images.unsplash.com/photo-1733570890170-49be2550189b",
+      "abstract_bg": "https://images.unsplash.com/photo-1557092738-aa47812cb878"
+    },
+    "usage": {
+      "hero": "Use 'abstract_bg' with a heavy dark gradient overlay for the landing page hero.",
+      "features": "Use 'meal_prep' for the Nutrition section, 'social_group' for the Community section.",
+      "integration": "Use 'digital_scale' and 'smart_watch' in the Devices/Integration section."
+    }
+  },
+  "motion": {
+    "library": "framer-motion",
+    "preferences": {
+      "reduced_motion": "respect",
+      "type": "spring",
+      "stiffness": 100,
+      "damping": 20
+    },
+    "standard_animations": {
+      "fade_in_up": {
+        "initial": { "opacity": 0, "y": 20 },
+        "animate": { "opacity": 1, "y": 0 },
+        "transition": { "duration": 0.5 }
+      },
+      "hover_scale": {
+        "whileHover": { "scale": 1.02 }
+      }
+    }
+  },
+  "accessibility": {
+    "contrast_check": "Ensure all text on #CCFF00 is BLACK. Text on #09090B must be WHITE or #A1A1AA.",
+    "focus_states": "Visible focus rings in #CCFF00 are mandatory for keyboard navigation.",
+    "aria_labels": "Required for all icon-only buttons."
+  },
+  "instructions_to_main_agent": [
+    "1. SETUP: Install 'framer-motion', 'clsx', 'tailwind-merge' if not present.",
+    "2. FONTS: Add the Google Fonts import to index.css immediately.",
+    "3. THEME: Force Dark Mode. Do not implement a light mode toggle unless explicitly requested by user interaction (default to dark).",
+    "4. LAYOUT: Use the 'Bento Grid' strategy for the Dashboard. Mix 1x1, 2x1, and 2x2 tiles.",
+    "5. CHARTS: Use Recharts. Style them with the neon palette (#CCFF00, #00E0FF). Hide grid lines or make them very subtle (#27272A).",
+    "6. IMAGES: Use the provided Unsplash URLs. Do not use placeholders.",
+    "7. SHADCN: Customize all Shadcn components to match the 'Performance Pro' archetype (square corners, dark bg, neon accents).",
+    "8. DATA-TESTID: Add data-testid to all interactive elements (buttons, inputs, links)."
+  ],
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients.",
+    "Don't make generic centered layouts, simplistic gradients, and uniform styling.",
+    "Create depth through layered design elements with z-index hierarchy.",
+    "Use glass-morphism effects with backdrop filters (12-24px blur) sparingly, prefer solid tech borders.",
+    "You MUST NOT apply universal transition. Eg: transition: all. This results in breaking transforms.",
+    "You MUST NOT center align the app container.",
+    "Always use modern button styles like pill-shaped, or sharp button with interaction animations.",
+    "NEVER use AI assistant Emoji characters like 🤖🧠 etc for icons.",
+    "Every interaction needs micro-animations - hover states, transitions.",
+    "Use 2-3x more spacing than feels comfortable.",
+    "Subtle grain textures, noise overlays, custom cursors, selection states, and loading animations: separates good from extraordinary.",
+    "Main agent relies on these image URLs. Missing categories = main agent will use placeholder text which is FORBIDDEN.",
+    "Prioritize using pre-existing components from src/components/ui when applicable.",
+    "Components MUST use named exports.",
+    "Pages MUST use default exports.",
+    "Use 'sonner' for toasts."
+  ]
+}
