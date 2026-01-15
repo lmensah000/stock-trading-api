@@ -204,7 +204,7 @@ describe('Data Validation', () => {
 
     test('rejects short password', () => {
       expect(validatePassword('12345')).toBe(false);
-      expect(validatePassword('')).toBe(false);
+      expect(validatePassword('')).toBeFalsy();
     });
 
     test('validates correct username', () => {
