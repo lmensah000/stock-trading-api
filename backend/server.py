@@ -1009,6 +1009,14 @@ async def share_achievement(share_data: ShareAchievement, current_user: dict = D
     
     await award_points(current_user['id'], 5, "social_share", "Shared achievement on social media")
     
+    # Check for social butterfly badge
+    shared_count = await db.achievements.count_documents({
+        "user_id": current_user['id'],
+        "shared": True
+    })
+    if shared_count == 5:
+        await check_and_award_badge(current_user['id'], "social_butterfly")
+    
     share_url = f"https://innate.fitness/share/{share_data.achievement_id}"
     
     return {
