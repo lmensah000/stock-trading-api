@@ -628,8 +628,17 @@ async def get_watchlist(current_user: dict = Depends(get_current_user)):
     stocks_data = []
     for ticker in watchlist.get("stocks", []):
         try:
-            stock = yf.Ticker(ticker)
-            info = stock.info
+            info = get_stock_info(ticker)
+            if not info:
+                stocks_data.append({
+                    "ticker": ticker,
+                    "name": ticker,
+                    "price": 0,
+                    "change": 0,
+                    "change_percent": 0
+                })
+                continue
+                
             current_price = info.get("regularMarketPrice", info.get("currentPrice", 0))
             previous_close = info.get("previousClose", info.get("regularMarketPreviousClose", 0))
             change = current_price - previous_close if previous_close else 0
