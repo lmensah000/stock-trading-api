@@ -3,6 +3,8 @@ package com.moneyteam.service;
 import com.moneyteam.model.Trade;
 import com.moneyteam.model.User;
 import com.moneyteam.model.Position;
+import com.moneyteam.model.enums.TradeStatus;
+import com.moneyteam.model.enums.TradeType;
 import com.moneyteam.repository.TradeRepository;
 import com.moneyteam.repository.PositionRepository;
 import com.moneyteam.service.impl.TradeServiceImpl;
@@ -14,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -36,9 +39,6 @@ public class TradeServiceTest {
     @Mock
     private PositionRepository positionRepository;
 
-    @InjectMocks
-    private TradeServiceImpl tradeService;
-
     private Trade testTrade;
     private User testUser;
     private Position testPosition;
@@ -47,22 +47,23 @@ public class TradeServiceTest {
     void setUp() {
         testUser = new User();
         testUser.setId(1L);
-        testUser.setUsername("testuser");
+        testUser.setUserName("testuser");
 
         testTrade = new Trade();
         testTrade.setId(1L);
         testTrade.setStockTicker("AAPL");
         testTrade.setQuantity(10.0);
-        testTrade.setPrice(185.92);
-        testTrade.setTradeType("BUY");
-        testTrade.setStatus("EXECUTED");
+        testTrade.setPrice(BigDecimal.valueOf(185.92));
+        testTrade.setTradeType(TradeType.BUY);
+        testTrade.setStatus(TradeStatus.EXECUTED);
         testTrade.setExecutionDate(LocalDateTime.now());
+        testTrade.setUserTradeId(1L);
 
         testPosition = new Position();
         testPosition.setId(1L);
         testPosition.setStockTicker("AAPL");
         testPosition.setTotalQuantity(10.0);
-        testPosition.setAveragePrice(185.92);
+        testPosition.setAveragePrice(BigDecimal.valueOf(185.92));
     }
 
     @Test
@@ -73,28 +74,28 @@ public class TradeServiceTest {
         Trade result = tradeRepository.save(testTrade);
 
         assertNotNull(result);
-        assertEquals("BUY", result.getTradeType());
-        assertEquals("EXECUTED", result.getStatus());
+        assertEquals(TradeType.BUY, result.getTradeType());
+        assertEquals(TradeStatus.EXECUTED, result.getStatus());
         verify(tradeRepository, times(1)).save(any(Trade.class));
     }
 
     @Test
     @DisplayName("Should execute SELL trade")
     void testExecuteSellTrade() {
-        testTrade.setTradeType("SELL");
+        testTrade.setTradeType(TradeType.SELL);
         when(tradeRepository.save(any(Trade.class))).thenReturn(testTrade);
 
         Trade result = tradeRepository.save(testTrade);
 
         assertNotNull(result);
-        assertEquals("SELL", result.getTradeType());
+        assertEquals(TradeType.SELL, result.getTradeType());
     }
 
     @Test
     @DisplayName("Should calculate trade total value")
     void testCalculateTradeValue() {
-        Double totalValue = testTrade.getQuantity() * testTrade.getPrice();
-        assertEquals(1859.2, totalValue, 0.01);
+        BigDecimal totalValue = testTrade.getPrice().multiply(BigDecimal.valueOf(testTrade.getQuantity()));
+        assertEquals(0, BigDecimal.valueOf(1859.2).compareTo(totalValue));
     }
 
     @Test
@@ -115,13 +116,13 @@ public class TradeServiceTest {
         trade2.setId(2L);
         trade2.setStockTicker("MSFT");
         trade2.setQuantity(5.0);
-        trade2.setPrice(378.91);
-        trade2.setTradeType("BUY");
+        trade2.setPrice(BigDecimal.valueOf(378.91));
+        trade2.setTradeType(TradeType.BUY);
 
         List<Trade> trades = Arrays.asList(testTrade, trade2);
-        when(tradeRepository.findByUserId(1L)).thenReturn(trades);
+        when(tradeRepository.findByUserTradeId(1L)).thenReturn(trades);
 
-        List<Trade> result = tradeRepository.findByUserId(1L);
+        List<Trade> result = tradeRepository.findByUserTradeId(1L);
 
         assertEquals(2, result.size());
     }
@@ -130,9 +131,9 @@ public class TradeServiceTest {
     @DisplayName("Should get trades by stock ticker")
     void testGetTradesByTicker() {
         List<Trade> trades = Arrays.asList(testTrade);
-        when(tradeRepository.findByStockTicker("AAPL")).thenReturn(trades);
+        when(tradeRepository.findByStockTickerIgnoreCase("AAPL")).thenReturn(trades);
 
-        List<Trade> result = tradeRepository.findByStockTicker("AAPL");
+        List<Trade> result = tradeRepository.findByStockTickerIgnoreCase("AAPL");
 
         assertEquals(1, result.size());
         assertEquals("AAPL", result.get(0).getStockTicker());
@@ -141,13 +142,13 @@ public class TradeServiceTest {
     @Test
     @DisplayName("Should cancel pending trade")
     void testCancelTrade() {
-        testTrade.setStatus("PENDING");
+        testTrade.setStatus(TradeStatus.PENDING);
         when(tradeRepository.findById(1L)).thenReturn(Optional.of(testTrade));
 
         Optional<Trade> trade = tradeRepository.findById(1L);
-        trade.get().setStatus("CANCELLED");
+        trade.get().setStatus(TradeStatus.CANCELLED);
 
-        assertEquals("CANCELLED", trade.get().getStatus());
+        assertEquals(TradeStatus.CANCELLED, trade.get().getStatus());
     }
 
     @Test
@@ -158,8 +159,8 @@ public class TradeServiceTest {
         Optional<Trade> trade = tradeRepository.findById(1L);
         
         // Trade is already EXECUTED, should not be cancellable
-        assertEquals("EXECUTED", trade.get().getStatus());
-        assertNotEquals("PENDING", trade.get().getStatus());
+        assertEquals(TradeStatus.EXECUTED, trade.get().getStatus());
+        assertNotEquals(TradeStatus.PENDING, trade.get().getStatus());
     }
 
     @Test
@@ -171,23 +172,46 @@ public class TradeServiceTest {
     @Test
     @DisplayName("Should validate trade price is positive")
     void testValidatePositivePrice() {
-        assertTrue(testTrade.getPrice() > 0);
+        assertTrue(testTrade.getPrice().compareTo(BigDecimal.ZERO) > 0);
     }
 
     @Test
-    @DisplayName("Should get all trades sorted by date")
+    @DisplayName("Should get trades sorted by date")
     void testGetTradesSortedByDate() {
         Trade olderTrade = new Trade();
+        olderTrade.setId(2L);
         olderTrade.setExecutionDate(LocalDateTime.now().minusDays(1));
         
         Trade newerTrade = new Trade();
+        newerTrade.setId(3L);
         newerTrade.setExecutionDate(LocalDateTime.now());
 
         List<Trade> trades = Arrays.asList(newerTrade, olderTrade);
-        when(tradeRepository.findAllByOrderByExecutionDateDesc()).thenReturn(trades);
 
-        List<Trade> result = tradeRepository.findAllByOrderByExecutionDateDesc();
+        assertTrue(trades.get(0).getExecutionDate().isAfter(trades.get(1).getExecutionDate()));
+    }
 
-        assertTrue(result.get(0).getExecutionDate().isAfter(result.get(1).getExecutionDate()));
+    @Test
+    @DisplayName("Should get trades by status")
+    void testGetTradesByStatus() {
+        List<Trade> trades = Arrays.asList(testTrade);
+        when(tradeRepository.findByStatus(TradeStatus.EXECUTED)).thenReturn(trades);
+
+        List<Trade> result = tradeRepository.findByStatus(TradeStatus.EXECUTED);
+
+        assertEquals(1, result.size());
+        assertEquals(TradeStatus.EXECUTED, result.get(0).getStatus());
+    }
+
+    @Test
+    @DisplayName("Should get trades by type")
+    void testGetTradesByType() {
+        List<Trade> trades = Arrays.asList(testTrade);
+        when(tradeRepository.findByTradeType(TradeType.BUY)).thenReturn(trades);
+
+        List<Trade> result = tradeRepository.findByTradeType(TradeType.BUY);
+
+        assertEquals(1, result.size());
+        assertEquals(TradeType.BUY, result.get(0).getTradeType());
     }
 }
