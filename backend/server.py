@@ -1020,6 +1020,275 @@ async def get_dashboard_stats(current_user: dict = Depends(get_current_user)):
         "points": current_user.get('points', 0)
     }
 
+# ============= GAMIFICATION ROUTES =============
+
+@api_router.post("/onboarding/complete")
+async def complete_onboarding(current_user: dict = Depends(get_current_user)):
+    """Mark onboarding as complete and award points"""
+    if current_user.get('onboarding_completed'):
+        return {"message": "Onboarding already completed"}
+    
+    await db.users.update_one(
+        {"id": current_user['id']},
+        {"$set": {"onboarding_completed": True}}
+    )
+    
+    # Award 100 points for completing onboarding
+    await award_points(current_user['id'], 100, "onboarding", "Completed onboarding")
+    
+    return {"message": "Onboarding completed!", "points_earned": 100}
+
+@api_router.get("/levels")
+async def get_levels():
+    """Get all level information"""
+    return LEVEL_SYSTEM
+
+@api_router.get("/badges")
+async def get_badges():
+    """Get all badge information"""
+    return BADGE_SYSTEM
+
+@api_router.get("/my/progress")
+async def get_user_progress(current_user: dict = Depends(get_current_user)):
+    """Get user's level, badges, and progress"""
+    current_level_data = next((l for l in LEVEL_SYSTEM if l['level'] == current_user.get('level', 1)), LEVEL_SYSTEM[0])
+    next_level_data = next((l for l in LEVEL_SYSTEM if l['level'] == current_user.get('level', 1) + 1), None)
+    
+    user_badges = []
+    for badge_id in current_user.get('badges', []):
+        badge = next((b for b in BADGE_SYSTEM if b['id'] == badge_id), None)
+        if badge:
+            user_badges.append(badge)
+    
+    return {
+        "level": current_user.get('level', 1),
+        "xp": current_user.get('xp', 0),
+        "avatar_stage": current_user.get('avatar_stage', 1),
+        "current_level_info": current_level_data,
+        "next_level_info": next_level_data,
+        "xp_to_next_level": next_level_data['xp_required'] - current_user.get('xp', 0) if next_level_data else 0,
+        "badges": user_badges,
+        "total_badges": len(user_badges),
+        "available_badges": len(BADGE_SYSTEM)
+    }
+
+# ============= REFERRAL ROUTES =============
+
+@api_router.post("/referrals/create")
+async def create_referral(referral_data: ReferralCreate, current_user: dict = Depends(get_current_user)):
+    """Apply referral code during registration"""
+    # Find referrer by code
+    referrer = await db.users.find_one({"referral_code": referral_data.referral_code}, {"_id": 0})
+    if not referrer:
+        raise HTTPException(status_code=404, detail="Invalid referral code")
+    
+    if referrer['id'] == current_user['id']:
+        raise HTTPException(status_code=400, detail="Cannot refer yourself")
+    
+    # Check if already referred
+    if current_user.get('referred_by'):
+        raise HTTPException(status_code=400, detail="Already used a referral code")
+    
+    # Create referral record
+    referral = Referral(
+        referrer_id=referrer['id'],
+        referee_id=current_user['id'],
+        referee_email=current_user['email']
+    )
+    
+    doc = referral.model_dump()
+    doc['created_at'] = doc['created_at'].isoformat()
+    await db.referrals.insert_one(doc)
+    
+    # Update referee
+    await db.users.update_one(
+        {"id": current_user['id']},
+        {"$set": {"referred_by": referrer['id']}}
+    )
+    
+    return {"message": "Referral code applied successfully"}
+
+@api_router.get("/referrals/my")
+async def get_my_referrals(current_user: dict = Depends(get_current_user)):
+    """Get user's referrals"""
+    referrals = await db.referrals.find(
+        {"referrer_id": current_user['id']},
+        {"_id": 0}
+    ).to_list(100)
+    
+    for ref in referrals:
+        if isinstance(ref['created_at'], str):
+            ref['created_at'] = datetime.fromisoformat(ref['created_at'])
+    
+    return {
+        "referral_code": current_user.get('referral_code', ''),
+        "total_referrals": len(referrals),
+        "onboarded_referrals": sum(1 for r in referrals if r.get('onboarded')),
+        "referrals": referrals
+    }
+
+@api_router.post("/referrals/check-onboarding")
+async def check_referral_onboarding(current_user: dict = Depends(get_current_user)):
+    """Check if user completed onboarding actions for referral"""
+    # Check if user has: 1 workout, 1 meal plan, 1 goal
+    workout_count = await db.workout_logs.count_documents({"user_id": current_user['id']})
+    meal_count = await db.meal_plans.count_documents({"user_id": current_user['id']})
+    goal_count = await db.goals.count_documents({"user_id": current_user['id']})
+    
+    if workout_count >= 1 and meal_count >= 1 and goal_count >= 1:
+        # Mark referral as onboarded
+        referral = await db.referrals.find_one(
+            {"referee_id": current_user['id'], "onboarded": False},
+            {"_id": 0}
+        )
+        
+        if referral:
+            await db.referrals.update_one(
+                {"id": referral['id']},
+                {"$set": {"onboarded": True, "status": "completed"}}
+            )
+            
+            # Award points to referrer
+            await award_points(referral['referrer_id'], 200, "referral", f"Friend {current_user['name']} completed onboarding")
+            
+            # Award points to referee
+            await award_points(current_user['id'], 50, "referred", "Completed onboarding via referral")
+            
+            # Check for referral badges
+            referrer_referral_count = await db.referrals.count_documents({
+                "referrer_id": referral['referrer_id'],
+                "onboarded": True
+            })
+            
+            if referrer_referral_count == 5:
+                await check_and_award_badge(referral['referrer_id'], "referral_champion")
+            
+            return {"message": "Referral onboarding completed!", "points_earned": 50}
+    
+    return {"message": "Keep going! Complete 1 workout, 1 meal plan, and 1 goal to finish onboarding"}
+
+# ============= GROUP GOAL COMPLETION ROUTES =============
+
+@api_router.post("/groups/{group_id}/complete")
+async def complete_group_goal(group_id: str, current_user: dict = Depends(get_current_user)):
+    """Complete a group goal and award ranked points"""
+    group = await db.group_goals.find_one({"id": group_id}, {"_id": 0})
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+    
+    if current_user['id'] not in group['members']:
+        raise HTTPException(status_code=403, detail="Not a member of this group")
+    
+    # Check if goal is reached
+    if group['current_value'] < group['target_value']:
+        raise HTTPException(status_code=400, detail="Group goal not yet reached")
+    
+    # Get all members' contributions
+    contributions = await db.points_transactions.aggregate([
+        {
+            "$match": {
+                "description": {"$regex": f"Added progress to {group['name']}"},
+                "user_id": {"$in": group['members']}
+            }
+        },
+        {
+            "$group": {
+                "_id": "$user_id",
+                "total_contribution": {"$sum": "$points"}
+            }
+        },
+        {
+            "$sort": {"total_contribution": -1}
+        }
+    ]).to_list(100)
+    
+    # Calculate rankings and award points
+    rankings = []
+    for idx, contrib in enumerate(contributions):
+        user = await db.users.find_one({"id": contrib['_id']}, {"_id": 0})
+        rank = idx + 1
+        
+        # Award points based on rank
+        if rank == 1:
+            points = 300  # 1st place
+        elif rank == 2:
+            points = 200  # 2nd place
+        elif rank == 3:
+            points = 150  # 3rd place
+        else:
+            points = 100  # Participation
+        
+        # Bonus points if everyone reached the goal
+        if len(contributions) == len(group['members']):
+            points += 100
+        
+        await award_points(contrib['_id'], points, "group_completion", f"Ranked #{rank} in {group['name']}")
+        
+        rankings.append({
+            "user_id": contrib['_id'],
+            "user_name": user.get('name', 'Unknown'),
+            "contribution": contrib['total_contribution'],
+            "rank": rank,
+            "points_earned": points
+        })
+        
+        # Award team player badge to winner
+        if rank == 1:
+            await check_and_award_badge(contrib['_id'], "team_player")
+    
+    # Mark group as completed
+    await db.group_goals.update_one(
+        {"id": group_id},
+        {"$set": {"status": "completed"}}
+    )
+    
+    return {
+        "message": "Group goal completed!",
+        "rankings": rankings,
+        "all_members_contributed": len(contributions) == len(group['members'])
+    }
+
+@api_router.get("/groups/{group_id}/rankings")
+async def get_group_rankings(group_id: str, current_user: dict = Depends(get_current_user)):
+    """Get current rankings for a group goal"""
+    group = await db.group_goals.find_one({"id": group_id}, {"_id": 0})
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+    
+    if current_user['id'] not in group['members']:
+        raise HTTPException(status_code=403, detail="Not a member of this group")
+    
+    # Get contributions
+    contributions = await db.points_transactions.aggregate([
+        {
+            "$match": {
+                "description": {"$regex": f"Added progress to {group['name']}"},
+                "user_id": {"$in": group['members']}
+            }
+        },
+        {
+            "$group": {
+                "_id": "$user_id",
+                "total_contribution": {"$sum": "$points"}
+            }
+        },
+        {
+            "$sort": {"total_contribution": -1}
+        }
+    ]).to_list(100)
+    
+    rankings = []
+    for idx, contrib in enumerate(contributions):
+        user = await db.users.find_one({"id": contrib['_id']}, {"_id": 0})
+        rankings.append({
+            "user_id": contrib['_id'],
+            "user_name": user.get('name', 'Unknown'),
+            "contribution": contrib['total_contribution'],
+            "rank": idx + 1
+        })
+    
+    return rankings
+
 # ============= SEED DATA ENDPOINT =============
 
 @api_router.post("/seed/shop")
