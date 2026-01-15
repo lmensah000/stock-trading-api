@@ -572,6 +572,8 @@ async def execute_trade(trade: TradeRequest, current_user: dict = Depends(get_cu
             {"$inc": {"cash_balance": total_value}}
         )
     
+    # Map _id to id for Pydantic model compatibility
+    trade_record["id"] = trade_record["_id"]
     return TradeResponse(**trade_record)
 
 @app.get("/api/trades", response_model=List[TradeResponse])
