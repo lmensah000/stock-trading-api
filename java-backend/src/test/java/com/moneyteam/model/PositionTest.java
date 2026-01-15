@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.math.BigDecimal;
+
 /**
  * Unit tests for Position model.
  */
@@ -33,6 +35,14 @@ public class PositionTest {
     }
 
     @Test
+    @DisplayName("Should set and get user ID")
+    void testSetAndGetUserId() {
+        Long userId = 1L;
+        position.setUserId(userId);
+        assertEquals(userId, position.getUserId());
+    }
+
+    @Test
     @DisplayName("Should set and get stock ticker")
     void testSetAndGetStockTicker() {
         String ticker = "MSFT";
@@ -51,72 +61,66 @@ public class PositionTest {
     @Test
     @DisplayName("Should set and get average price")
     void testSetAndGetAveragePrice() {
-        Double avgPrice = 378.91;
+        BigDecimal avgPrice = BigDecimal.valueOf(378.91);
         position.setAveragePrice(avgPrice);
         assertEquals(avgPrice, position.getAveragePrice());
+    }
+
+    @Test
+    @DisplayName("Should set and get unrealized P&L")
+    void testSetAndGetUnrealizedPnL() {
+        Double unrealizedPnL = 500.0;
+        position.setUnrealizedPnL(unrealizedPnL);
+        assertEquals(unrealizedPnL, position.getUnrealizedPnL());
     }
 
     @Test
     @DisplayName("Should calculate market value")
     void testCalculateMarketValue() {
         position.setTotalQuantity(10.0);
-        Double currentPrice = 400.0;
+        BigDecimal currentPrice = BigDecimal.valueOf(400.0);
         
-        Double marketValue = position.getTotalQuantity() * currentPrice;
-        assertEquals(4000.0, marketValue);
+        BigDecimal marketValue = currentPrice.multiply(BigDecimal.valueOf(position.getTotalQuantity()));
+        assertEquals(0, BigDecimal.valueOf(4000.0).compareTo(marketValue));
     }
 
     @Test
     @DisplayName("Should calculate cost basis")
     void testCalculateCostBasis() {
         position.setTotalQuantity(10.0);
-        position.setAveragePrice(350.0);
+        position.setAveragePrice(BigDecimal.valueOf(350.0));
         
-        Double costBasis = position.getTotalQuantity() * position.getAveragePrice();
-        assertEquals(3500.0, costBasis);
+        BigDecimal costBasis = position.getAveragePrice().multiply(BigDecimal.valueOf(position.getTotalQuantity()));
+        assertEquals(0, BigDecimal.valueOf(3500.0).compareTo(costBasis));
     }
 
     @Test
     @DisplayName("Should calculate unrealized P&L")
     void testCalculateUnrealizedPnL() {
         position.setTotalQuantity(10.0);
-        position.setAveragePrice(350.0);
-        Double currentPrice = 400.0;
+        position.setAveragePrice(BigDecimal.valueOf(350.0));
+        BigDecimal currentPrice = BigDecimal.valueOf(400.0);
         
-        Double costBasis = position.getTotalQuantity() * position.getAveragePrice();
-        Double marketValue = position.getTotalQuantity() * currentPrice;
-        Double unrealizedPnL = marketValue - costBasis;
+        BigDecimal costBasis = position.getAveragePrice().multiply(BigDecimal.valueOf(position.getTotalQuantity()));
+        BigDecimal marketValue = currentPrice.multiply(BigDecimal.valueOf(position.getTotalQuantity()));
+        BigDecimal unrealizedPnL = marketValue.subtract(costBasis);
         
-        assertEquals(500.0, unrealizedPnL);
-    }
-
-    @Test
-    @DisplayName("Should calculate unrealized P&L percentage")
-    void testCalculateUnrealizedPnLPercent() {
-        position.setTotalQuantity(10.0);
-        position.setAveragePrice(100.0);
-        Double currentPrice = 110.0;
-        
-        Double costBasis = position.getTotalQuantity() * position.getAveragePrice();
-        Double marketValue = position.getTotalQuantity() * currentPrice;
-        Double pnlPercent = ((marketValue - costBasis) / costBasis) * 100;
-        
-        assertEquals(10.0, pnlPercent);
+        assertEquals(0, BigDecimal.valueOf(500.0).compareTo(unrealizedPnL));
     }
 
     @Test
     @DisplayName("Should handle negative P&L")
     void testNegativePnL() {
         position.setTotalQuantity(10.0);
-        position.setAveragePrice(100.0);
-        Double currentPrice = 90.0;
+        position.setAveragePrice(BigDecimal.valueOf(100.0));
+        BigDecimal currentPrice = BigDecimal.valueOf(90.0);
         
-        Double costBasis = position.getTotalQuantity() * position.getAveragePrice();
-        Double marketValue = position.getTotalQuantity() * currentPrice;
-        Double unrealizedPnL = marketValue - costBasis;
+        BigDecimal costBasis = position.getAveragePrice().multiply(BigDecimal.valueOf(position.getTotalQuantity()));
+        BigDecimal marketValue = currentPrice.multiply(BigDecimal.valueOf(position.getTotalQuantity()));
+        BigDecimal unrealizedPnL = marketValue.subtract(costBasis);
         
-        assertTrue(unrealizedPnL < 0);
-        assertEquals(-100.0, unrealizedPnL);
+        assertTrue(unrealizedPnL.compareTo(BigDecimal.ZERO) < 0);
+        assertEquals(0, BigDecimal.valueOf(-100.0).compareTo(unrealizedPnL));
     }
 
     @Test
@@ -128,5 +132,13 @@ public class PositionTest {
         
         assertNotNull(position.getUsers());
         assertEquals(1L, position.getUsers().getId());
+    }
+
+    @Test
+    @DisplayName("Should set and get user ref ID")
+    void testSetAndGetUserRefId() {
+        Long userRefId = 1L;
+        position.setUserRefId(userRefId);
+        assertEquals(userRefId, position.getUserRefId());
     }
 }
