@@ -92,7 +92,7 @@ export default function Goals() {
   };
 
   return (
-    <div className="min-h-screen bg-[#09090B]">
+    <div className="min-h-screen bg-[#FAF9F7]">
       <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 py-8" data-testid="goals-page">
@@ -105,13 +105,13 @@ export default function Goals() {
             <DialogTrigger asChild>
               <Button 
                 data-testid="create-goal-btn"
-                className="bg-[#CCFF00] text-black font-bold uppercase hover:bg-[#B3E600]"
+                className="bg-[#D4A574] text-black font-bold uppercase hover:bg-[#B3E600]"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 NEW GOAL
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-[#18181B] border border-[#27272A] text-white">
+            <DialogContent className="warm-card border border-[#D4C4B0] text-white">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-bold uppercase">CREATE GOAL</DialogTitle>
               </DialogHeader>
@@ -124,7 +124,7 @@ export default function Goals() {
                     data-testid="goal-title-input"
                     value={newGoal.title}
                     onChange={(e) => setNewGoal({ ...newGoal, title: e.target.value })}
-                    className="bg-[#09090B] border-[#27272A] text-white focus:border-[#CCFF00]"
+                    className="bg-[#FAF9F7] border-[#D4C4B0] text-white focus:border-[#D4A574]"
                     required
                   />
                 </div>
@@ -137,7 +137,7 @@ export default function Goals() {
                     data-testid="goal-description-input"
                     value={newGoal.description}
                     onChange={(e) => setNewGoal({ ...newGoal, description: e.target.value })}
-                    className="bg-[#09090B] border-[#27272A] text-white focus:border-[#CCFF00]"
+                    className="bg-[#FAF9F7] border-[#D4C4B0] text-white focus:border-[#D4A574]"
                     required
                   />
                 </div>
@@ -152,7 +152,7 @@ export default function Goals() {
                       type="number"
                       value={newGoal.target_value}
                       onChange={(e) => setNewGoal({ ...newGoal, target_value: e.target.value })}
-                      className="bg-[#09090B] border-[#27272A] text-white focus:border-[#CCFF00]"
+                      className="bg-[#FAF9F7] border-[#D4C4B0] text-white focus:border-[#D4A574]"
                       required
                     />
                   </div>
@@ -165,7 +165,7 @@ export default function Goals() {
                       value={newGoal.unit}
                       onChange={(e) => setNewGoal({ ...newGoal, unit: e.target.value })}
                       placeholder="kg, reps, km"
-                      className="bg-[#09090B] border-[#27272A] text-white focus:border-[#CCFF00]"
+                      className="bg-[#FAF9F7] border-[#D4C4B0] text-white focus:border-[#D4A574]"
                       required
                     />
                   </div>
@@ -180,14 +180,14 @@ export default function Goals() {
                     type="date"
                     value={newGoal.deadline}
                     onChange={(e) => setNewGoal({ ...newGoal, deadline: e.target.value })}
-                    className="bg-[#09090B] border-[#27272A] text-white focus:border-[#CCFF00]"
+                    className="bg-[#FAF9F7] border-[#D4C4B0] text-white focus:border-[#D4A574]"
                   />
                 </div>
                 
                 <Button
                   type="submit"
                   data-testid="submit-goal-btn"
-                  className="w-full bg-[#CCFF00] text-black font-bold uppercase hover:bg-[#B3E600]"
+                  className="w-full bg-[#D4A574] text-black font-bold uppercase hover:bg-[#B3E600]"
                 >
                   CREATE GOAL
                 </Button>
@@ -199,8 +199,8 @@ export default function Goals() {
         {/* Goals List */}
         <div className="grid md:grid-cols-2 gap-6" data-testid="goals-list">
           {goals.length === 0 ? (
-            <div className="md:col-span-2 bg-[#18181B] border border-[#27272A] p-8 text-center">
-              <p className="text-[#A1A1AA]">No goals yet. Create your first goal to get started!</p>
+            <div className="md:col-span-2 warm-card border border-[#D4C4B0] p-8 text-center">
+              <p className="text-[#8B7355]">No goals yet. Create your first goal to get started!</p>
             </div>
           ) : (
             goals.map((goal) => {
@@ -212,34 +212,34 @@ export default function Goals() {
                   key={goal.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className={`bg-[#18181B] border p-6 ${
-                    isCompleted ? 'border-[#CCFF00]' : 'border-[#27272A] hover:border-[#CCFF00]/50'
+                  className={`warm-card border p-6 ${
+                    isCompleted ? 'border-[#D4A574]' : 'border-[#D4C4B0] hover:border-[#D4A574]/50'
                   } transition-all duration-300`}
                   data-testid={`goal-${goal.id}`}
                 >
                   {isCompleted && (
                     <div className="mb-4">
-                      <span className="inline-block bg-[#CCFF00] text-black text-xs font-bold uppercase px-3 py-1">
+                      <span className="inline-block bg-[#D4A574] text-black text-xs font-bold uppercase px-3 py-1">
                         COMPLETED
                       </span>
                     </div>
                   )}
                   
                   <h3 className="text-2xl font-bold uppercase mb-2">{goal.title}</h3>
-                  <p className="text-[#A1A1AA] mb-4">{goal.description}</p>
+                  <p className="text-[#8B7355] mb-4">{goal.description}</p>
                   
                   <div className="mb-4">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-white font-bold">
                         {goal.current_value} / {goal.target_value} {goal.unit}
                       </span>
-                      <span className="text-[#CCFF00] font-bold">{progress.toFixed(0)}%</span>
+                      <span className="text-[#D4A574] font-bold">{progress.toFixed(0)}%</span>
                     </div>
                     <Progress value={progress} className="h-2 bg-[#27272A]" />
                   </div>
                   
                   {goal.deadline && (
-                    <p className="text-[#A1A1AA] text-sm mb-4">
+                    <p className="text-[#8B7355] text-sm mb-4">
                       Deadline: {new Date(goal.deadline).toLocaleDateString()}
                     </p>
                   )}
@@ -250,7 +250,7 @@ export default function Goals() {
                         type="number"
                         placeholder="Update progress"
                         data-testid={`update-progress-${goal.id}`}
-                        className="bg-[#09090B] border-[#27272A] text-white focus:border-[#CCFF00]"
+                        className="bg-[#FAF9F7] border-[#D4C4B0] text-white focus:border-[#D4A574]"
                         onKeyPress={(e) => {
                           if (e.key === 'Enter') {
                             updateProgress(goal.id, e.target.value);
@@ -262,7 +262,7 @@ export default function Goals() {
                         <Button
                           onClick={() => markComplete(goal.id)}
                           data-testid={`complete-goal-${goal.id}`}
-                          className="bg-[#CCFF00] text-black font-bold uppercase hover:bg-[#B3E600] whitespace-nowrap"
+                          className="bg-[#D4A574] text-black font-bold uppercase hover:bg-[#B3E600] whitespace-nowrap"
                         >
                           <TrendingUp className="w-4 h-4 mr-2" />
                           COMPLETE

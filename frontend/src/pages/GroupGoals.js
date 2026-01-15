@@ -104,7 +104,7 @@ export default function GroupGoals({ user }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#09090B]">
+    <div className="min-h-screen bg-[#FAF9F7]">
       <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 py-8" data-testid="group-goals-page">
@@ -117,13 +117,13 @@ export default function GroupGoals({ user }) {
             <DialogTrigger asChild>
               <Button 
                 data-testid="create-group-btn"
-                className="bg-[#CCFF00] text-black font-bold uppercase hover:bg-[#B3E600]"
+                className="bg-[#D4A574] text-black font-bold uppercase hover:bg-[#B3E600]"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 NEW GROUP
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-[#18181B] border border-[#27272A] text-white">
+            <DialogContent className="warm-card border border-[#D4C4B0] text-white">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-bold uppercase">CREATE GROUP</DialogTitle>
               </DialogHeader>
@@ -136,7 +136,7 @@ export default function GroupGoals({ user }) {
                     data-testid="group-name-input"
                     value={newGroup.name}
                     onChange={(e) => setNewGroup({ ...newGroup, name: e.target.value })}
-                    className="bg-[#09090B] border-[#27272A] text-white focus:border-[#CCFF00]"
+                    className="bg-[#FAF9F7] border-[#D4C4B0] text-white focus:border-[#D4A574]"
                     required
                   />
                 </div>
@@ -149,7 +149,7 @@ export default function GroupGoals({ user }) {
                     data-testid="group-description-input"
                     value={newGroup.description}
                     onChange={(e) => setNewGroup({ ...newGroup, description: e.target.value })}
-                    className="bg-[#09090B] border-[#27272A] text-white focus:border-[#CCFF00]"
+                    className="bg-[#FAF9F7] border-[#D4C4B0] text-white focus:border-[#D4A574]"
                     required
                   />
                 </div>
@@ -164,7 +164,7 @@ export default function GroupGoals({ user }) {
                       type="number"
                       value={newGroup.target_value}
                       onChange={(e) => setNewGroup({ ...newGroup, target_value: e.target.value })}
-                      className="bg-[#09090B] border-[#27272A] text-white focus:border-[#CCFF00]"
+                      className="bg-[#FAF9F7] border-[#D4C4B0] text-white focus:border-[#D4A574]"
                       required
                     />
                   </div>
@@ -177,7 +177,7 @@ export default function GroupGoals({ user }) {
                       value={newGroup.unit}
                       onChange={(e) => setNewGroup({ ...newGroup, unit: e.target.value })}
                       placeholder="km, steps"
-                      className="bg-[#09090B] border-[#27272A] text-white focus:border-[#CCFF00]"
+                      className="bg-[#FAF9F7] border-[#D4C4B0] text-white focus:border-[#D4A574]"
                       required
                     />
                   </div>
@@ -186,7 +186,7 @@ export default function GroupGoals({ user }) {
                 <Button
                   type="submit"
                   data-testid="submit-group-btn"
-                  className="w-full bg-[#CCFF00] text-black font-bold uppercase hover:bg-[#B3E600]"
+                  className="w-full bg-[#D4A574] text-black font-bold uppercase hover:bg-[#B3E600]"
                 >
                   CREATE GROUP
                 </Button>
@@ -199,8 +199,8 @@ export default function GroupGoals({ user }) {
           {/* Groups List */}
           <div className="md:col-span-1 space-y-4" data-testid="groups-list">
             {groups.length === 0 ? (
-              <div className="bg-[#18181B] border border-[#27272A] p-6 text-center">
-                <p className="text-[#A1A1AA]">No groups yet</p>
+              <div className="warm-card border border-[#D4C4B0] p-6 text-center">
+                <p className="text-[#8B7355]">No groups yet</p>
               </div>
             ) : (
               groups.map((group) => {
@@ -211,24 +211,24 @@ export default function GroupGoals({ user }) {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     onClick={() => setSelectedGroup(group)}
-                    className={`bg-[#18181B] border p-4 cursor-pointer transition-all duration-300 ${
-                      selectedGroup?.id === group.id ? 'border-[#CCFF00]' : 'border-[#27272A] hover:border-[#CCFF00]/50'
+                    className={`warm-card border p-4 cursor-pointer transition-all duration-300 ${
+                      selectedGroup?.id === group.id ? 'border-[#D4A574]' : 'border-[#D4C4B0] hover:border-[#D4A574]/50'
                     }`}
                     data-testid={`group-${group.id}`}
                   >
                     <div className="flex items-center gap-2 mb-2">
-                      <UsersIcon className="w-5 h-5 text-[#CCFF00]" strokeWidth={1.5} />
+                      <UsersIcon className="w-5 h-5 text-[#D4A574]" strokeWidth={1.5} />
                       <h3 className="font-bold uppercase">{group.name}</h3>
                     </div>
-                    <p className="text-[#A1A1AA] text-sm mb-3">{group.description}</p>
+                    <p className="text-[#8B7355] text-sm mb-3">{group.description}</p>
                     <div className="mb-2">
                       <div className="flex items-center justify-between text-sm mb-1">
                         <span>{group.current_value} / {group.target_value} {group.unit}</span>
-                        <span className="text-[#CCFF00] font-bold">{progress.toFixed(0)}%</span>
+                        <span className="text-[#D4A574] font-bold">{progress.toFixed(0)}%</span>
                       </div>
                       <Progress value={progress} className="h-1.5 bg-[#27272A]" />
                     </div>
-                    <p className="text-[#A1A1AA] text-xs">{group.members.length} members</p>
+                    <p className="text-[#8B7355] text-xs">{group.members.length} members</p>
                   </motion.div>
                 );
               })
@@ -238,15 +238,15 @@ export default function GroupGoals({ user }) {
           {/* Group Detail & Chat */}
           <div className="md:col-span-2">
             {selectedGroup ? (
-              <div className="bg-[#18181B] border border-[#27272A] h-[600px] flex flex-col" data-testid="group-detail">
+              <div className="warm-card border border-[#D4C4B0] h-[600px] flex flex-col" data-testid="group-detail">
                 {/* Header */}
-                <div className="p-6 border-b border-[#27272A]">
+                <div className="p-6 border-b border-[#D4C4B0]">
                   <h2 className="text-2xl font-bold uppercase mb-2">{selectedGroup.name}</h2>
-                  <p className="text-[#A1A1AA] mb-4">{selectedGroup.description}</p>
+                  <p className="text-[#8B7355] mb-4">{selectedGroup.description}</p>
                   
                   <div className="flex items-center gap-4 mb-4">
                     <div>
-                      <p className="text-xs text-[#A1A1AA] uppercase">Progress</p>
+                      <p className="text-xs text-[#8B7355] uppercase">Progress</p>
                       <p className="text-xl font-bold">
                         {selectedGroup.current_value} / {selectedGroup.target_value} {selectedGroup.unit}
                       </p>
@@ -264,7 +264,7 @@ export default function GroupGoals({ user }) {
                       type="number"
                       placeholder="Add your progress"
                       data-testid="add-progress-input"
-                      className="bg-[#09090B] border-[#27272A] text-white focus:border-[#CCFF00]"
+                      className="bg-[#FAF9F7] border-[#D4C4B0] text-white focus:border-[#D4A574]"
                       onKeyPress={(e) => {
                         if (e.key === 'Enter') {
                           updateGroupProgress(selectedGroup.id, e.target.value);
@@ -273,7 +273,7 @@ export default function GroupGoals({ user }) {
                       }}
                     />
                     <Button
-                      className="bg-[#CCFF00] text-black font-bold uppercase hover:bg-[#B3E600] whitespace-nowrap"
+                      className="bg-[#D4A574] text-black font-bold uppercase hover:bg-[#B3E600] whitespace-nowrap"
                       data-testid="update-group-progress-btn"
                     >
                       <TrendingUp className="w-4 h-4" />
@@ -292,11 +292,11 @@ export default function GroupGoals({ user }) {
                         }`}
                         data-testid={`message-${message.id}`}
                       >
-                        <p className="text-xs text-[#A1A1AA] mb-1">{message.user_name}</p>
+                        <p className="text-xs text-[#8B7355] mb-1">{message.user_name}</p>
                         <div
                           className={`max-w-[70%] p-3 ${
                             message.user_id === user?.id
-                              ? 'bg-[#CCFF00] text-black'
+                              ? 'bg-[#D4A574] text-black'
                               : 'bg-[#27272A] text-white'
                           }`}
                         >
@@ -308,19 +308,19 @@ export default function GroupGoals({ user }) {
                 </ScrollArea>
 
                 {/* Message Input */}
-                <form onSubmit={sendMessage} className="p-4 border-t border-[#27272A]">
+                <form onSubmit={sendMessage} className="p-4 border-t border-[#D4C4B0]">
                   <div className="flex gap-2">
                     <Input
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       placeholder="Type a message..."
                       data-testid="message-input"
-                      className="bg-[#09090B] border-[#27272A] text-white focus:border-[#CCFF00]"
+                      className="bg-[#FAF9F7] border-[#D4C4B0] text-white focus:border-[#D4A574]"
                     />
                     <Button
                       type="submit"
                       data-testid="send-message-btn"
-                      className="bg-[#CCFF00] text-black font-bold hover:bg-[#B3E600]"
+                      className="bg-[#D4A574] text-black font-bold hover:bg-[#B3E600]"
                     >
                       <Send className="w-4 h-4" />
                     </Button>
@@ -328,8 +328,8 @@ export default function GroupGoals({ user }) {
                 </form>
               </div>
             ) : (
-              <div className="bg-[#18181B] border border-[#27272A] h-[600px] flex items-center justify-center">
-                <p className="text-[#A1A1AA]">Select a group to view details and chat</p>
+              <div className="warm-card border border-[#D4C4B0] h-[600px] flex items-center justify-center">
+                <p className="text-[#8B7355]">Select a group to view details and chat</p>
               </div>
             )}
           </div>

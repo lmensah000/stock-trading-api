@@ -55,7 +55,7 @@ export default function WeightTracking() {
   }));
 
   return (
-    <div className="min-h-screen bg-[#09090B]">
+    <div className="min-h-screen bg-[#FAF9F7]">
       <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 py-8" data-testid="weight-tracking-page">
@@ -68,10 +68,10 @@ export default function WeightTracking() {
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="bg-[#18181B] border border-[#27272A] p-6"
+            className="warm-card border border-[#D4C4B0] p-6"
           >
             <h2 className="text-2xl font-bold uppercase mb-6 flex items-center gap-2">
-              <Scale className="w-6 h-6 text-[#CCFF00]" strokeWidth={1.5} />
+              <Scale className="w-6 h-6 text-[#D4A574]" strokeWidth={1.5} />
               LOG WEIGHT
             </h2>
             
@@ -86,7 +86,7 @@ export default function WeightTracking() {
                   data-testid="weight-input"
                   value={newEntry.weight}
                   onChange={(e) => setNewEntry({ ...newEntry, weight: e.target.value })}
-                  className="bg-[#09090B] border-[#27272A] text-white focus:border-[#CCFF00]"
+                  className="bg-[#FAF9F7] border-[#D4C4B0] text-white focus:border-[#D4A574]"
                   required
                 />
               </div>
@@ -101,11 +101,11 @@ export default function WeightTracking() {
                 >
                   <SelectTrigger 
                     data-testid="unit-select"
-                    className="bg-[#09090B] border-[#27272A] text-white focus:border-[#CCFF00]"
+                    className="bg-[#FAF9F7] border-[#D4C4B0] text-white focus:border-[#D4A574]"
                   >
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#18181B] border-[#27272A]">
+                  <SelectContent className="warm-card border-[#D4C4B0]">
                     <SelectItem value="kg" className="text-white hover:bg-[#27272A]">kg</SelectItem>
                     <SelectItem value="lbs" className="text-white hover:bg-[#27272A]">lbs</SelectItem>
                   </SelectContent>
@@ -121,14 +121,14 @@ export default function WeightTracking() {
                   value={newEntry.notes}
                   onChange={(e) => setNewEntry({ ...newEntry, notes: e.target.value })}
                   placeholder="How are you feeling?"
-                  className="bg-[#09090B] border-[#27272A] text-white focus:border-[#CCFF00]"
+                  className="bg-[#FAF9F7] border-[#D4C4B0] text-white focus:border-[#D4A574]"
                 />
               </div>
               
               <Button
                 type="submit"
                 data-testid="submit-weight-btn"
-                className="w-full bg-[#CCFF00] text-black font-bold uppercase hover:bg-[#B3E600]"
+                className="w-full bg-[#D4A574] text-black font-bold uppercase hover:bg-[#B3E600]"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 ADD ENTRY
@@ -137,15 +137,15 @@ export default function WeightTracking() {
 
             {/* Scale Integration Info */}
             <div className="mt-8 p-4 bg-[#27272A] border border-[#3F3F46]">
-              <h3 className="text-sm font-bold uppercase mb-2 text-[#CCFF00]">SMART SCALE SYNC</h3>
-              <p className="text-xs text-[#A1A1AA] mb-3">
+              <h3 className="text-sm font-bold uppercase mb-2 text-[#D4A574]">SMART SCALE SYNC</h3>
+              <p className="text-xs text-[#8B7355] mb-3">
                 Connect your digital scale for automatic tracking
               </p>
               <Button
                 variant="outline"
                 size="sm"
                 data-testid="connect-scale-btn"
-                className="w-full border-[#CCFF00] text-[#CCFF00] hover:bg-[#CCFF00] hover:text-black uppercase text-xs"
+                className="w-full border-[#D4A574] text-[#D4A574] hover:bg-[#D4A574] hover:text-black uppercase text-xs"
               >
                 CONNECT SCALE
               </Button>
@@ -162,7 +162,7 @@ export default function WeightTracking() {
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="bg-[#18181B] border border-[#27272A] p-6"
+                className="warm-card border border-[#D4C4B0] p-6"
                 data-testid="weight-chart"
               >
                 <h2 className="text-2xl font-bold uppercase mb-6">PROGRESS CHART</h2>
@@ -189,13 +189,13 @@ export default function WeightTracking() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-[#18181B] border border-[#27272A] p-6"
+              className="warm-card border border-[#D4C4B0] p-6"
               data-testid="weight-history"
             >
               <h2 className="text-2xl font-bold uppercase mb-6">ENTRY HISTORY</h2>
               
               {entries.length === 0 ? (
-                <p className="text-[#A1A1AA] text-center py-8">No entries yet. Add your first weight entry!</p>
+                <p className="text-[#8B7355] text-center py-8">No entries yet. Add your first weight entry!</p>
               ) : (
                 <div className="space-y-3">
                   {entries.map((entry) => (
@@ -205,18 +205,18 @@ export default function WeightTracking() {
                       data-testid={`entry-${entry.id}`}
                     >
                       <div className="flex-1">
-                        <p className="text-2xl font-bold text-[#CCFF00]">
-                          {entry.weight} <span className="text-lg text-[#A1A1AA]">{entry.unit}</span>
+                        <p className="text-2xl font-bold text-[#D4A574]">
+                          {entry.weight} <span className="text-lg text-[#8B7355]">{entry.unit}</span>
                         </p>
                         {entry.notes && (
-                          <p className="text-sm text-[#A1A1AA] mt-1">{entry.notes}</p>
+                          <p className="text-sm text-[#8B7355] mt-1">{entry.notes}</p>
                         )}
                       </div>
                       <div className="text-right">
                         <p className="text-sm text-white">
                           {new Date(entry.created_at).toLocaleDateString()}
                         </p>
-                        <p className="text-xs text-[#A1A1AA]">
+                        <p className="text-xs text-[#8B7355]">
                           {new Date(entry.created_at).toLocaleTimeString()}
                         </p>
                         <span className="inline-block mt-1 text-xs uppercase font-bold tracking-widest text-[#52525B]">

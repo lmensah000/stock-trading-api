@@ -65,7 +65,7 @@ export default function MealPlanning() {
   };
 
   return (
-    <div className="min-h-screen bg-[#09090B]">
+    <div className="min-h-screen bg-[#FAF9F7]">
       <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 py-8" data-testid="meal-planning-page">
@@ -78,7 +78,7 @@ export default function MealPlanning() {
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="bg-[#18181B] border border-[#27272A] p-6"
+            className="warm-card border border-[#D4C4B0] p-6"
           >
             <h2 className="text-2xl font-bold uppercase mb-6">AVAILABLE GROCERIES</h2>
             
@@ -92,7 +92,7 @@ export default function MealPlanning() {
                   value={newGrocery.name}
                   onChange={(e) => setNewGrocery({ ...newGrocery, name: e.target.value })}
                   placeholder="e.g., Chicken Breast"
-                  className="bg-[#09090B] border-[#27272A] text-white focus:border-[#CCFF00]"
+                  className="bg-[#FAF9F7] border-[#D4C4B0] text-white focus:border-[#D4A574]"
                   onKeyPress={(e) => e.key === 'Enter' && addGrocery()}
                 />
               </div>
@@ -107,7 +107,7 @@ export default function MealPlanning() {
                     value={newGrocery.quantity}
                     onChange={(e) => setNewGrocery({ ...newGrocery, quantity: e.target.value })}
                     placeholder="2"
-                    className="bg-[#09090B] border-[#27272A] text-white focus:border-[#CCFF00]"
+                    className="bg-[#FAF9F7] border-[#D4C4B0] text-white focus:border-[#D4A574]"
                   />
                 </div>
                 <div>
@@ -119,7 +119,7 @@ export default function MealPlanning() {
                     value={newGrocery.unit}
                     onChange={(e) => setNewGrocery({ ...newGrocery, unit: e.target.value })}
                     placeholder="kg"
-                    className="bg-[#09090B] border-[#27272A] text-white focus:border-[#CCFF00]"
+                    className="bg-[#FAF9F7] border-[#D4C4B0] text-white focus:border-[#D4A574]"
                   />
                 </div>
               </div>
@@ -127,7 +127,7 @@ export default function MealPlanning() {
               <Button
                 onClick={addGrocery}
                 data-testid="add-grocery-btn"
-                className="w-full bg-[#CCFF00] text-black font-bold uppercase hover:bg-[#B3E600]"
+                className="w-full bg-[#D4A574] text-black font-bold uppercase hover:bg-[#B3E600]"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 ADD ITEM
@@ -167,7 +167,7 @@ export default function MealPlanning() {
                 value={preferences}
                 onChange={(e) => setPreferences(e.target.value)}
                 placeholder="e.g., High protein, low carb, vegetarian..."
-                className="bg-[#09090B] border-[#27272A] text-white focus:border-[#CCFF00] min-h-[100px]"
+                className="bg-[#FAF9F7] border-[#D4C4B0] text-white focus:border-[#D4A574] min-h-[100px]"
               />
             </div>
 
@@ -175,7 +175,7 @@ export default function MealPlanning() {
               onClick={generateMealPlan}
               disabled={generating || groceries.length === 0}
               data-testid="generate-meal-plan-btn"
-              className="w-full bg-[#00E0FF] text-black font-bold uppercase hover:bg-[#00C8E6] transition-all duration-300"
+              className="w-full bg-[#8B7355] text-black font-bold uppercase hover:bg-[#00C8E6] transition-all duration-300"
             >
               <Sparkles className="w-4 h-4 mr-2" />
               {generating ? 'GENERATING...' : 'GENERATE MEAL PLAN'}
@@ -192,31 +192,31 @@ export default function MealPlanning() {
             <h2 className="text-2xl font-bold uppercase mb-6">YOUR MEAL PLANS</h2>
             
             {mealPlans.length === 0 ? (
-              <div className="bg-[#18181B] border border-[#27272A] p-8 text-center">
-                <p className="text-[#A1A1AA]">No meal plans yet. Generate your first one!</p>
+              <div className="warm-card border border-[#D4C4B0] p-8 text-center">
+                <p className="text-[#8B7355]">No meal plans yet. Generate your first one!</p>
               </div>
             ) : (
               mealPlans.map((plan) => (
                 <div
                   key={plan.id}
-                  className="bg-[#18181B] border border-[#27272A] p-6 hover:border-[#CCFF00]/50 transition-all duration-300"
+                  className="warm-card border border-[#D4C4B0] p-6 hover:border-[#D4A574]/50 transition-all duration-300"
                   data-testid={`meal-plan-${plan.id}`}
                 >
-                  <h3 className="text-xl font-bold text-[#CCFF00] mb-3 uppercase">{plan.meal_name}</h3>
+                  <h3 className="text-xl font-bold text-[#D4A574] mb-3 uppercase">{plan.meal_name}</h3>
                   
                   {plan.calories && plan.protein && (
                     <div className="flex gap-4 mb-4">
-                      <span className="text-[#A1A1AA] text-sm uppercase">
+                      <span className="text-[#8B7355] text-sm uppercase">
                         <span className="text-white font-bold">{plan.calories}</span> CAL
                       </span>
-                      <span className="text-[#A1A1AA] text-sm uppercase">
+                      <span className="text-[#8B7355] text-sm uppercase">
                         <span className="text-white font-bold">{plan.protein}g</span> PROTEIN
                       </span>
                     </div>
                   )}
                   
                   <div className="mb-4">
-                    <p className="text-[#A1A1AA] text-xs uppercase font-bold mb-2">INGREDIENTS:</p>
+                    <p className="text-[#8B7355] text-xs uppercase font-bold mb-2">INGREDIENTS:</p>
                     <ul className="list-disc list-inside text-white space-y-1">
                       {plan.ingredients.map((ingredient, idx) => (
                         <li key={idx} className="text-sm">{ingredient}</li>
@@ -225,7 +225,7 @@ export default function MealPlanning() {
                   </div>
                   
                   <div>
-                    <p className="text-[#A1A1AA] text-xs uppercase font-bold mb-2">INSTRUCTIONS:</p>
+                    <p className="text-[#8B7355] text-xs uppercase font-bold mb-2">INSTRUCTIONS:</p>
                     <p className="text-white text-sm whitespace-pre-line">{plan.instructions}</p>
                   </div>
                 </div>
