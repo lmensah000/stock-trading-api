@@ -99,12 +99,43 @@ export default function GroupGoals({ user }) {
       });
       toast.success('Progress updated!');
       fetchGroups();
+      fetchRankings(groupId);
       if (selectedGroup?.id === groupId) {
         const updatedGroup = groups.find(g => g.id === groupId);
         setSelectedGroup({ ...updatedGroup, current_value: updatedGroup.current_value + parseFloat(progress) });
       }
     } catch (error) {
       toast.error('Failed to update progress');
+    }
+  };
+
+  const fetchRankings = async (groupId) => {
+    try {
+      const response = await apiClient.get(`/groups/${groupId}/rankings`);
+      setRankings(response.data);
+    } catch (error) {
+      console.error('Failed to fetch rankings:', error);
+    }
+  };
+
+  const completeGroupGoal = async (groupId) => {
+    try {
+      const response = await apiClient.post(`/groups/${groupId}/complete`);
+      toast.success('Group goal completed! Check your rewards!');
+      fetchGroups();
+      setSelectedGroup(null);
+      
+      // Show rankings result
+      if (response.data.rankings) {
+        const userRanking = response.data.rankings.find(r => r.user_id === user?.id);
+        if (userRanking) {
+          toast.success(`You ranked #${userRanking.rank}! +${userRanking.points_earned} points earned!`, {
+            duration: 5000
+          });
+        }
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to complete group goal');
     }
   };
 
