@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, TrendingUp } from 'lucide-react';
+import { Plus, TrendingUp, Share2, Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,10 +10,14 @@ import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import apiClient from '@/api';
 import Navbar from '@/components/Navbar';
+import ShareModal from '@/components/ShareModal';
 
 export default function Goals() {
   const [goals, setGoals] = useState([]);
+  const [achievements, setAchievements] = useState([]);
   const [open, setOpen] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [selectedAchievement, setSelectedAchievement] = useState(null);
   const [newGoal, setNewGoal] = useState({
     title: '',
     description: '',
@@ -24,6 +28,7 @@ export default function Goals() {
 
   useEffect(() => {
     fetchGoals();
+    fetchAchievements();
   }, []);
 
   const fetchGoals = async () => {
@@ -32,6 +37,15 @@ export default function Goals() {
       setGoals(response.data);
     } catch (error) {
       console.error('Failed to fetch goals:', error);
+    }
+  };
+
+  const fetchAchievements = async () => {
+    try {
+      const response = await apiClient.get('/achievements');
+      setAchievements(response.data);
+    } catch (error) {
+      console.error('Failed to fetch achievements:', error);
     }
   };
 
