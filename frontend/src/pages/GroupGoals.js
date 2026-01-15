@@ -16,6 +16,7 @@ export default function GroupGoals({ user }) {
   const [groups, setGroups] = useState([]);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [messages, setMessages] = useState([]);
+  const [rankings, setRankings] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [open, setOpen] = useState(false);
   const [newGroup, setNewGroup] = useState({
@@ -32,7 +33,11 @@ export default function GroupGoals({ user }) {
   useEffect(() => {
     if (selectedGroup) {
       fetchMessages(selectedGroup.id);
-      const interval = setInterval(() => fetchMessages(selectedGroup.id), 5000);
+      fetchRankings(selectedGroup.id);
+      const interval = setInterval(() => {
+        fetchMessages(selectedGroup.id);
+        fetchRankings(selectedGroup.id);
+      }, 5000);
       return () => clearInterval(interval);
     }
   }, [selectedGroup]);
