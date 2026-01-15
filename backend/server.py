@@ -576,6 +576,14 @@ Format as JSON with keys: meal_name, ingredients (array), instructions, calories
             doc['created_at'] = doc['created_at'].isoformat()
             await db.meal_plans.insert_one(doc)
             
+            # Check for meal planner badge
+            meal_count = await db.meal_plans.count_documents({"user_id": current_user['id']})
+            if meal_count == 10:
+                await check_and_award_badge(current_user['id'], "meal_planner")
+            
+            # Check referral onboarding
+            await check_referral_onboarding_helper(current_user['id'])
+            
             return meal_plan
         except json.JSONDecodeError:
             return {"raw_response": response, "message": "Meal plan generated but formatting needs adjustment"}
