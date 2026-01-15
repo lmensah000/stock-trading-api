@@ -666,13 +666,9 @@ async def get_watchlist(current_user: dict = Depends(get_current_user)):
 async def add_to_watchlist(item: WatchlistItem, current_user: dict = Depends(get_current_user)):
     ticker = item.stock_ticker.upper()
     
-    # Verify stock exists
-    try:
-        stock = yf.Ticker(ticker)
-        info = stock.info
-        if not info or "shortName" not in info:
-            raise HTTPException(status_code=404, detail=f"Stock {ticker} not found")
-    except:
+    # Verify stock exists using demo data or API
+    info = get_stock_info(ticker)
+    if not info:
         raise HTTPException(status_code=404, detail=f"Stock {ticker} not found")
     
     watchlist = await db.watchlists.find_one({"user_id": current_user["_id"]})
