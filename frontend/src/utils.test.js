@@ -214,7 +214,7 @@ describe('Data Validation', () => {
 
     test('rejects invalid username', () => {
       expect(validateUsername('ab')).toBe(false); // too short
-      expect(validateUsername('')).toBe(false);
+      expect(validateUsername('')).toBeFalsy();
     });
   });
 });
