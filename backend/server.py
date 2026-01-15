@@ -314,10 +314,9 @@ async def get_me(current_user: dict = Depends(get_current_user)):
 @app.get("/api/stocks/quote/{ticker}", response_model=StockQuote)
 async def get_stock_quote(ticker: str):
     try:
-        stock = yf.Ticker(ticker.upper())
-        info = stock.info
+        info = get_stock_info(ticker.upper())
         
-        if not info or "regularMarketPrice" not in info:
+        if not info:
             raise HTTPException(status_code=404, detail=f"Stock {ticker} not found")
         
         current_price = info.get("regularMarketPrice", info.get("currentPrice", 0))
@@ -342,6 +341,8 @@ async def get_stock_quote(ticker: str):
             day_high=info.get("dayHigh", info.get("regularMarketDayHigh")),
             day_low=info.get("dayLow", info.get("regularMarketDayLow"))
         )
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=404, detail=f"Error fetching stock data: {str(e)}")
 
