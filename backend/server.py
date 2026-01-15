@@ -597,9 +597,11 @@ async def get_portfolio_summary(current_user: dict = Depends(get_current_user)):
     
     for pos in positions:
         try:
-            stock = yf.Ticker(pos["stock_ticker"])
-            info = stock.info
-            current_price = info.get("regularMarketPrice", info.get("currentPrice", pos["average_price"]))
+            info = get_stock_info(pos["stock_ticker"])
+            if info:
+                current_price = info.get("regularMarketPrice", info.get("currentPrice", pos["average_price"]))
+            else:
+                current_price = pos["average_price"]
         except:
             current_price = pos["average_price"]
         
