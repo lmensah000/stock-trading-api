@@ -295,13 +295,24 @@ Format as JSON with keys: meal_name, ingredients (array), instructions, calories
             
             meal_data = json.loads(response_text)
             
+            # Parse calories and protein, extracting numeric values from strings like "580 kcal" or "25g"
+            def extract_number(value):
+                if value is None:
+                    return None
+                if isinstance(value, (int, float)):
+                    return int(value)
+                # Extract first number from string
+                import re
+                match = re.search(r'\d+', str(value))
+                return int(match.group()) if match else None
+            
             meal_plan = MealPlan(
                 user_id=current_user['id'],
                 meal_name=meal_data.get('meal_name', 'Generated Meal'),
                 ingredients=meal_data.get('ingredients', []),
                 instructions=meal_data.get('instructions', ''),
-                calories=meal_data.get('calories'),
-                protein=meal_data.get('protein')
+                calories=extract_number(meal_data.get('calories')),
+                protein=extract_number(meal_data.get('protein'))
             )
             
             doc = meal_plan.model_dump()
