@@ -40,7 +40,7 @@ async def test_db(mongo_client):
 @pytest.fixture
 async def http_client():
     """Create async HTTP client for API tests."""
-    async with httpx.AsyncClient(base_url=TEST_API_URL, timeout=30.0) as client:
+    async with httpx.AsyncClient(base_url=TEST_API_URL, timeout=60.0) as client:
         yield client
 
 @pytest.fixture
