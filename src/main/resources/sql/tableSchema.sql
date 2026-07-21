@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS positions (
     total_quantity  DOUBLE,
     average_price   DECIMAL(19,4),
     unrealized_pnl  DECIMAL(19,4),
+    realized_pnl    DECIMAL(19,4) DEFAULT 0,
 
     CONSTRAINT fk_position_user
         FOREIGN KEY (user_id) REFERENCES users(id)
@@ -161,5 +162,75 @@ CREATE TABLE IF NOT EXISTS financial_statements (
 
     CONSTRAINT fk_fs_stock
         FOREIGN KEY (stock_ticker) REFERENCES stocks(stock_ticker)
+        ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- ============================================================
+--  ORDERS
+-- ============================================================
+CREATE TABLE IF NOT EXISTS orders (
+    id             BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id        BIGINT NOT NULL,
+    stock_ticker   VARCHAR(32) NOT NULL,
+    quantity       DOUBLE,
+    target_price   DOUBLE,
+    order_type     ENUM('MARKET','LIMIT','STOP') NOT NULL,
+    side           ENUM('BUY','SELL') NOT NULL,
+    status         ENUM('NEW','PENDING','PARTIALLY_FILLED','FILLED','CANCELLED','REJECTED','EXPIRED') NOT NULL,
+    created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_order_user
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+
+    CONSTRAINT fk_order_stock
+        FOREIGN KEY (stock_ticker) REFERENCES stocks(stock_ticker)
+        ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- ============================================================
+--  ORDER EXECUTIONS (partial/full fills of an order)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS order_executions (
+    id               BIGINT AUTO_INCREMENT PRIMARY KEY,
+    order_id         BIGINT NOT NULL,
+    filled_quantity  DOUBLE NOT NULL,
+    fill_price       DECIMAL(19,4) NOT NULL,
+    executed_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_execution_order
+        FOREIGN KEY (order_id) REFERENCES orders(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- ============================================================
+--  ACCOUNTS
+-- ============================================================
+CREATE TABLE IF NOT EXISTS accounts (
+    id             BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id        BIGINT NOT NULL UNIQUE,
+    cash_balance   DECIMAL(19,4) NOT NULL DEFAULT 0,
+    buying_power   DECIMAL(19,4) NOT NULL DEFAULT 0,
+
+    CONSTRAINT fk_account_user
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- ============================================================
+--  LEDGER ENTRIES
+-- ============================================================
+CREATE TABLE IF NOT EXISTS ledger_entries (
+    id               BIGINT AUTO_INCREMENT PRIMARY KEY,
+    account_id       BIGINT NOT NULL,
+    type             ENUM('DEPOSIT','WITHDRAWAL','TRADE_SETTLEMENT','FEE','DIVIDEND') NOT NULL,
+    amount           DECIMAL(19,4) NOT NULL,
+    timestamp        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    related_trade_id BIGINT NULL,
+
+    KEY idx_ledger_account (account_id),
+
+    CONSTRAINT fk_ledger_account
+        FOREIGN KEY (account_id) REFERENCES accounts(id)
         ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;

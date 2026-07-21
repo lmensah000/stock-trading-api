@@ -1,10 +1,14 @@
 package com.moneyteam.trading.model;
 
+import com.moneyteam.trading.model.enums.OrderSide;
+import com.moneyteam.trading.model.enums.OrderStatus;
 import com.moneyteam.user.model.User;
 import com.moneyteam.marketdata.model.Stock;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "orders", indexes = {
@@ -26,11 +30,18 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private OrderType orderType; // MARKET, LIMIT, STOP
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "side", nullable = false)
+    private OrderSide side;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private OrderStatus status;
+
     private LocalDateTime createdAt;
 
-    @ManyToOne
-    @JoinColumn(name = "trade_id")
-    private Trade executedTrade;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderExecution> executions = new ArrayList<>();
 
     // ✅ read-only relationships
     @ManyToOne(fetch = FetchType.LAZY)
@@ -38,7 +49,7 @@ public class Order {
     private User users;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    @JoinColumn(name = "stockTicker", referencedColumnName = "stockTicker", insertable = false, updatable = false)
     private Stock stock;
 
     // Getters and setters
@@ -91,6 +102,22 @@ public class Order {
         this.orderType = orderType;
     }
 
+    public OrderSide getSide() {
+        return side;
+    }
+
+    public void setSide(OrderSide side) {
+        this.side = side;
+    }
+
+    public OrderStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(OrderStatus status) {
+        this.status = status;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -99,12 +126,16 @@ public class Order {
         this.createdAt = createdAt;
     }
 
-    public Trade getExecutedTrade() {
-        return executedTrade;
+    public List<OrderExecution> getExecutions() {
+        return executions;
     }
 
-    public void setExecutedTrade(Trade executedTrade) {
-        this.executedTrade = executedTrade;
+    public void setExecutions(List<OrderExecution> executions) {
+        this.executions = executions;
+    }
+
+    public double getFilledQuantity() {
+        return executions.stream().mapToDouble(OrderExecution::getFilledQuantity).sum();
     }
 
     public User getUsers() {

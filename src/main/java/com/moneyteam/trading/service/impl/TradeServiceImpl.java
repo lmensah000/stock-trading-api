@@ -5,7 +5,6 @@ import com.moneyteam.trading.dto.TradeResponseDto;
 import com.moneyteam.trading.mapper.TradeMapper;
 import com.moneyteam.trading.model.Trade;
 import com.moneyteam.trading.model.Position;
-import com.moneyteam.trading.model.OptionTradeDetails;
 import com.moneyteam.user.model.User;
 import com.moneyteam.trading.model.enums.TradeStatus;
 import com.moneyteam.trading.model.enums.OrderSide;
@@ -14,12 +13,12 @@ import com.moneyteam.trading.repository.PositionRepository;
 import com.moneyteam.trading.repository.TradeRepository;
 import com.moneyteam.marketdata.repository.StockTradeRepository;
 import com.moneyteam.trading.repository.OptionsTradeRepository;
+import com.moneyteam.trading.service.AccountService;
+import com.moneyteam.trading.service.PnLCalculator;
 import com.moneyteam.trading.service.TradeService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.CascadeType;
-import javax.persistence.OneToOne;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,19 +36,22 @@ public class TradeServiceImpl implements TradeService {
     private final TradeRepository tradeRepository;
     private final StockTradeRepository stockTradeRepository;
     private final OptionsTradeRepository optionsTradeRepository;
+    private final AccountService accountService;
 
     public TradeServiceImpl(
             UserRepository userRepository,
             PositionRepository positionRepository,
             TradeRepository tradeRepository,
             StockTradeRepository stockTradeRepository,
-            OptionsTradeRepository optionsTradeRepository
+            OptionsTradeRepository optionsTradeRepository,
+            AccountService accountService
     ) {
         this.userRepository = userRepository;
         this.positionRepository = positionRepository;
         this.tradeRepository = tradeRepository;
         this.stockTradeRepository = stockTradeRepository;
         this.optionsTradeRepository = optionsTradeRepository;
+        this.accountService = accountService;
     }
 //    public void executeTrade (Trade trade) {
 //        log.info("Executing trade: ");
@@ -128,12 +130,19 @@ public class TradeServiceImpl implements TradeService {
         trade.setSide(dto.getSide());
         trade.setStatus(TradeStatus.PENDING);
 
-        tradeRepository.save(trade);
+        Trade saved = tradeRepository.save(trade);
+
+        BigDecimal settlementAmount = dto.getPrice().multiply(BigDecimal.valueOf(dto.getQuantity()));
+        if (dto.getSide() == OrderSide.BUY) {
+            accountService.debitForBuy(dto.getUserId(), settlementAmount, saved.getId());
+        } else if (dto.getSide() == OrderSide.SELL) {
+            accountService.creditForSell(dto.getUserId(), settlementAmount, saved.getId());
+        }
 
     // Update the position based on the trade
-    updatePosition(position, trade);
+    updatePosition(position, saved);
 
-    return TradeMapper.toDto(trade);
+    return TradeMapper.toDto(saved);
 }
 
 
@@ -164,14 +173,9 @@ public class TradeServiceImpl implements TradeService {
         tradeRepository.save(trade);
     }
 
-    @OneToOne(mappedBy = "trade", cascade = CascadeType.ALL)
-    private OptionTradeDetails optionDetails;
-
     //helper function
     @Override
     public void updatePosition(Position position, Trade trade) {
-//        final StockTradeRequest tradeRequest;
-//        TradeType tradeType = tradeRequest.getTradeType();
     double qty = trade.getQuantity();
     BigDecimal price = trade.getPrice();
 
@@ -183,14 +187,22 @@ public class TradeServiceImpl implements TradeService {
 
         BigDecimal newAvg = (oldAvg.multiply(BigDecimal.valueOf(oldQty))
                 .add(price.multiply(BigDecimal.valueOf(qty))))
-                .divide(BigDecimal.valueOf(newQty), BigDecimal.ROUND_HALF_UP);
+                .divide(BigDecimal.valueOf(newQty), 4, java.math.RoundingMode.HALF_UP);
 
         position.setTotalQuantity(newQty);
         position.setAveragePrice(newAvg);
     } else if (trade.getSide() == OrderSide.SELL) {
-        double newQty = position.getTotalQuantity() - qty;
-        position.setTotalQuantity(newQty);
-        // You might choose not to change averagePrice on SELL
+        double heldQty = position.getTotalQuantity();
+        if (qty > heldQty) {
+            throw new IllegalArgumentException(
+                    "Cannot sell " + qty + " shares of " + position.getStockTicker() +
+                            "; position only holds " + heldQty);
+        }
+
+        BigDecimal realized = PnLCalculator.realizedPnL(position.getAveragePrice(), price, qty);
+        position.setRealizedPnL(position.getRealizedPnL().add(realized));
+        position.setTotalQuantity(heldQty - qty);
+        // averagePrice on the remaining shares is unchanged by a sell
     }
 
     positionRepository.save(position);
