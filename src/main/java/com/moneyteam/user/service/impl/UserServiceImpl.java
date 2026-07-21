@@ -3,6 +3,7 @@ package com.moneyteam.user.service.impl;
 import com.moneyteam.user.model.User;
 import com.moneyteam.user.repository.UserRepository;
 import com.moneyteam.user.service.UserService;
+import com.moneyteam.trading.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,12 +17,15 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AccountService accountService;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository,
-                           PasswordEncoder passwordEncoder) {
+                           PasswordEncoder passwordEncoder,
+                           AccountService accountService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.accountService = accountService;
     }
 
     @Override
@@ -41,7 +45,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public void registerUser(User users) {
         users.setPassWord(passwordEncoder.encode(users.getPassWord()));
-        userRepository.save(users);
+        User saved = userRepository.save(users);
+        accountService.createAccountForUser(saved.getId());
     }
 
     //update users
@@ -71,8 +76,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public User getUserById(Long userId) {
-        return null;
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new java.util.NoSuchElementException("User not found: " + userId));
     }
     // Implement other methods for managing users-specific data
 }
