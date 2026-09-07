@@ -11,9 +11,9 @@ public class OrderMapper {
 
     private OrderMapper() {}
 
+    /** The caller sets userId from the authenticated principal; it is not in the DTO. */
     public static Order toEntity(OrderRequestDto dto) {
         Order order = new Order();
-        order.setUserId(dto.getUserId());
         order.setStockTicker(dto.getStockTicker());
         order.setQuantity(dto.getQuantity());
         order.setTargetPrice(dto.getTargetPrice());

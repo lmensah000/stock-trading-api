@@ -1,5 +1,6 @@
 package com.moneyteam.trading.controller;
 
+import com.moneyteam.common.security.CurrentUserService;
 import com.moneyteam.trading.dto.AccountResponseDto;
 import com.moneyteam.trading.model.Account;
 import com.moneyteam.trading.service.AccountService;
@@ -9,32 +10,42 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.constraints.Positive;
 import java.math.BigDecimal;
 
+/**
+ * Balance and cash movement for the authenticated caller's own account.
+ *
+ * These routes previously took the account's user id from the path, which let
+ * any authenticated caller deposit to or withdraw from another user's account.
+ */
 @RestController
 @RequestMapping("/api/accounts")
 public class AccountController {
 
     private final AccountService accountService;
+    private final CurrentUserService currentUserService;
 
-    public AccountController(AccountService accountService) {
+    public AccountController(AccountService accountService, CurrentUserService currentUserService) {
         this.accountService = accountService;
+        this.currentUserService = currentUserService;
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<AccountResponseDto> getAccount(@PathVariable Long userId) {
-        return accountService.getAccount(userId)
+    @GetMapping("/me")
+    public ResponseEntity<AccountResponseDto> getMyAccount() {
+        return accountService.getAccount(currentUserService.getCurrentUserId())
                 .map(AccountController::toDto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/{userId}/deposit")
-    public ResponseEntity<AccountResponseDto> deposit(@PathVariable Long userId, @RequestParam @Positive BigDecimal amount) {
-        return ResponseEntity.ok(toDto(accountService.deposit(userId, amount)));
+    @PostMapping("/me/deposit")
+    public ResponseEntity<AccountResponseDto> deposit(@RequestParam @Positive BigDecimal amount) {
+        return ResponseEntity.ok(
+                toDto(accountService.deposit(currentUserService.getCurrentUserId(), amount)));
     }
 
-    @PostMapping("/{userId}/withdraw")
-    public ResponseEntity<AccountResponseDto> withdraw(@PathVariable Long userId, @RequestParam @Positive BigDecimal amount) {
-        return ResponseEntity.ok(toDto(accountService.withdraw(userId, amount)));
+    @PostMapping("/me/withdraw")
+    public ResponseEntity<AccountResponseDto> withdraw(@RequestParam @Positive BigDecimal amount) {
+        return ResponseEntity.ok(
+                toDto(accountService.withdraw(currentUserService.getCurrentUserId(), amount)));
     }
 
     private static AccountResponseDto toDto(Account account) {

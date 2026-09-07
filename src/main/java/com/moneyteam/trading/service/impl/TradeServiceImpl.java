@@ -57,18 +57,27 @@ public class TradeServiceImpl implements TradeService {
 //        log.info("Executing trade: ");
 //
     //    private final StockTradeRepository stockTradeRepository;
-    @Override
-    @Transactional
-    public TradeResponseDto create(TradeRequestDto request) {
-        Trade trade = TradeMapper.toEntity(request);
-        trade.setStatus(TradeStatus.PENDING);
-        Trade saved = tradeRepository.save(TradeMapper.toEntity(request));
-        return TradeMapper.toDto(saved);
+    /**
+     * Loads a trade only if it belongs to the acting user. Reporting a
+     * not-found for someone else's trade avoids confirming that the id exists.
+     */
+    private Trade requireOwnedTrade(Long userId, Long tradeId) {
+        return tradeRepository.findByIdAndUserTradeId(tradeId, userId)
+                .orElseThrow(() -> new NoSuchElementException("Trade not found: " + tradeId));
     }
 
     @Override
-    public Optional<TradeResponseDto> getById(Long id) {
-        return tradeRepository.findById(id).map(TradeMapper::toDto);
+    @Transactional
+    public TradeResponseDto create(Long userId, TradeRequestDto request) {
+        Trade trade = TradeMapper.toEntity(request);
+        trade.setUserTradeId(userId);
+        trade.setStatus(TradeStatus.PENDING);
+        return TradeMapper.toDto(tradeRepository.save(trade));
+    }
+
+    @Override
+    public Optional<TradeResponseDto> getById(Long userId, Long id) {
+        return tradeRepository.findByIdAndUserTradeId(id, userId).map(TradeMapper::toDto);
     }
 
     @Override
@@ -78,50 +87,50 @@ public class TradeServiceImpl implements TradeService {
     }
 
     @Override
-    public List<TradeResponseDto> listBySide(OrderSide side) {
-        return tradeRepository.findBySide(side)
+    public List<TradeResponseDto> listBySide(Long userId, OrderSide side) {
+        return tradeRepository.findByUserTradeIdAndSide(userId, side)
                 .stream().map(TradeMapper::toDto).toList();
     }
 
     @Override
-    public List<TradeResponseDto> listByStatus(TradeStatus status) {
-        return tradeRepository.findByStatus(status)
+    public List<TradeResponseDto> listByStatus(Long userId, TradeStatus status) {
+        return tradeRepository.findByUserTradeIdAndStatus(userId, status)
                 .stream().map(TradeMapper::toDto).toList();
     }
 
     @Override
-    public List<TradeResponseDto> listByStockTicker(String stockTicker) {
-        return tradeRepository.findByStockTickerIgnoreCase(stockTicker)
+    public List<TradeResponseDto> listByStockTicker(Long userId, String stockTicker) {
+        return tradeRepository.findByUserTradeIdAndStockTickerIgnoreCase(userId, stockTicker)
                 .stream().map(TradeMapper::toDto).toList();
     }
 
     @Override
-    public List<TradeResponseDto> listBetween(LocalDateTime start, LocalDateTime end) {
-        return tradeRepository.findByExecutionDateBetween(start, end)
+    public List<TradeResponseDto> listBetween(Long userId, LocalDateTime start, LocalDateTime end) {
+        return tradeRepository.findByUserTradeIdAndExecutionDateBetween(userId, start, end)
                 .stream().map(TradeMapper::toDto).toList();
     }
 
     @Override
     @Transactional
-    public TradeResponseDto updateStatus(Long id, TradeStatus newStatus) {
-        Trade trade = tradeRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Trade not found: " + id));
+    public TradeResponseDto updateStatus(Long userId, Long id, TradeStatus newStatus) {
+        Trade trade = requireOwnedTrade(userId, id);
         trade.setStatus(newStatus);
         return TradeMapper.toDto(tradeRepository.save(trade));
     }
 
     @Override
-    public TradeResponseDto placeTrade(TradeRequestDto dto) {
+    public TradeResponseDto placeTrade(Long userId, TradeRequestDto dto) {
 
-    User user = userRepository.findById(dto.getUserId())
-            .orElseThrow(() -> new NoSuchElementException("User not found"));
-    //Fetch or create position
-    Position position = positionRepository
-            .findByUsersIdAndStockTicker(dto.getUserId(), dto.getStockTicker())
-            .orElseGet(() -> createNewPosition(user, dto.getStockTicker()));
-    // Build Trade
-    Trade trade = new Trade();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
+        //Fetch or create position
+        Position position = positionRepository
+                .findByUsersIdAndStockTicker(userId, dto.getStockTicker())
+                .orElseGet(() -> createNewPosition(user, dto.getStockTicker()));
+
+        Trade trade = new Trade();
         trade.setUsers(user);
+        trade.setUserTradeId(userId);
         trade.setPosition(position);
         trade.setStockTicker(dto.getStockTicker());
         trade.setQuantity(dto.getQuantity());
@@ -134,41 +143,43 @@ public class TradeServiceImpl implements TradeService {
 
         BigDecimal settlementAmount = dto.getPrice().multiply(BigDecimal.valueOf(dto.getQuantity()));
         if (dto.getSide() == OrderSide.BUY) {
-            accountService.debitForBuy(dto.getUserId(), settlementAmount, saved.getId());
+            accountService.debitForBuy(userId, settlementAmount, saved.getId());
         } else if (dto.getSide() == OrderSide.SELL) {
-            accountService.creditForSell(dto.getUserId(), settlementAmount, saved.getId());
+            accountService.creditForSell(userId, settlementAmount, saved.getId());
         }
 
-    // Update the position based on the trade
-    updatePosition(position, saved);
+        // Update the position based on the trade
+        updatePosition(position, saved);
 
-    return TradeMapper.toDto(saved);
-}
+        return TradeMapper.toDto(saved);
+    }
 
 
     private Position createNewPosition(User user, String stockTicker) {
-    Position position = new Position();
-    position.setUsers(user);
-    position.setStockTicker(stockTicker);
-    position.setAveragePrice(BigDecimal.ZERO);
-    position.setTotalQuantity(0.0);
-    return positionRepository.save(position);
-}
+        Position position = new Position();
+        position.setUsers(user);
+        // users is a read-only mapping, so the scalar FK must be set explicitly
+        // or the NOT NULL user_id column is written as null.
+        position.setUserRefId(user.getId());
+        position.setStockTicker(stockTicker);
+        position.setAveragePrice(BigDecimal.ZERO);
+        position.setTotalQuantity(0.0);
+        return positionRepository.save(position);
+    }
 
     @Override
     public List<TradeResponseDto> getTradeHistory(Long userId) {
-    return List.of();
-}
+        return listByUser(userId);
+    }
 
     @Override
-    public List<?> getUserPositions(Long userId) {
-    return List.of();
-}
+    public List<Position> getUserPositions(Long userId) {
+        return positionRepository.findByUserRefId(userId);
+    }
 
     @Override
-    public void cancelTrade(Long tradeId) {
-        Trade trade = tradeRepository.findById(tradeId)
-                .orElseThrow(() -> new NoSuchElementException("Trade not found: " + tradeId));
+    public void cancelTrade(Long userId, Long tradeId) {
+        Trade trade = requireOwnedTrade(userId, tradeId);
         trade.setStatus(TradeStatus.CANCELLED);
         tradeRepository.save(trade);
     }

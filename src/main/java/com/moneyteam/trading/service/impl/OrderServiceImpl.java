@@ -59,16 +59,27 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(newStatus);
     }
 
+    /**
+     * Loads an order only if it belongs to the acting user. Another user's
+     * order is reported as not found rather than forbidden, so the endpoint
+     * cannot be used to probe which order ids exist.
+     */
+    private Order requireOwnedOrder(Long userId, Long orderId) {
+        return orderRepository.findByIdAndUserId(orderId, userId)
+                .orElseThrow(() -> new NoSuchElementException("Order not found: " + orderId));
+    }
+
     @Override
-    public OrderResponseDto placeOrder(OrderRequestDto request) {
+    public OrderResponseDto placeOrder(Long userId, OrderRequestDto request) {
         Order order = OrderMapper.toEntity(request);
+        order.setUserId(userId);
         transition(order, OrderStatus.PENDING);
         return OrderMapper.toDto(orderRepository.save(order));
     }
 
     @Override
-    public Optional<OrderResponseDto> getById(Long id) {
-        return orderRepository.findById(id).map(OrderMapper::toDto);
+    public Optional<OrderResponseDto> getById(Long userId, Long id) {
+        return orderRepository.findByIdAndUserId(id, userId).map(OrderMapper::toDto);
     }
 
     @Override
@@ -77,9 +88,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderResponseDto fill(Long orderId, double filledQuantity, BigDecimal fillPrice) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new NoSuchElementException("Order not found: " + orderId));
+    public OrderResponseDto fill(Long userId, Long orderId, double filledQuantity, BigDecimal fillPrice) {
+        Order order = requireOwnedOrder(userId, orderId);
 
         double alreadyFilled = order.getFilledQuantity();
         double remaining = order.getQuantity() - alreadyFilled;
@@ -100,30 +110,29 @@ public class OrderServiceImpl implements OrderService {
         Order saved = orderRepository.save(order);
 
         TradeRequestDto tradeRequest = new TradeRequestDto();
-        tradeRequest.setUserId(order.getUserId());
         tradeRequest.setStockTicker(order.getStockTicker());
         tradeRequest.setQuantity(filledQuantity);
         tradeRequest.setPrice(fillPrice);
         tradeRequest.setExecutionDate(LocalDateTime.now());
         tradeRequest.setSide(order.getSide());
         tradeRequest.setStatus(TradeStatus.EXECUTED);
-        tradeService.placeTrade(tradeRequest);
+        // Identity comes from the order's owner, which was set from the
+        // authenticated principal when the order was placed.
+        tradeService.placeTrade(order.getUserId(), tradeRequest);
 
         return OrderMapper.toDto(saved);
     }
 
     @Override
-    public OrderResponseDto cancel(Long orderId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new NoSuchElementException("Order not found: " + orderId));
+    public OrderResponseDto cancel(Long userId, Long orderId) {
+        Order order = requireOwnedOrder(userId, orderId);
         transition(order, OrderStatus.CANCELLED);
         return OrderMapper.toDto(orderRepository.save(order));
     }
 
     @Override
-    public OrderResponseDto reject(Long orderId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new NoSuchElementException("Order not found: " + orderId));
+    public OrderResponseDto reject(Long userId, Long orderId) {
+        Order order = requireOwnedOrder(userId, orderId);
         transition(order, OrderStatus.REJECTED);
         return OrderMapper.toDto(orderRepository.save(order));
     }
