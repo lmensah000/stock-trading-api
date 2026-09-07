@@ -11,30 +11,35 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Every operation that touches a user's data takes the acting user's id as an
+ * explicit parameter. Callers must source it from the authenticated principal,
+ * never from client-supplied request data.
+ */
 public interface TradeService {
-    TradeResponseDto create(TradeRequestDto request);
+    TradeResponseDto create(Long userId, TradeRequestDto request);
 
-    Optional<TradeResponseDto> getById(Long id);
+    Optional<TradeResponseDto> getById(Long userId, Long id);
 
     List<TradeResponseDto> listByUser(Long userId);
 
-    List<TradeResponseDto> listBySide(OrderSide side);
+    List<TradeResponseDto> listBySide(Long userId, OrderSide side);
 
-    List<TradeResponseDto> listByStatus(TradeStatus status);
+    List<TradeResponseDto> listByStatus(Long userId, TradeStatus status);
 
-    List<TradeResponseDto> listByStockTicker(String stockTicker);
+    List<TradeResponseDto> listByStockTicker(Long userId, String stockTicker);
 
-    List<TradeResponseDto> listBetween(LocalDateTime start, LocalDateTime end);
+    List<TradeResponseDto> listBetween(Long userId, LocalDateTime start, LocalDateTime end);
 
-    TradeResponseDto updateStatus(Long id, TradeStatus newStatus);
+    TradeResponseDto updateStatus(Long userId, Long id, TradeStatus newStatus);
 
-    TradeResponseDto placeTrade(TradeRequestDto dto);
+    TradeResponseDto placeTrade(Long userId, TradeRequestDto dto);
 
     List<TradeResponseDto> getTradeHistory(Long userId);
 
-    List<?> getUserPositions(Long userId);
+    List<Position> getUserPositions(Long userId);
 
     void updatePosition(Position position, Trade trade);
 
-    void cancelTrade(Long tradeId);
+    void cancelTrade(Long userId, Long tradeId);
 }

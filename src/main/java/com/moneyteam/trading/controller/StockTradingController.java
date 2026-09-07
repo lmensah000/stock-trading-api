@@ -1,5 +1,6 @@
 package com.moneyteam.trading.controller;
 
+import com.moneyteam.common.security.CurrentUserService;
 import com.moneyteam.trading.model.StockTradeRequest;
 import com.moneyteam.trading.model.OptionsTradeRequest;
 import com.moneyteam.trading.model.Options;
@@ -30,6 +31,9 @@ public class StockTradingController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private CurrentUserService currentUserService;
 
     private static final Logger log = LoggerFactory.getLogger(StockTradingController.class);
 
@@ -66,10 +70,6 @@ public class StockTradingController {
     @PostMapping("/trade/options")
     public ResponseEntity<?> executeOptionsTrade(@RequestBody OptionsTradeRequest tradeRequest) {
         // Validate the trade request
-        if (tradeRequest.getUserId() == null) {
-            return ResponseEntity.badRequest().body("User ID is required.");
-        }
-
         if (tradeRequest.getOptions() == null) {
             return ResponseEntity.badRequest().body("Options details are required.");
         }
@@ -78,8 +78,8 @@ public class StockTradingController {
             return ResponseEntity.badRequest().body("Trading strategy is required.");
         }
 
-        // Retrieve users, options, and strategy information from the tradeRequest
-        User users = userService.getUserById(tradeRequest.getUserId());
+        // The trade is always placed for the authenticated caller.
+        User users = currentUserService.getCurrentUser();
         Options options = tradeRequest.getOptions();
         StockStrategies strategy = tradeRequest.getStrategy();
 

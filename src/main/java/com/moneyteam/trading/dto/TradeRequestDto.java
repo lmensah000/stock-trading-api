@@ -21,7 +21,8 @@ public class TradeRequestDto {
     @Positive private Double quantity;
     @NotNull @DecimalMin(value = "0.0", inclusive =false) private BigDecimal price;
     @NotNull private LocalDateTime executionDate;
-    @NotNull private Long userTradeId;
+    // No userId here on purpose: the acting user comes from the authenticated
+    // principal (CurrentUserService), never from the request body.
 
     public TradeStatus getStatus() {
         return status;
@@ -71,13 +72,5 @@ public class TradeRequestDto {
 
     public void setExecutionDate(LocalDateTime executionDate) {
         this.executionDate = executionDate;
-    }
-
-    public Long getUserId() {
-        return userTradeId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userTradeId = userId;
     }
 }

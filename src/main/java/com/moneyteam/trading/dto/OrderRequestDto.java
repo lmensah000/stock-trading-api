@@ -9,8 +9,8 @@ import javax.validation.constraints.Positive;
 
 public class OrderRequestDto {
 
-    @NotNull
-    private Long userId;
+    // No userId here on purpose: the acting user comes from the authenticated
+    // principal (CurrentUserService), never from the request body.
 
     @NotBlank
     private String stockTicker;
@@ -26,14 +26,6 @@ public class OrderRequestDto {
 
     @NotNull
     private OrderSide side;
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
 
     public String getStockTicker() {
         return stockTicker;

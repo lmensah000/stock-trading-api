@@ -6,19 +6,11 @@ public class OptionsTradeRequest {
     private String stockTicker;
     private int quantity;
     private String tradeType; // "BUY" or "SELL"
-    private Long userTradeId;
+
+    // No userId: the acting user comes from the authenticated principal.
 
     private Options options;
     private StockStrategies strategy;
-
-
-    public Long getUserId() {
-        return userTradeId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userTradeId = userId;
-    }
 
     public String getTradeType() {
         return tradeType;
@@ -46,6 +38,12 @@ public class OptionsTradeRequest {
 
     public StockStrategies getStrategy() {
         return strategy;
+    }
+
+    // Without this setter Jackson cannot populate strategy, so every request
+    // arrived with it null and was rejected by the controller's validation.
+    public void setStrategy(StockStrategies strategy) {
+        this.strategy = strategy;
     }
 
     public int getQuantity() {
