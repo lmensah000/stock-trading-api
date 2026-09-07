@@ -40,64 +40,53 @@ public class StockTradingController {
         // Retrieve users, stock, and strategy information from the tradeRequest
         // Call the appropriate method in the stockTradingService to execute the trade
         // Return the response to the client
-        try {
-            // Validate the trade request
-            if (tradeRequest.getStockTicker() == null || tradeRequest.getStockTicker().isEmpty()) {
-                return ResponseEntity.badRequest().body("Stock ticker is required.");
-            }
+        // Validate the trade request
+        if (tradeRequest.getStockTicker() == null || tradeRequest.getStockTicker().isEmpty()) {
+            return ResponseEntity.badRequest().body("Stock ticker is required.");
+        }
 
-            if (tradeRequest.getQuantity() <= 0) {
-                return ResponseEntity.badRequest().body("Quantity must be greater than zero.");
-            }
+        if (tradeRequest.getQuantity() <= 0) {
+            return ResponseEntity.badRequest().body("Quantity must be greater than zero.");
+        }
 
-            if (tradeRequest.getTradeType() != OrderSide.BUY && tradeRequest.getTradeType() != OrderSide.SELL) {
-                return ResponseEntity.badRequest().body("Trade type must be 'BUY' or 'SELL'.");
-            }
+        if (tradeRequest.getTradeType() == null) {
+            return ResponseEntity.badRequest().body("Trade side is required.");
+        }
+
         PurchaseTrade stockPurchaseTrade = new PurchaseTrade();
 
         // Call the service to execute the trade
         stockTradingService.executeTrade(tradeRequest, stockPurchaseTrade);
 
-        // Return success response
+        // Failures propagate to GlobalExceptionHandler rather than being caught and
+        // echoed back with raw exception text.
         return ResponseEntity.ok("Trade executed successfully");
-
-        } catch (Exception e) {
-            // Handle exceptions and return error response
-            return ResponseEntity.status(500).body("An error occurred while executing the trade: " + e.getMessage());
-        }
-
     }
 
     @PostMapping("/trade/options")
     public ResponseEntity<?> executeOptionsTrade(@RequestBody OptionsTradeRequest tradeRequest) {
-        try {
-            // Validate the trade request
-            if (tradeRequest.getUserId() == null) {
-                return ResponseEntity.badRequest().body("User ID is required.");
-            }
-
-            if (tradeRequest.getOptions() == null) {
-                return ResponseEntity.badRequest().body("Options details are required.");
-            }
-
-            if (tradeRequest.getStrategy() == null) {
-                return ResponseEntity.badRequest().body("Trading strategy is required.");
-            }
-
-            // Retrieve users, options, and strategy information from the tradeRequest
-            User users = userService.getUserById(tradeRequest.getUserId());
-            Options options = tradeRequest.getOptions();
-            StockStrategies strategy = tradeRequest.getStrategy();
-
-            // Call the service to execute the options trade
-            stockTradingService.executeOptionsTrade(users, options, strategy);
-
-            // Return success response
-            return ResponseEntity.ok("Options trade executed successfully.");
-        } catch (Exception e) {
-            // Handle exceptions and return error response
-            return ResponseEntity.status(500).body("An error occurred while executing the options trade: " + e.getMessage());
+        // Validate the trade request
+        if (tradeRequest.getUserId() == null) {
+            return ResponseEntity.badRequest().body("User ID is required.");
         }
+
+        if (tradeRequest.getOptions() == null) {
+            return ResponseEntity.badRequest().body("Options details are required.");
+        }
+
+        if (tradeRequest.getStrategy() == null) {
+            return ResponseEntity.badRequest().body("Trading strategy is required.");
+        }
+
+        // Retrieve users, options, and strategy information from the tradeRequest
+        User users = userService.getUserById(tradeRequest.getUserId());
+        Options options = tradeRequest.getOptions();
+        StockStrategies strategy = tradeRequest.getStrategy();
+
+        // Call the service to execute the options trade
+        stockTradingService.executeOptionsTrade(users, options, strategy);
+
+        return ResponseEntity.ok("Options trade executed successfully.");
     }
 
 

@@ -30,20 +30,15 @@ public class UserController {
 
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
+    // Authentication failures propagate to GlobalExceptionHandler, which maps them
+    // to 401/423 without echoing internal exception text back to the caller.
     @PostMapping("/login")
     public ResponseEntity<?> authenticate(@Valid @RequestBody LoginRequest loginRequest) {
-        // Retrieve the username and password from the loginRequest
-        try {
-            User authenticatedUser = userService.authenticateUser(
-                    loginRequest.getUserName(),
-                    loginRequest.getPassWord()
-                    );
-            log.info("✅ Successful login for users: {}", authenticatedUser.getUserName());
-            return ResponseEntity.ok("Login successful for users: " + authenticatedUser.getUserName());
-        } catch (Exception e) {
-            log.warn("❌ Login failed for username: {} - {}", loginRequest.getUserName(), e.getMessage());
-            return ResponseEntity.status(401).body("Authentication failed: " + e.getMessage());
-        }
+        User authenticatedUser = userService.authenticateUser(
+                loginRequest.getUserName(),
+                loginRequest.getPassWord());
+        log.info("✅ Successful login for users: {}", authenticatedUser.getUserName());
+        return ResponseEntity.ok("Login successful for users: " + authenticatedUser.getUserName());
     }
 // public String getLogin(String email, String passWord){
 //        return login;
@@ -57,22 +52,14 @@ public class UserController {
     public ResponseEntity<?> registerUser(@Valid @RequestBody UserRegistrationRequest registrationRequest) {
         log.info("User registration attempt for username: {}", registrationRequest.getUserName());
 
-        try {
-                User newUser = new User();
-                newUser.setUserName(registrationRequest.getUserName());
-                newUser.setPassWord(registrationRequest.getPassWord());
-                newUser.setEmail(registrationRequest.getEmail());
-                //newUser.setCreatedAt(registrationRequest.getCreatedAt());
+        User newUser = new User();
+        newUser.setUserName(registrationRequest.getUserName());
+        newUser.setPassWord(registrationRequest.getPassWord());
+        newUser.setEmail(registrationRequest.getEmail());
 
-                userService.registerUser(newUser);
-                log.info("✅ Successfully registered new users: {}", newUser.getUserName());
-                return ResponseEntity.ok("User successfully registered.");// Retrieve users details from the registrationRequest
-            } catch (Exception e) {
-                log.error("❌ Registration failed for username: {} - {}", registrationRequest.getUserName(), e.getMessage());
-                return ResponseEntity.status(500).body("Registration failed: " + e.getMessage());
-            }
-        // Call the registerUser method in the userService to register the users
-        // Return the registration result to the client
+        userService.registerUser(newUser);
+        log.info("✅ Successfully registered new users: {}", newUser.getUserName());
+        return ResponseEntity.ok("User successfully registered.");
     }
 
 //    public ResponseEntity<?> updateUser(@Valid @RequestBody UserRegistrationRequest registrationRequest) {

@@ -3,6 +3,7 @@ package com.moneyteam.user.model;
 import com.moneyteam.trading.model.Trade;
 import com.moneyteam.trading.model.Position;
 import com.moneyteam.watchlist.model.Watchlist;
+import com.moneyteam.user.model.enums.Role;
 
 import javax.persistence.*;
 import java.sql.Time;
@@ -28,6 +29,10 @@ public class User {
 
     @Column(unique = true)
     private String email;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private Role role = Role.USER;
 
     @OneToMany(mappedBy = "users", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Trade> trades;
@@ -100,6 +105,14 @@ public class User {
         this.id = id;
     }
 
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
 //    public String getPlaceOrder() {
 //        return placeOrder;
 //    }
@@ -127,14 +140,16 @@ public class User {
         this.email= email;
     }
 
+    // passWord is deliberately omitted: toString() output reaches logs, and the
+    // stored value is a credential hash that must never be logged.
     @Override
     public String toString() {
         return "User{" +
                 "id=" + id +
-                ", userName" + userName + '\'' +
-                ", passWord" + passWord + '\'' +
-                ", email" + email + '\'' +
-                ", createdAt" + createdAt + '\'' +
+                ", userName='" + userName + '\'' +
+                ", email='" + email + '\'' +
+                ", role=" + role +
+                ", createdAt=" + createdAt +
                 "}";
     }
 }

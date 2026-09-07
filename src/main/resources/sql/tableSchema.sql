@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
     user_name    VARCHAR(100) NOT NULL UNIQUE,
     pass_word    VARCHAR(255) NOT NULL,
     email        VARCHAR(255) UNIQUE,
+    role         ENUM('USER','ADMIN') NOT NULL DEFAULT 'USER',
     created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 

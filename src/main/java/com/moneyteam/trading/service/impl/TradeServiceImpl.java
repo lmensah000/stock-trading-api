@@ -114,7 +114,7 @@ public class TradeServiceImpl implements TradeService {
     public TradeResponseDto placeTrade(TradeRequestDto dto) {
 
     User user = userRepository.findById(dto.getUserId())
-            .orElseThrow(() -> new RuntimeException("User not found"));
+            .orElseThrow(() -> new NoSuchElementException("User not found"));
     //Fetch or create position
     Position position = positionRepository
             .findByUsersIdAndStockTicker(dto.getUserId(), dto.getStockTicker())
