@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.NoSuchElementException;
+
 @Service
 @Transactional
 public class StockTradingServiceImpl implements StockTradingService {
@@ -58,7 +60,7 @@ public class StockTradingServiceImpl implements StockTradingService {
 //    }
     public Trade executeTrade(Long userId, Trade trade) {
         User users = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
 
         trade.setUsers(users);
         trade.setStatus(TradeStatus.EXECUTED);
@@ -69,7 +71,7 @@ public class StockTradingServiceImpl implements StockTradingService {
     @Override
     public Trade cancelTrade(Long tradeId) {
         Trade trade = tradeRepository.findById(tradeId)
-                .orElseThrow(() -> new RuntimeException("Trade not found"));
+                .orElseThrow(() -> new NoSuchElementException("Trade not found"));
 
         trade.setStatus(TradeStatus.CANCELLED);
         return tradeRepository.save(trade);

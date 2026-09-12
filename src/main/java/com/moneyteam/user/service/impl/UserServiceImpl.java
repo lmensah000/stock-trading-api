@@ -1,13 +1,19 @@
 package com.moneyteam.user.service.impl;
 
+import com.moneyteam.common.security.LoginAttemptService;
 import com.moneyteam.user.model.User;
+import com.moneyteam.user.model.enums.Role;
 import com.moneyteam.user.repository.UserRepository;
 import com.moneyteam.user.service.UserService;
+import com.moneyteam.trading.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -16,39 +22,56 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AccountService accountService;
+    private final LoginAttemptService loginAttemptService;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository,
-                           PasswordEncoder passwordEncoder) {
+                           PasswordEncoder passwordEncoder,
+                           AccountService accountService,
+                           LoginAttemptService loginAttemptService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.accountService = accountService;
+        this.loginAttemptService = loginAttemptService;
     }
 
     @Override
     @Transactional(readOnly = true)
     public User authenticateUser(String userName, String rawPassword) {
-//find by users then fill in users and password?
-        User users = userRepository.findByUserName(userName)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        if (!passwordEncoder.matches(rawPassword, users.getPassWord())) {
-            throw new RuntimeException("Incorrect password");
+        if (loginAttemptService.isLocked(userName)) {
+            throw new LockedException("Account temporarily locked after too many failed login attempts. Try again in "
+                    + loginAttemptService.getLockDuration().toMinutes() + " minutes.");
         }
 
-        return users;
+        Optional<User> found = userRepository.findByUserName(userName);
+
+        // Deliberately identical failure for "no such user" and "wrong password":
+        // distinguishing them lets an attacker enumerate valid usernames.
+        if (found.isEmpty() || !passwordEncoder.matches(rawPassword, found.get().getPassWord())) {
+            loginAttemptService.recordFailure(userName);
+            throw new BadCredentialsException("Invalid username or password");
+        }
+
+        loginAttemptService.recordSuccess(userName);
+        return found.get();
     }
 
     @Override
     public void registerUser(User users) {
         users.setPassWord(passwordEncoder.encode(users.getPassWord()));
-        userRepository.save(users);
+        if (users.getRole() == null) {
+            users.setRole(Role.USER);
+        }
+        User saved = userRepository.save(users);
+        accountService.createAccountForUser(saved.getId());
     }
 
     //update users
     @Override
     public void updateUser(Long userId, User newUser) {
         User existingUser = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
 
         existingUser.setUserName(newUser.getUserName());;
         existingUser.setPassWord(newUser.getPassWord());//
@@ -71,8 +94,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public User getUserById(Long userId) {
-        return null;
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new java.util.NoSuchElementException("User not found: " + userId));
     }
     // Implement other methods for managing users-specific data
 }

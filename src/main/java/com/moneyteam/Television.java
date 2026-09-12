@@ -11,7 +11,6 @@ import java.io.*;
 public class Television {
     public static void main(String[] args) {
         SpringApplication.run(Television.class, args);
-        System.out.println("DB USER: " + System.getenv("DB_USER"));
     }
 }
 //

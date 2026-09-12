@@ -1,5 +1,6 @@
 package com.moneyteam.trading.controller;
 
+import com.moneyteam.common.security.CurrentUserService;
 import com.moneyteam.trading.dto.TradeRequestDto;
 import com.moneyteam.trading.dto.TradeResponseDto;
 import com.moneyteam.trading.model.enums.TradeStatus;
@@ -28,17 +29,20 @@ import java.util.List;
 public class TradeController {
 
     private final TradeService tradeService;
+    private final CurrentUserService currentUserService;
 
     @Autowired
-    public TradeController(TradeService tradeService)
-    { this.tradeService = tradeService; }
+    public TradeController(TradeService tradeService, CurrentUserService currentUserService) {
+        this.tradeService = tradeService;
+        this.currentUserService = currentUserService;
+    }
 
     private static final Logger log = LoggerFactory.getLogger(TradeController.class);
 
     @PostMapping("/create")
     public ResponseEntity<TradeResponseDto> create(@Valid @RequestBody TradeRequestDto dto) {
         log.info("Received trade creation request for stockTicker: {}", dto.getStockTicker());
-        TradeResponseDto response = tradeService.create(dto);
+        TradeResponseDto response = tradeService.create(currentUserService.getCurrentUserId(), dto);
         log.info("Trade successfully created: {}", response);
         return ResponseEntity.ok(response);
     }
@@ -46,37 +50,42 @@ public class TradeController {
     @GetMapping("/{id}")
     public ResponseEntity<TradeResponseDto> getById(@PathVariable Long id) {
         log.info("Fetching trade by ID: {}", id);
-        return tradeService.getById(id)
+        return tradeService.getById(currentUserService.getCurrentUserId(), id)
                 .map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
+    /**
+     * Searches the caller's own trades. The user is never a query parameter -
+     * results are always scoped to the authenticated principal.
+     */
     @GetMapping
     public ResponseEntity<?> search(
-            @RequestParam(required = false) Long userTradeId,
             @RequestParam(required = false) OrderSide side,
             @RequestParam(required = false) String stockTicker,
             @RequestParam(required = false) TradeStatus status,
             @RequestParam(required = false) LocalDateTime start,
             @RequestParam(required = false) LocalDateTime end) {
 
-        log.info("Search request - userId={}, side={}, stockTicker={}, status={}, start={}, end={}",
-                userTradeId, side, stockTicker, status, start, end);
+        Long userId = currentUserService.getCurrentUserId();
+        log.info("Search request - side={}, stockTicker={}, status={}, start={}, end={}",
+                side, stockTicker, status, start, end);
 
-                if (userTradeId != null)
-                    return ResponseEntity.ok(tradeService.listByUser((userTradeId)));
-                if (side != null)
-                    return ResponseEntity.ok(tradeService.listBySide(side));
-                if (stockTicker != null)
-                    return ResponseEntity.ok(tradeService.listByStockTicker(stockTicker));
-                if (status != null)
-                    return ResponseEntity.ok(tradeService.listByStatus(status));
-                if (status != null)
-                    return ResponseEntity.ok(tradeService.listByStatus(status));
-                if (start != null && end != null)
-                    return ResponseEntity.ok(tradeService.listBetween(start, end));
+        if (side != null)
+            return ResponseEntity.ok(tradeService.listBySide(userId, side));
+        if (stockTicker != null)
+            return ResponseEntity.ok(tradeService.listByStockTicker(userId, stockTicker));
+        if (status != null)
+            return ResponseEntity.ok(tradeService.listByStatus(userId, status));
+        if (start != null && end != null)
+            return ResponseEntity.ok(tradeService.listBetween(userId, start, end));
 
-            log.warn("Search called without parameters.");
-            return ResponseEntity.badRequest().body("Please provide at least one filter parameter.");
+        // No filter given: return the caller's full history rather than an error.
+        return ResponseEntity.ok(tradeService.listByUser(userId));
+    }
 
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<Void> cancel(@PathVariable Long id) {
+        tradeService.cancelTrade(currentUserService.getCurrentUserId(), id);
+        return ResponseEntity.noContent().build();
     }
 }

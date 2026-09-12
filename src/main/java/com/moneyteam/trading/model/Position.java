@@ -35,6 +35,9 @@ public class Position {
 
     @Column(name = "unrealized_pnl")
     private Double unrealizedPnL;
+
+    @Column(name = "realized_pnl")
+    private BigDecimal realizedPnL = BigDecimal.ZERO;
     //relationship setup
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
@@ -92,6 +95,14 @@ public class Position {
 
     public void setUnrealizedPnL(Double unrealizedPnL) {
         this.unrealizedPnL = unrealizedPnL;
+    }
+
+    public BigDecimal getRealizedPnL() {
+        return realizedPnL;
+    }
+
+    public void setRealizedPnL(BigDecimal realizedPnL) {
+        this.realizedPnL = realizedPnL;
     }
 
     public List<Trade> getTrades() {
