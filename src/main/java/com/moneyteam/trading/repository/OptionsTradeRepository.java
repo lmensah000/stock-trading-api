@@ -11,6 +11,8 @@ import java.util.List;
 @Repository
 public interface OptionsTradeRepository extends JpaRepository <OptionTradeDetails, Long> {
 
-    //List<OptionTradeDetails> findByStockTicker(String stockTicker);
-    List<Options> findByOptionType(String optionType);
+    // Returns OptionTradeDetails, not Options: optionType is a field on
+    // OptionTradeDetails (the repository root), and a derived query cannot
+    // return a different entity than the one it queries.
+    List<OptionTradeDetails> findByOptionType(String optionType);
 }
