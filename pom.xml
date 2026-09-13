@@ -111,6 +111,14 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Flyway owns the schema. Version is managed by Boot 2.6.6 (8.0.5),
+             where MySQL support still ships inside flyway-core; the separate
+             flyway-mysql artifact does not exist until 8.2.1. -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+
         <!-- Bucket4j: token-bucket rate limiting on auth endpoints -->
         <dependency>
             <groupId>com.bucket4j</groupId>

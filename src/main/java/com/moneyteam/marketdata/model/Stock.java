@@ -32,7 +32,7 @@ public class Stock {
     private Double ask;
     private Double bid;
 
-    @Column(name = "number_of_share")
+    @Column(name = "number_of_shares")
     private Integer numberOfShares;
 
     @Column(name = "open_price")
@@ -48,7 +48,7 @@ public class Stock {
     private Double markChange;
 
     @ElementCollection
-    @CollectionTable(name = "stock_historical_data", joinColumns = @JoinColumn(name = "stock_stockTicker"))
+    @CollectionTable(name = "stock_historical_data", joinColumns = @JoinColumn(name = "stock_ticker"))
     @Column(name = "price")
     private List<Double> historicalData;
 
