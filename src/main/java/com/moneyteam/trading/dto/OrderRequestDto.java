@@ -1,5 +1,6 @@
 package com.moneyteam.trading.dto;
 
+import java.math.BigDecimal;
 import com.moneyteam.trading.model.OrderType;
 import com.moneyteam.trading.model.enums.OrderSide;
 
@@ -19,7 +20,7 @@ public class OrderRequestDto {
     @Positive
     private Double quantity;
 
-    private Double targetPrice;
+    private BigDecimal targetPrice;
 
     @NotNull
     private OrderType orderType;
@@ -43,11 +44,11 @@ public class OrderRequestDto {
         this.quantity = quantity;
     }
 
-    public Double getTargetPrice() {
+    public BigDecimal getTargetPrice() {
         return targetPrice;
     }
 
-    public void setTargetPrice(Double targetPrice) {
+    public void setTargetPrice(BigDecimal targetPrice) {
         this.targetPrice = targetPrice;
     }
 
