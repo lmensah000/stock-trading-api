@@ -11,7 +11,7 @@ import java.util.List;
         name = "positions",
         indexes = {
                 @Index(name = "idx_position_user", columnList = "user_id"),
-                @Index(name = "idx_position_stockTicker", columnList = "stockTicker")
+                @Index(name = "idx_position_stock_ticker", columnList = "stock_ticker")
         }
 )
 public class Position {
@@ -24,7 +24,7 @@ public class Position {
     @Column(name = "user_id", nullable = false) // explicitly maps to DB column
     private Long userRefId;    // renamed local variable to avoid duplicate name
 
-    @Column(name = "stockTicker")
+    @Column(name = "stock_ticker")
     private String stockTicker;
 
     @Column(name = "total_quantity")
@@ -34,7 +34,7 @@ public class Position {
     private BigDecimal averagePrice;
 
     @Column(name = "unrealized_pnl")
-    private Double unrealizedPnL;
+    private BigDecimal unrealizedPnL;
 
     @Column(name = "realized_pnl")
     private BigDecimal realizedPnL = BigDecimal.ZERO;
@@ -89,11 +89,11 @@ public class Position {
         this.averagePrice = averagePrice;
     }
 
-    public Double getUnrealizedPnL() {
+    public BigDecimal getUnrealizedPnL() {
         return unrealizedPnL;
     }
 
-    public void setUnrealizedPnL(Double unrealizedPnL) {
+    public void setUnrealizedPnL(BigDecimal unrealizedPnL) {
         this.unrealizedPnL = unrealizedPnL;
     }
 
