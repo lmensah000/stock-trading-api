@@ -21,7 +21,7 @@ public class Watchlist {
     @JoinTable(
         name = "watchlist_stocks",
         joinColumns = @JoinColumn(name = "watchlist_id"),
-        inverseJoinColumns = @JoinColumn(name = "stock_stockTicker")
+        inverseJoinColumns = @JoinColumn(name = "stock_ticker")
     )
     private List<Stock> stocks;
 

@@ -1,5 +1,6 @@
 package com.moneyteam.trading.model;
 
+import java.math.BigDecimal;
 import javax.persistence.*;
 import java.time.LocalDate;
 
@@ -11,7 +12,7 @@ public class OptionTradeDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Double strikePrice;
+    private BigDecimal strikePrice;
     private LocalDate expirationDate;
     private String optionType; // CALL or PUT
 
@@ -29,11 +30,11 @@ public class OptionTradeDetails {
         this.id = id;
     }
 
-    public Double getStrikePrice() {
+    public BigDecimal getStrikePrice() {
         return strikePrice;
     }
 
-    public void setStrikePrice(Double strikePrice) {
+    public void setStrikePrice(BigDecimal strikePrice) {
         this.strikePrice = strikePrice;
     }
 

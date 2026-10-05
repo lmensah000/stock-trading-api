@@ -1,5 +1,6 @@
 package com.moneyteam.trading.model;
 
+import java.math.BigDecimal;
 import com.moneyteam.trading.model.enums.OrderSide;
 import com.moneyteam.trading.model.enums.OrderStatus;
 import com.moneyteam.user.model.User;
@@ -13,7 +14,7 @@ import java.util.List;
 @Entity
 @Table(name = "orders", indexes = {
         @Index(name = "idx_order_user", columnList = "user_id"),
-        @Index(name = "idx_order_ticker", columnList = "stockTicker")
+        @Index(name = "idx_order_ticker", columnList = "stock_ticker")
 })
 public class Order {
 
@@ -23,9 +24,11 @@ public class Order {
 
     @Column(name = "user_id") // explicitly maps to DB column
     private Long userId;
+
+    @Column(name = "stock_ticker")
     private String stockTicker;
     private Double quantity;
-    private Double targetPrice;
+    private BigDecimal targetPrice;
 
     @Enumerated(EnumType.STRING)
     private OrderType orderType; // MARKET, LIMIT, STOP
@@ -49,7 +52,7 @@ public class Order {
     private User users;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "stockTicker", referencedColumnName = "stockTicker", insertable = false, updatable = false)
+    @JoinColumn(name = "stock_ticker", referencedColumnName = "stock_ticker", insertable = false, updatable = false)
     private Stock stock;
 
     // Getters and setters
@@ -86,11 +89,11 @@ public class Order {
         this.quantity = quantity;
     }
 
-    public Double getTargetPrice() {
+    public BigDecimal getTargetPrice() {
         return targetPrice;
     }
 
-    public void setTargetPrice(Double targetPrice) {
+    public void setTargetPrice(BigDecimal targetPrice) {
         this.targetPrice = targetPrice;
     }
 
