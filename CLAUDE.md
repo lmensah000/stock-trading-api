@@ -163,13 +163,27 @@ if you find another `double` holding money, flag it before changing it.
   `Account`/`LedgerEntry` with buying-power checks on BUY and proceeds on SELL.
 - Log and error-response hygiene; `dev` and `prod` profiles.
 
+- Flyway owns the schema (`db/migration`), with `ddl-auto=validate` in every
+  profile so entity/schema drift fails at startup.
+- A test suite exists under `src/test`. Indicator maths is specified by
+  hand-computed vectors in `src/test/resources/vectors` and
+  `docs/INDICATOR-SPEC.md`, written before the implementations.
+- A `strategy` package with a concurrent scan engine, a Fair Value Gap
+  detector, percentage-move and volume/open-interest rules, alerts with
+  deduplication, and staged `TradePlan`s that never place an order.
+- A Schwab `MarketDataProvider` adapter with OAuth token handling, rate
+  limiting, retry and circuit breaking.
+
 **Not done — do not assume these exist:**
-- **No tests at all.** There is no `src/test` directory.
-- **No database migrations.** No Flyway; schema is a hand-written SQL file that
-  can drift from the entities silently.
-- **No market-data provider.** The existing clients are stubs or point at dead
-  endpoints.
-- **No strategy engine.** No `strategy` package, no indicator library, no regime
+- **The Schwab adapter has never run against the live API.** It is tested only
+  against a stubbed server, because using it for real requires rotated
+  credentials. Until then the default provider is in-memory and **no signal in
+  this system comes from real market data.**
+- **No market-stage gate.** Every signal is a setup signal; nothing enforces
+  the exposure ceiling in the order path yet, so the first invariant in "the
+  strategy this app implements" is documented but not applied.
+- **No backtest.** The rule thresholds are untested guesses.
+- **No indicator library** beyond the FVG detector, and no regime
   classification, setup detection, scale-out ladder or adaptive weighting.
 - **No front end.** No `src/main/resources/static`, no dashboard.
 
