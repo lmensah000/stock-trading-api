@@ -35,7 +35,7 @@ public class Options {
     private User users;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "stock_ticker", referencedColumnName = "stockTicker", insertable = false, updatable = false)
+    @JoinColumn(name = "stock_ticker", referencedColumnName = "stock_ticker", insertable = false, updatable = false)
     private Stock stock;
 
 

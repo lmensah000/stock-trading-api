@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "trades", indexes = {
         @Index(name = "idx_trade_user", columnList = "user_id"),
-        @Index(name = "idx_trade_stockTicker", columnList = "stockTicker"),
-        @Index(name = "idx_trade_date", columnList = "executionDate")
+        @Index(name = "idx_trade_stock_ticker", columnList = "stock_ticker"),
+        @Index(name = "idx_trade_date", columnList = "execution_date")
 })
 public class   Trade {
 
@@ -24,7 +24,7 @@ public class   Trade {
     @Column(name = "user_id") // explicitly maps to DB column
     private Long userTradeId;
 
-    @Column(name = "stockTicker", nullable = false)
+    @Column(name = "stock_ticker", nullable = false)
     private String stockTicker;
 
     @Column(name = "position_id")
@@ -86,7 +86,7 @@ public class   Trade {
     private User users;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "stockTicker", referencedColumnName = "stockTicker", insertable = false, updatable = false)
+    @JoinColumn(name = "stock_ticker", referencedColumnName = "stock_ticker", insertable = false, updatable = false)
     private Stock stock;
 
     @ManyToOne(fetch = FetchType.LAZY)
