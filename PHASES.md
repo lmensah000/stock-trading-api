@@ -14,7 +14,7 @@ retired to avoid ambiguity about which plan a phase number refers to.
 | 2 | Core domain model | **PARTIAL** |
 | 3 | Schema ownership: migrations + money precision | **NEXT** |
 | 4 | Test foundation + math reference vectors | **NEXT** |
-| 5 | Market-data provider layer | **PORT DEFINED** ² |
+| 5 | Market-data provider layer | **ADAPTER BUILT** ³ |
 | 6 | Indicator library (test-first) | |
 | 7 | Strategy engine (test-first) | **PARTIAL** ² |
 | 8 | Dashboard | Future |
@@ -23,6 +23,13 @@ retired to avoid ambiguity about which plan a phase number refers to.
 
 ¹ Code work complete. **Credential rotation at the Schwab developer portal is
 still outstanding and is a human action.**
+
+³ The Schwab adapter is implemented and tested against a stubbed server, but
+**it has never run against the live API**: that needs rotated credentials (see
+the security note in CLAUDE.md). Two API constraints shaped it — Schwab has no
+one-hour bar frequency, so H1 is aggregated from 30-minute bars, and intraday
+history is capped at roughly ten days, which bounds how far back any backtest
+can replay intraday signals.
 
 ² A slice of Phase 7 was built ahead of its dependencies, by request: the
 concurrent scan engine, the percentage-move rule, and the high-value option
