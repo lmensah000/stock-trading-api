@@ -14,15 +14,26 @@ retired to avoid ambiguity about which plan a phase number refers to.
 | 2 | Core domain model | **PARTIAL** |
 | 3 | Schema ownership: migrations + money precision | **NEXT** |
 | 4 | Test foundation + math reference vectors | **NEXT** |
-| 5 | Market-data provider layer | |
+| 5 | Market-data provider layer | **PORT DEFINED** ² |
 | 6 | Indicator library (test-first) | |
-| 7 | Strategy engine (test-first) | Future |
+| 7 | Strategy engine (test-first) | **PARTIAL** ² |
 | 8 | Dashboard | Future |
 | 9 | Alternative data | |
 | 10 | Ops: CI, Docker, observability | Parallel |
 
 ¹ Code work complete. **Credential rotation at the Schwab developer portal is
 still outstanding and is a human action.**
+
+² A slice of Phase 7 was built ahead of its dependencies, by request: the
+concurrent scan engine, the percentage-move rule, and the high-value option
+rule (volume/open-interest plus Fair Value Gaps across 5m/15m/1h), together
+with alerts and staged trade plans. It is sound because the dependency
+direction is right — the strategy package defines the `MarketDataProvider`
+port and runs against an in-memory adapter, so the logic and its tests are
+complete and the live feed drops in behind the same interface. **No live
+market data exists yet, so nothing here produces a real signal until Phase 5
+ships an adapter.** Phase 6's indicator library is likewise still unwritten;
+the FVG detector is self-contained and does not depend on it.
 
 ---
 
