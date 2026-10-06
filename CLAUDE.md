@@ -82,6 +82,14 @@ guarantee the system currently provides.
 - **`[enforced]` Secrets come from the environment.** No credential is committed.
   SQL bind-parameter logging is never enabled outside the `dev` profile — bind
   values contain passwords and PII.
+- **`[enforced]` A refresh token may be redeemed once.** Redemption spends the
+  token and issues a replacement; `common/security/RefreshTokenStore` holds one
+  row per issued token, keyed on its `jti`. A second redemption means two
+  parties hold the token and the server cannot tell owner from thief, so the
+  user's whole set is revoked rather than that one call refused. Never make
+  redemption idempotent to smooth over a double-submitting client — that
+  removes the only signal theft produces. Access tokens deliberately carry no
+  `jti` and are not checked against the store.
 - **`[enforced]` Errors do not leak internals.** Exceptions are mapped centrally
   in `common/exception/GlobalExceptionHandler`. Controllers do not catch and echo
   `e.getMessage()`. Unanticipated failures return a correlation id; the cause is
@@ -156,7 +164,9 @@ if you find another `double` holding money, flag it before changing it.
 **Done:**
 - Package-by-feature layout; the boot blockers and dead-code defects are fixed.
 - Stateless JWT auth (`/api/auth/login`, `/api/auth/refresh`) replacing HTTP
-  Basic, with a `Role` enum, login lockout and per-IP rate limiting.
+  Basic, with a `Role` enum, login lockout and per-IP rate limiting. Refresh
+  tokens are single-use, with replay detection that revokes the user's whole
+  set.
 - Principal-based authorization across every trading route.
 - Order/`OrderExecution` state machine with enforced legal transitions and
   partial fills; `PnLCalculator` with realized P&L booking and an oversell guard;

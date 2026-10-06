@@ -64,6 +64,12 @@ and wrong password; SQL bind-parameter logging confined to `dev`; `dev`/`prod`
 profiles; `User.toString()` no longer prints the password hash; centralised error
 handling that does not echo exception text.
 
+Also landed: **refresh tokens are single-use** (`V4`, `RefreshTokenStore`).
+Redeeming one spends it; a second redemption of the same token is treated as
+proof the token leaked and revokes the user's whole set. Before this, a refresh
+token stayed valid for its full seven-day TTL however many times it was
+redeemed, so a stolen copy worked for a week alongside the legitimate holder.
+
 **Still outstanding:** rotate the leaked Schwab `client_id` / `client_secret` /
 bearer token. They remain in git history. No history rewrite was performed, by
 decision — rotation is what closes the exposure.
@@ -208,9 +214,31 @@ highest test-value code in the repository. Implement against the Phase 4 vectors
 SMA, EMA, RSI (Wilder), MACD, Bollinger, VWAP, ATR, weekly rollup, contraction
 ratio.
 
+Also in scope, transcribed from the `TradingBotApp` sketch that was commented out
+at the foot of `StockTradingController` and `StockController`. That sketch was the
+only record of this list, and it is kept here so the comment carries nothing
+unique:
+
+- `calculatePE` and the rest of a real `FundamentalAnalysis` surface — currently
+  a model class with no computation behind it.
+- `OrderFlow.getOrderFlowData()` — no equivalent exists. Needs a data source
+  decision first; Schwab's Trader API does not expose tape or level 2.
+- `OrderHistory.getOrderHistory()` — superseded. `OrderService.listByUser` and
+  `TradeService.getTradeHistory` already do this, with the user id taken as an
+  explicit parameter. Nothing to build.
+- `PositionManager.getPositions()` — superseded by
+  `TradeService.getUserPositions`.
+
+So of that sketch only fundamentals and order flow are real gaps; the rest was
+already built better. Order flow is the one that needs a provider decision rather
+than code.
+
 `StockStrategiesImpl.shouldBuy` / `shouldSell` currently compare price against
 hardcoded thresholds (`> 50`, `< 40`). They compose real indicators once these
-exist.
+exist. Note that `StockStrategiesImpl` does **not** implement the
+`StockStrategies` interface despite the name — the interface has no
+implementation at all, and both methods are `static`. Either wire it up or drop
+the interface when this phase lands.
 
 **Exit:** every indicator passes its hand-computed vectors; no bare price
 thresholds remain in strategy code.
