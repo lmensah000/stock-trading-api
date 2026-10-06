@@ -12,7 +12,9 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * Issues and validates HS256 JWTs.
@@ -20,6 +22,12 @@ import java.util.Date;
  * Access and refresh tokens are distinguished by a "type" claim so that an
  * access token cannot be replayed against the refresh endpoint to mint a fresh
  * pair indefinitely.
+ *
+ * Refresh tokens additionally carry a random "jti", which
+ * {@link RefreshTokenStore} uses to spend each one exactly once. Access tokens
+ * do not: they live fifteen minutes and are presented on every request, so
+ * checking a store on each call would put a database read in front of all
+ * traffic to protect a window that is short by design.
  */
 @Component
 public class JwtTokenProvider {
@@ -58,21 +66,56 @@ public class JwtTokenProvider {
         return buildToken(userId, userName, role, TYPE_ACCESS, accessTokenTtlMs);
     }
 
-    public String generateRefreshToken(Long userId, String userName, String role) {
-        return buildToken(userId, userName, role, TYPE_REFRESH, refreshTokenTtlMs);
+    /**
+     * Issues a refresh token under a caller-supplied jti.
+     *
+     * The jti is a parameter rather than generated here so that the caller can
+     * register it with {@link RefreshTokenStore} before the token is returned
+     * to the client. A token that reached a client without a stored record
+     * would be rejected on first use.
+     */
+    public String generateRefreshToken(Long userId, String userName, String role, String jti) {
+        return buildToken(userId, userName, role, TYPE_REFRESH, refreshTokenTtlMs, jti);
     }
 
     private String buildToken(Long userId, String userName, String role, String type, long ttlMs) {
+        return buildToken(userId, userName, role, type, ttlMs, null);
+    }
+
+    private String buildToken(Long userId, String userName, String role, String type,
+                              long ttlMs, String jti) {
         Date now = new Date();
-        return Jwts.builder()
+        var builder = Jwts.builder()
                 .setSubject(userName)
                 .claim(CLAIM_USER_ID, userId)
                 .claim(CLAIM_ROLE, role)
                 .claim(CLAIM_TYPE, type)
                 .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + ttlMs))
-                .signWith(signingKey, SignatureAlgorithm.HS256)
-                .compact();
+                .setExpiration(new Date(now.getTime() + ttlMs));
+        if (jti != null) {
+            builder.setId(jti);
+        }
+        return builder.signWith(signingKey, SignatureAlgorithm.HS256).compact();
+    }
+
+    /** A freshly generated jti, for a refresh token about to be issued. */
+    public String newTokenId() {
+        return UUID.randomUUID().toString();
+    }
+
+    /** The token's jti, or null if it carries none. */
+    public String getTokenId(Claims claims) {
+        return claims.getId();
+    }
+
+    public Instant getIssuedAt(Claims claims) {
+        Date issued = claims.getIssuedAt();
+        return issued == null ? null : issued.toInstant();
+    }
+
+    public Instant getExpiration(Claims claims) {
+        Date expiration = claims.getExpiration();
+        return expiration == null ? null : expiration.toInstant();
     }
 
     /** Returns the token's claims, or null when the token is invalid or expired. */
@@ -109,5 +152,9 @@ public class JwtTokenProvider {
 
     public long getAccessTokenTtlMs() {
         return accessTokenTtlMs;
+    }
+
+    public long getRefreshTokenTtlMs() {
+        return refreshTokenTtlMs;
     }
 }

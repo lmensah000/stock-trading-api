@@ -25,14 +25,12 @@ import java.time.Duration;
  * credentials. Selecting {@code schwab} requires every credential to be present
  * in the environment; there are deliberately no defaults, because a default
  * credential is worse than a missing one.
+ *
+ * The injected {@link Clock} comes from {@code common/config/CoreConfig}; it is
+ * shared infrastructure rather than a market-data concern.
  */
 @Configuration
 public class MarketDataConfig {
-
-    @Bean
-    public Clock systemClock() {
-        return Clock.systemUTC();
-    }
 
     @Bean
     public HttpClient marketDataHttpClient() {
