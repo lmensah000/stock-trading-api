@@ -73,6 +73,9 @@ services:
       # is switched on deliberately.
       BOT_ENABLED: ${BOT_ENABLED:-false}
       BOT_OWNER_USERNAME: ${BOT_OWNER_USERNAME:-}
+      BOT_STARTING_EQUITY: ${BOT_STARTING_EQUITY:-100000}
+      # Required on first boot with the bot enabled, and immutable afterwards.
+      BOT_UNLOCK_TARGET_EQUITY: ${BOT_UNLOCK_TARGET_EQUITY:-}
 
       # Market data. in-memory by default so the stack comes up with no
       # credentials at all; csv for backtesting; schwab only once the

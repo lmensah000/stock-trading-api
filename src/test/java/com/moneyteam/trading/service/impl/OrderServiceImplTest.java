@@ -1,6 +1,10 @@
 package com.moneyteam.trading.service.impl;
 
+import com.moneyteam.bot.LiveTradingGate;
+import com.moneyteam.bot.LiveTradingLockedException;
+import com.moneyteam.trading.dto.OrderRequestDto;
 import com.moneyteam.trading.model.Order;
+import com.moneyteam.trading.model.OrderType;
 import com.moneyteam.trading.model.enums.OrderSide;
 import com.moneyteam.trading.model.enums.OrderStatus;
 import com.moneyteam.trading.repository.OrderRepository;
@@ -40,6 +44,7 @@ class OrderServiceImplTest {
 
     @Mock private OrderRepository orderRepository;
     @Mock private TradeService tradeService;
+    @Mock private LiveTradingGate liveTradingGate;
     @InjectMocks private OrderServiceImpl orderService;
 
     private Order order;
@@ -58,6 +63,50 @@ class OrderServiceImplTest {
     private void orderIsFound() {
         when(orderRepository.findByIdAndUserId(ORDER, USER)).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenAnswer(i -> i.getArgument(0));
+    }
+
+    private static OrderRequestDto requestFor(OrderSide side) {
+        OrderRequestDto dto = new OrderRequestDto();
+        dto.setStockTicker("AAPL");
+        dto.setQuantity(100.0);
+        dto.setSide(side);
+        dto.setOrderType(OrderType.MARKET);
+        dto.setTargetPrice(new BigDecimal("150.00"));
+        return dto;
+    }
+
+    @Test
+    @DisplayName("placing an order consults the live-trading gate before anything is saved")
+    void placeOrderConsultsTheGate() {
+        when(orderRepository.save(any(Order.class))).thenAnswer(i -> i.getArgument(0));
+
+        orderService.placeOrder(USER, requestFor(OrderSide.BUY));
+
+        verify(liveTradingGate).assertCanPlace(OrderSide.BUY);
+    }
+
+    @Test
+    @DisplayName("a gate refusal stops the order being persisted at all")
+    void gateRefusalPersistsNothing() {
+        // The order of operations is the point: a refused order must leave no
+        // trace, not be saved and then rejected.
+        org.mockito.Mockito.doThrow(new LiveTradingLockedException("locked"))
+                .when(liveTradingGate).assertCanPlace(OrderSide.BUY);
+
+        assertThatThrownBy(() -> orderService.placeOrder(USER, requestFor(OrderSide.BUY)))
+                .isInstanceOf(LiveTradingLockedException.class);
+
+        verify(orderRepository, never()).save(any(Order.class));
+    }
+
+    @Test
+    @DisplayName("the side is passed through, so the gate can let SELL past while stopping BUY")
+    void sideIsPassedToTheGate() {
+        when(orderRepository.save(any(Order.class))).thenAnswer(i -> i.getArgument(0));
+
+        orderService.placeOrder(USER, requestFor(OrderSide.SELL));
+
+        verify(liveTradingGate).assertCanPlace(OrderSide.SELL);
     }
 
     @Test

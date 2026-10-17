@@ -50,11 +50,11 @@ DB_USER=... DB_PASS=... JWT_SECRET=... mvn spring-boot:run
 mvn test
 ```
 
-**182 tests. With Docker running, all 182 pass.** Without Docker one is skipped:
+**200 tests. With Docker running, all 200 pass.** Without Docker one is skipped:
 `SchemaMigrationTest` uses Testcontainers to apply the migrations to a real
 MySQL 8.0 and validate every entity against them. It is the authoritative check
-on the schema, so a run reporting `181 passed, 1 skipped` has **not** verified
-the schema. Prefer the number that says 182.
+on the schema, so a run reporting `199 passed, 1 skipped` has **not** verified
+the schema. Prefer the number that says 200.
 
 MySQL rather than H2 is deliberate: H2 does not reproduce MySQL's `ENUM`
 columns, foreign-key semantics or dialect behaviour, so it can pass while
@@ -70,7 +70,46 @@ that reaches production unnoticed.
 |---|---|---|
 | `SPRING_PROFILES_ACTIVE` | `dev` | `dev` logs SQL **and bind parameters**, which include passwords and PII. Never expose a `dev` instance. |
 | `BOT_ENABLED` | `false` | While false, nothing scans and no order is placed. |
+| `BOT_OWNER_USERNAME` | — | The account the bot acts as. Must already be registered. |
+| `BOT_STARTING_EQUITY` | `100000` | What the paper account is funded with, once. |
+| `BOT_UNLOCK_TARGET_EQUITY` | — | Required on first boot with the bot on. Immutable after. |
 | `MARKETDATA_PROVIDER` | `in-memory` | `in-memory` (fixtures), `csv` (backtesting), `schwab` (live). |
+
+## The live-trading gate
+
+Real money is unreachable until **two separate things** have happened.
+
+1. **Armed** — paper equity reaches `BOT_UNLOCK_TARGET_EQUITY`. The system
+   observes this on its own. The target is recorded on first boot and is
+   immutable: a gate whose bar can be lowered on the evening it would have
+   stopped a trade is decorative.
+2. **Unlocked** — you do this, deliberately:
+
+```bash
+curl http://127.0.0.1:8080/api/bot/status -H "Authorization: Bearer $TOKEN"
+
+curl -X POST http://127.0.0.1:8080/api/bot/unlock \
+     -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+     -d '{"confirmTargetEquity": 130000}'
+```
+
+The confirmation must echo the target exactly. That isn't authentication — you
+are already authenticated — it is there so an unlock cannot be a mistake.
+
+`POST /api/bot/relock` returns to paper and needs no confirmation.
+
+Two things worth knowing about the gate:
+
+- **A SELL is never blocked**, in either mode. Blocking a close would trap an
+  open position, which is more dangerous than no gate at all.
+- **Equity counts open positions at cost, not market value.** An unrealized
+  gain cannot arm the gate; only booked money counts. This understates a winning
+  open position, so it delays arming and never hastens it.
+
+And one thing it is not: **the gate is not the market-stage exposure ceiling.**
+`CLAUDE.md` specifies that ceiling as a hard cap in the order path and it does
+not exist yet. Unlocking the gate does not mean the strategy's own risk rules
+are being enforced.
 
 ## Current limitations
 

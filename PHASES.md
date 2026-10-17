@@ -74,6 +74,27 @@ redeemed, so a stolen copy worked for a week alongside the legitimate holder.
 bearer token. They remain in git history. No history rewrite was performed, by
 decision — rotation is what closes the exposure.
 
+## Phase 0b — Personal bot: containerisation and the live gate ✅ DONE
+
+Landed: a multi-stage Docker image and a `docker compose` stack with MySQL 8.0,
+which is what finally lets `SchemaMigrationTest` run and the schema be verified
+(`spring-boot-maven-plugin` was never declared, so the build had produced an
+unrunnable jar; `spring.datasource.url` hardcoded loopback). Actuator exposing
+`/actuator/health` only, for a real Compose readiness gate.
+
+Also landed: a `bot` package with a single configured owner identity resolved
+from `app.bot.owner-username` (never from a request, so the authorization
+invariant holds with no principal present), an idempotent initializer that seeds
+the owner's funded paper account, and `LiveTradingGate` — armed by reaching an
+immutable paper-equity target, unlocked only by an explicit owner action, with
+SELL never gated and equity measured at cost so an unrealized spike cannot arm
+it. Enforced at the single order choke point, `OrderServiceImpl.placeOrder`.
+
+**Still outstanding and important:** the market-stage exposure ceiling is still
+not enforced anywhere. It belongs in the same method as the live gate, and it
+should be built before live trading is worth unlocking — the live gate decides
+whether real money is reachable, not how much exposure the market stage allows.
+
 ## Phase 1 — Boot blockers and bug fixes ✅ DONE
 
 Landed: package-by-feature reorg; `@RestController` added where missing;

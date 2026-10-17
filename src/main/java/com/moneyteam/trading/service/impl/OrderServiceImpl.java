@@ -1,5 +1,6 @@
 package com.moneyteam.trading.service.impl;
 
+import com.moneyteam.bot.LiveTradingGate;
 import com.moneyteam.trading.dto.OrderRequestDto;
 import com.moneyteam.trading.dto.OrderResponseDto;
 import com.moneyteam.trading.dto.TradeRequestDto;
@@ -44,10 +45,14 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final TradeService tradeService;
+    private final LiveTradingGate liveTradingGate;
 
-    public OrderServiceImpl(OrderRepository orderRepository, TradeService tradeService) {
+    public OrderServiceImpl(OrderRepository orderRepository,
+                            TradeService tradeService,
+                            LiveTradingGate liveTradingGate) {
         this.orderRepository = orderRepository;
         this.tradeService = tradeService;
+        this.liveTradingGate = liveTradingGate;
     }
 
     private static void transition(Order order, OrderStatus newStatus) {
@@ -71,6 +76,16 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderResponseDto placeOrder(Long userId, OrderRequestDto request) {
+        // The single choke point for opening risk, and the only place the gate
+        // is consulted. Every order path in the application reaches this method,
+        // which is why the market-stage exposure ceiling belongs here too when
+        // it is built - CLAUDE.md specifies it as a hard cap in *the* order
+        // path, singular, and that only holds while this stays the only one.
+        //
+        // SELL is not gated; see LiveTradingGate for why closing must never be
+        // blocked.
+        liveTradingGate.assertCanPlace(request.getSide());
+
         Order order = OrderMapper.toEntity(request);
         order.setUserId(userId);
         transition(order, OrderStatus.PENDING);

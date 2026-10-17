@@ -90,6 +90,21 @@ guarantee the system currently provides.
   redemption idempotent to smooth over a double-submitting client — that
   removes the only signal theft produces. Access tokens deliberately carry no
   `jti` and are not checked against the store.
+- **`[enforced]` Real money is unreachable until the gate is opened by hand.**
+  `bot/LiveTradingGate` holds two separate facts: *armed*, set when paper equity
+  reaches a target fixed on first boot and immutable thereafter, and *unlocked*,
+  set only by an explicit owner action. Never collapse them — if reaching the
+  target unlocked by itself, an arithmetic error in the equity calculation would
+  be an error that trades real money. **A SELL is never gated**, in `PAPER` or
+  `LIVE`: blocking a close traps an open position, which is worse than no gate.
+  Equity counts open positions at *cost*, not market value, so an unrealized
+  spike cannot arm the gate. This gate is not the market-stage ceiling below,
+  and must not be mistaken for it.
+- **`[enforced]` The bot's identity comes from configuration, not a request.**
+  `bot/BotIdentity` resolves the single owner from `app.bot.owner-username`.
+  A scheduled scan has no authenticated principal, so this is the bot's
+  equivalent of `CurrentUserService` — and like it, the client cannot influence
+  it. Services still take the user id as an explicit parameter.
 - **`[enforced]` Errors do not leak internals.** Exceptions are mapped centrally
   in `common/exception/GlobalExceptionHandler`. Controllers do not catch and echo
   `e.getMessage()`. Unanticipated failures return a correlation id; the cause is
@@ -172,6 +187,10 @@ if you find another `double` holding money, flag it before changing it.
   partial fills; `PnLCalculator` with realized P&L booking and an oversell guard;
   `Account`/`LedgerEntry` with buying-power checks on BUY and proceeds on SELL.
 - Log and error-response hygiene; `dev` and `prod` profiles.
+- A `bot` package with a single configured owner identity, a seeded paper
+  account, and the live-trading gate described in the invariants.
+- A Docker image and a `docker compose` stack with MySQL 8.0, which is what
+  lets `SchemaMigrationTest` actually run and the schema actually be verified.
 
 - Flyway owns the schema (`db/migration`), with `ddl-auto=validate` in every
   profile so entity/schema drift fails at startup.
@@ -191,7 +210,14 @@ if you find another `double` holding money, flag it before changing it.
   this system comes from real market data.**
 - **No market-stage gate.** Every signal is a setup signal; nothing enforces
   the exposure ceiling in the order path yet, so the first invariant in "the
-  strategy this app implements" is documented but not applied.
+  strategy this app implements" is documented but not applied. The
+  live-trading gate that *does* exist is a different thing and is no substitute:
+  it decides whether real money is reachable at all, not how much exposure the
+  market stage permits. `OrderServiceImpl.placeOrder` is where both belong, and
+  the ceiling must be built there before live trading is worth unlocking.
+- **No live broker adapter.** Nothing can place a real order even in `LIVE`
+  mode. The gate is the precondition for building one, not a switch that starts
+  live trading.
 - **No backtest.** The rule thresholds are untested guesses.
 - **No indicator library** beyond the FVG detector, and no regime
   classification, setup detection, scale-out ladder or adaptive weighting.

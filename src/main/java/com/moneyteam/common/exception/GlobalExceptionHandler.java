@@ -2,6 +2,7 @@ package com.moneyteam.common.exception;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.moneyteam.bot.LiveTradingLockedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -87,6 +88,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(LockedException.class)
     public ResponseEntity<Map<String, String>> handleLocked(LockedException ex) {
         log.warn("Locked account login attempt: {}", ex.getMessage());
+        return body(HttpStatus.LOCKED, ex.getMessage());
+    }
+
+    /**
+     * The live-trading gate refused something.
+     *
+     * The message is returned deliberately, unlike most failures. It says which
+     * safety condition was not met - unarmed, not unlocked, target not reached -
+     * which the owner needs in order to act, and it discloses nothing about the
+     * system's internals. 423 rather than 403: the caller is authorised, the
+     * resource is locked.
+     */
+    @ExceptionHandler(LiveTradingLockedException.class)
+    public ResponseEntity<Map<String, String>> handleLiveTradingLocked(LiveTradingLockedException ex) {
+        log.warn("Live-trading gate refused an operation: {}", ex.getMessage());
         return body(HttpStatus.LOCKED, ex.getMessage());
     }
 
