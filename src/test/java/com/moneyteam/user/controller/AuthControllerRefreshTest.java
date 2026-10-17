@@ -3,6 +3,7 @@ package com.moneyteam.user.controller;
 import com.moneyteam.common.security.JwtTokenProvider;
 import com.moneyteam.common.security.RefreshTokenRepository;
 import com.moneyteam.common.security.RefreshTokenStore;
+import com.moneyteam.support.TestKeys;
 import com.moneyteam.user.dto.RefreshRequest;
 import com.moneyteam.user.dto.TokenResponse;
 import com.moneyteam.user.model.User;
@@ -43,7 +44,8 @@ import static org.mockito.Mockito.when;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class AuthControllerRefreshTest {
 
-    private static final String SECRET = "a-test-secret-that-is-at-least-32-bytes-long";
+    // Generated, not written down. See TestKeys for why.
+    private static final String SECRET = TestKeys.hmacKey("auth-controller-refresh");
 
     @Mock
     private UserService userService;

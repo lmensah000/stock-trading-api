@@ -43,8 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers(disabledWithoutDocker = true)
 @SpringBootTest(properties = {
         "spring.jpa.hibernate.ddl-auto=validate",
-        "spring.flyway.enabled=true",
-        "app.jwt.secret=test-only-secret-at-least-32-bytes-long!"
+        "spring.flyway.enabled=true"
 })
 @ActiveProfiles("test")
 @DisplayName("Flyway V1 applies and Hibernate validates every entity against it")
@@ -61,6 +60,14 @@ class SchemaMigrationTest {
         registry.add("spring.datasource.password", MYSQL::getPassword);
         registry.add("spring.datasource.driver-class-name", MYSQL::getDriverClassName);
     }
+
+    // app.jwt.secret is no longer set here. It used to be a literal in the
+    // @SpringBootTest properties above, which overrode the one in
+    // application-test.properties; that file now generates the key, so the
+    // override is both redundant and the thing a secret scanner was flagging.
+    // Annotation values must be compile-time constants, so a literal was the
+    // only way to put a key in an annotation at all - which is why it moved
+    // out rather than being generated in place.
 
     @Autowired
     private DataSource dataSource;

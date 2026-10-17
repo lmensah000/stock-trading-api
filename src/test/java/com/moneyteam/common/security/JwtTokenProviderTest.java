@@ -1,5 +1,6 @@
 package com.moneyteam.common.security;
 
+import com.moneyteam.support.TestKeys;
 import io.jsonwebtoken.Claims;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 class JwtTokenProviderTest {
 
-    private static final String SECRET = "a-test-secret-that-is-at-least-32-bytes-long";
+    // Generated, not written down. See TestKeys for why.
+    private static final String SECRET = TestKeys.hmacKey("jwt-token-provider");
 
     private final JwtTokenProvider provider = new JwtTokenProvider(SECRET, 900_000L, 604_800_000L);
 
@@ -53,8 +55,8 @@ class JwtTokenProviderTest {
     @Test
     @DisplayName("a token signed with a different key is rejected, not parsed")
     void foreignSignatureIsRejected() {
-        JwtTokenProvider other =
-                new JwtTokenProvider("a-completely-different-secret-over-32-bytes", 900_000L, 1_000L);
+        JwtTokenProvider other = new JwtTokenProvider(
+                TestKeys.differentHmacKey("jwt-token-provider"), 900_000L, 1_000L);
 
         assertThat(provider.parseClaims(
                 other.generateRefreshToken(7L, "ada", "USER", "some-jti"))).isNull();
