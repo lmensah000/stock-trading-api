@@ -37,6 +37,14 @@ public class SecurityConfig {
                 .and()
                 .authorizeHttpRequests()
                     .antMatchers("/api/auth/**", "/api/users/register", "/api/users/login").permitAll()
+                    // Liveness only, and only this one actuator path. With
+                    // management.endpoint.health.show-details=never the body is
+                    // {"status":"UP"} and nothing else, which is what the
+                    // container healthcheck needs and all it is given. The rest
+                    // of the actuator surface (env, beans, mappings, configprops)
+                    // stays unexposed - it would leak internals and undo the
+                    // error hygiene the GlobalExceptionHandler exists to enforce.
+                    .antMatchers("/actuator/health").permitAll()
                     .anyRequest().authenticated()
                 .and()
                 // Return 401 instead of redirecting to a login page or prompting for Basic auth.

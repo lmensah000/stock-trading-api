@@ -1,0 +1,38 @@
+# Everything here is excluded from the build context.
+#
+# This matters for more than build speed: the context is uploaded to the Docker
+# daemon and anything in it can be COPYd into a layer. Without .git excluded,
+# the build context carries this repository's entire history - which still
+# contains the compromised Schwab credentials - into reach of the image.
+
+.git
+.gitignore
+
+# Local secrets. Must never enter an image layer.
+.env
+.env.*
+!.env.example
+
+# Build output. Stage 1 compiles from source; a stale host target/ directory
+# would otherwise be copied in and could shadow the real build.
+target/
+
+# Local logs and runtime noise
+logs/
+*.log
+
+# IDE and OS
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Docker's own files are not needed inside the build
+Dockerfile
+.dockerignore
+docker-compose.yml
+docker-compose.*.yml
+
+# Documentation and plans do not belong in a runtime image
+docs/
+*.md

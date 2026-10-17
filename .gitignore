@@ -5,3 +5,17 @@ logs/
 *.iml
 *.http
 !docs/**/*.http.example
+
+# Local secrets. .env holds the database password, the JWT signing key and the
+# Schwab credentials; committing it is how this repository acquired the leaked
+# credentials still sitting in its history. The template is tracked, the real
+# file never is.
+.env
+.env.*
+!.env.example
+
+# Bar CSVs for backtesting. Data, not source, and large enough to bloat the
+# repository. Keep the directory itself so the compose mount has something to
+# bind to.
+/data/*
+!/data/.gitkeep

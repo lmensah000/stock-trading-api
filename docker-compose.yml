@@ -1,0 +1,94 @@
+# ============================================================
+#  TCKR — local stack
+#
+#  docker compose up --build
+#
+#  Brings up MySQL 8.0 and the API. Flyway applies db/migration on startup and
+#  ddl-auto=validate then reconciles every entity against the result, so a boot
+#  that succeeds is itself proof that the schema and the entities agree. That
+#  check has never actually run before this file existed.
+#
+#  MySQL 8.0 deliberately matches the version SchemaMigrationTest uses via
+#  Testcontainers, so dev, test and this stack cannot disagree about dialect,
+#  ENUM handling or foreign-key semantics.
+#
+#  Every secret comes from .env, which is gitignored. Copy .env.example to .env
+#  and fill it in. There are no working defaults on purpose - a default
+#  credential is worse than a missing one, because it survives into production
+#  unnoticed.
+# ============================================================
+services:
+
+  mysql:
+    image: mysql:8.0
+    container_name: tckr-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in .env}
+      MYSQL_DATABASE: ${DB_NAME:-moneyteamdb}
+      MYSQL_USER: ${DB_USER:?set DB_USER in .env}
+      MYSQL_PASSWORD: ${DB_PASS:?set DB_PASS in .env}
+    # Not published by default. The API reaches MySQL over the compose network,
+    # so binding 3306 on the host only exposes the database to the rest of the
+    # machine. Uncomment to attach a GUI client, and prefer 127.0.0.1 so it is
+    # not reachable from the local network.
+    # ports:
+    #   - "127.0.0.1:3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      # The app must not start before MySQL can actually answer queries.
+      # mysqladmin ping returns success once the server accepts connections,
+      # which is later than the container merely being "running" - starting
+      # Flyway in that gap is the classic cause of a failed first boot.
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tckr-app
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-moneyteamdb}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+
+      # At least 32 bytes, or the app refuses to start rather than issuing
+      # forgeable tokens. See JwtTokenProvider.
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+
+      # Bot. Disabled by default: nothing scans or places an order until this
+      # is switched on deliberately.
+      BOT_ENABLED: ${BOT_ENABLED:-false}
+      BOT_OWNER_USERNAME: ${BOT_OWNER_USERNAME:-}
+
+      # Market data. in-memory by default so the stack comes up with no
+      # credentials at all; csv for backtesting; schwab only once the
+      # compromised credentials have been rotated.
+      MARKETDATA_PROVIDER: ${MARKETDATA_PROVIDER:-in-memory}
+      TOKEN_ENCRYPTION_KEY: ${TOKEN_ENCRYPTION_KEY:-}
+      SCHWAB_CLIENT_ID: ${SCHWAB_CLIENT_ID:-}
+      SCHWAB_CLIENT_SECRET: ${SCHWAB_CLIENT_SECRET:-}
+      SCHWAB_REDIRECT_URI: ${SCHWAB_REDIRECT_URI:-}
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      # Bar CSVs for backtesting, read-only from the container's point of view.
+      - ./data:/app/data:ro
+    # Healthcheck is defined in the Dockerfile so it applies to `docker run`
+    # as well, and is not duplicated here.
+
+volumes:
+  mysql-data:

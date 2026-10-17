@@ -105,6 +105,14 @@
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
+        <!-- Actuator, for /actuator/health only. The container healthcheck needs
+             a real readiness signal so Compose can gate startup on the app
+             rather than on a sleep. Every other endpoint stays unexposed. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
         <!-- JWT (jjwt 0.11.x is the last line built against the javax.* baseline Boot 2.6 uses) -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
@@ -205,6 +213,11 @@
     </dependencies>
 
     <build>
+        <!-- Stable artifact name so the Dockerfile does not have to track the
+             version. Without this the jar is Moneyteam-1.0-SNAPSHOT.jar and
+             every version bump silently breaks the image build. -->
+        <finalName>tckr</finalName>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -212,6 +225,24 @@
                 <configuration>
                     <source>17</source>
                     <target>17</target>
+                </configuration>
+            </plugin>
+
+            <!-- Repackages into an executable jar. Without this plugin the
+                 build produces a plain jar with no Main-Class and no bundled
+                 dependencies, which cannot be run - so it was needed before
+                 the app could be containerised at all.
+
+                 Layers are enabled so the image separates slow-changing
+                 dependencies from application code: a code-only change then
+                 rebuilds one small layer instead of re-shipping every jar. -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <layers>
+                        <enabled>true</enabled>
+                    </layers>
                 </configuration>
             </plugin>
         </plugins>
