@@ -223,11 +223,29 @@ if you find another `double` holding money, flag it before changing it.
   classification, setup detection, scale-out ladder or adaptive weighting.
 - **No front end.** No `src/main/resources/static`, no dashboard.
 
-**Standing security note:** Schwab API credentials (`client_id`, `client_secret`,
-a bearer token and an authorization code) were committed to this repository's
-history. They were removed from the working tree, but **remain in git history and
-must be treated as compromised.** Rotating them at the Schwab developer portal is
-the action that actually closes the exposure and has not been done.
+**Standing security note:** Schwab API credentials — a `client_id`, a
+`client_secret`, an OAuth access token and two authorization codes — were
+committed to this repository, which was **public from 2025-08-03 until the
+GitGuardian alert**, roughly fourteen months. They **must be treated as
+compromised**: public GitHub is scraped continuously, so assume they were
+collected.
+
+History has since been rewritten (`git filter-repo --replace-text`) and the
+values are redacted from all nine branches. Two things that rewrite did *not*
+achieve, and neither should be forgotten:
+
+- **GitHub's `refs/pull/*` refs still carry the original commits** (`f2c0c64`,
+  `1bca748`). They are server-managed and cannot be force-pushed or deleted.
+  Only a GitHub Support request to garbage-collect unreachable objects removes
+  them; making the repository private is what denies anonymous access meanwhile.
+- **Rotation at the Schwab developer portal is still outstanding.** It is the
+  only action that makes the already-published values worthless. A purge limits
+  further discovery; it does nothing about copies already taken.
+
+Before this rewrite the note here claimed the credentials had been "removed from
+the working tree". That was true of `master` but false of `sta`, whose tip still
+held a live credential in `ThinkOrSwimClient.java`. Verify such claims against
+every branch rather than the one you are standing on.
 
 **Related branches — reference only, do not merge.** `main` and `sta` hold a
 separate implementation of the same product (React + Tailwind frontend, FastAPI +
