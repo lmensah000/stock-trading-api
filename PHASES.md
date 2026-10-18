@@ -95,6 +95,26 @@ not enforced anywhere. It belongs in the same method as the live gate, and it
 should be built before live trading is worth unlocking — the live gate decides
 whether real money is reachable, not how much exposure the market stage allows.
 
+## Phase 0c — Backtest harness and CSV bars ✅ DONE
+
+Landed: `CsvMarketDataProvider` behind the existing `MarketDataProvider` port
+(`app.marketdata.provider=csv`), and `bot/backtest` — `CostModel`,
+`BacktestRunner`, `BacktestTrade`, `BacktestReport`, `BacktestService`, and
+`POST /api/bot/backtest`.
+
+Specified first in `docs/BACKTEST-SPEC.md` with hand-computed numbers, per the
+working agreement: no lookahead (the rule receives `bars[0..i]`, entry at bar
+`i+1`'s open), an intrabar stop-and-target bar scored **against** the position,
+costs charged on both sides, outcomes in R, and win rate withheld below 30
+closed trades. The runner holds no repository, so a replay cannot feed the
+live-trading gate.
+
+**Still outstanding:** no backtest has been *run* over real history, so the
+thresholds remain guesses. And the harness only exercises `PercentMoveRule` and
+the gap maths — the two option rules need chains with open interest that bar
+files do not carry, so Phase 9's alternative-data work is what unblocks
+testing them.
+
 ## Phase 1 — Boot blockers and bug fixes ✅ DONE
 
 Landed: package-by-feature reorg; `@RestController` added where missing;

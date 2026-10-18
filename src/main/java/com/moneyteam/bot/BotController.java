@@ -1,5 +1,8 @@
 package com.moneyteam.bot;
 
+import com.moneyteam.bot.backtest.BacktestReport;
+import com.moneyteam.bot.backtest.BacktestRequest;
+import com.moneyteam.bot.backtest.BacktestService;
 import com.moneyteam.common.security.CurrentUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,10 +38,14 @@ public class BotController {
 
     private final LiveTradingGate gate;
     private final CurrentUserService currentUserService;
+    private final BacktestService backtestService;
 
-    public BotController(LiveTradingGate gate, CurrentUserService currentUserService) {
+    public BotController(LiveTradingGate gate,
+                         CurrentUserService currentUserService,
+                         BacktestService backtestService) {
         this.gate = gate;
         this.currentUserService = currentUserService;
+        this.backtestService = backtestService;
     }
 
     /** Confirmation payload for {@link #unlock}. */
@@ -97,6 +104,27 @@ public class BotController {
                 "warning", "No live broker adapter is implemented, so no order can reach a "
                         + "brokerage account yet. The market-stage exposure ceiling is also not "
                         + "enforced in the order path."));
+    }
+
+    /**
+     * Replays a bar series through the real rules and scores the outcomes in R.
+     *
+     * Writes nothing: the runner holds no repository, so a replay cannot touch
+     * the account the live-trading gate reads. Safe to run at any time, in
+     * either mode.
+     *
+     * Note what it does and does not establish. It exercises the
+     * percentage-move and gap maths. It says nothing about the
+     * volume-to-open-interest or option-chart rules, which need option data
+     * that bar files do not contain - see docs/BACKTEST-SPEC.md.
+     */
+    @PostMapping("/backtest")
+    public ResponseEntity<BacktestReport> backtest(@Valid @RequestBody BacktestRequest request) {
+        BacktestReport report = backtestService.run(request);
+        log.info("Backtest for {} requested by '{}': {}",
+                request.getTicker(), currentUserService.getCurrentUser().getUserName(),
+                report.summary());
+        return ResponseEntity.ok(report);
     }
 
     /** Returns to paper. Needs no confirmation: reducing risk is never gated. */

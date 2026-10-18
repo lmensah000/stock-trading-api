@@ -202,6 +202,12 @@ if you find another `double` holding money, flag it before changing it.
   deduplication, and staged `TradePlan`s that never place an order.
 - A Schwab `MarketDataProvider` adapter with OAuth token handling, rate
   limiting, retry and circuit breaking.
+- A `csv` `MarketDataProvider` and a backtest harness (`bot/backtest`) that
+  replays bars through the real rules with no lookahead — the rule sees
+  `bars[0..i]` and enters at bar `i+1`'s open — scores outcomes in R after
+  commission and slippage, resolves an intrabar stop-and-target bar **against**
+  the position, and withholds win rate below a 30-trade floor. It holds no
+  repository, so a replay cannot write to the account the live gate reads.
 
 **Not done — do not assume these exist:**
 - **The Schwab adapter has never run against the live API.** It is tested only
@@ -218,7 +224,14 @@ if you find another `double` holding money, flag it before changing it.
 - **No live broker adapter.** Nothing can place a real order even in `LIVE`
   mode. The gate is the precondition for building one, not a switch that starts
   live trading.
-- **No backtest.** The rule thresholds are untested guesses.
+- **No backtest *results*.** The harness exists (`bot/backtest`, specified in
+  `docs/BACKTEST-SPEC.md` with hand-computed numbers written before the code),
+  and a `csv` provider feeds it without credentials. But nothing has been run
+  over real history, so **the rule thresholds are still untested guesses.**
+  The harness also only exercises `PercentMoveRule` and the gap maths:
+  `VolumeOpenInterestRule` and `HighValueOptionRule` need option chains with
+  open interest, which bar files do not carry. A good equity backtest is not
+  evidence about those two.
 - **No indicator library** beyond the FVG detector, and no regime
   classification, setup detection, scale-out ladder or adaptive weighting.
 - **No front end.** No `src/main/resources/static`, no dashboard.

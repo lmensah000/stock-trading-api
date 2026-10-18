@@ -81,6 +81,7 @@ services:
       # credentials at all; csv for backtesting; schwab only once the
       # compromised credentials have been rotated.
       MARKETDATA_PROVIDER: ${MARKETDATA_PROVIDER:-in-memory}
+      MARKETDATA_CSV_DIR: /app/data
       TOKEN_ENCRYPTION_KEY: ${TOKEN_ENCRYPTION_KEY:-}
       SCHWAB_CLIENT_ID: ${SCHWAB_CLIENT_ID:-}
       SCHWAB_CLIENT_SECRET: ${SCHWAB_CLIENT_SECRET:-}

@@ -1,6 +1,7 @@
 package com.moneyteam.marketdata.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.moneyteam.marketdata.provider.csv.CsvMarketDataProvider;
 import com.moneyteam.marketdata.provider.schwab.SchwabMarketDataProvider;
 import com.moneyteam.marketdata.provider.schwab.auth.OAuthTokenRepository;
 import com.moneyteam.marketdata.provider.schwab.auth.SchwabAuthService;
@@ -15,6 +16,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.net.http.HttpClient;
+import java.nio.file.Path;
 import java.time.Clock;
 import java.time.Duration;
 
@@ -50,6 +52,22 @@ public class MarketDataConfig {
     @ConditionalOnProperty(name = "app.marketdata.provider", havingValue = "in-memory", matchIfMissing = true)
     public MarketDataProvider inMemoryMarketDataProvider() {
         return new InMemoryMarketDataProvider();
+    }
+
+    // ---------------------------------------------------------------
+    //  CSV (backtesting)
+    // ---------------------------------------------------------------
+
+    /**
+     * Bars from files on disk. The one provider that needs no credentials,
+     * which is why backtesting is reachable while the Schwab rotation is
+     * still outstanding.
+     */
+    @Bean
+    @ConditionalOnProperty(name = "app.marketdata.provider", havingValue = "csv")
+    public MarketDataProvider csvMarketDataProvider(
+            @Value("${app.marketdata.csv.directory:data}") String directory) {
+        return new CsvMarketDataProvider(Path.of(directory));
     }
 
     // ---------------------------------------------------------------

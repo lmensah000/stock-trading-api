@@ -50,11 +50,11 @@ DB_USER=... DB_PASS=... JWT_SECRET=... mvn spring-boot:run
 mvn test
 ```
 
-**200 tests. With Docker running, all 200 pass.** Without Docker one is skipped:
+**244 tests. With Docker running, all 244 pass.** Without Docker one is skipped:
 `SchemaMigrationTest` uses Testcontainers to apply the migrations to a real
 MySQL 8.0 and validate every entity against them. It is the authoritative check
-on the schema, so a run reporting `199 passed, 1 skipped` has **not** verified
-the schema. Prefer the number that says 200.
+on the schema, so a run reporting `243 passed, 1 skipped` has **not** verified
+the schema. Prefer the number that says 244.
 
 MySQL rather than H2 is deliberate: H2 does not reproduce MySQL's `ENUM`
 columns, foreign-key semantics or dialect behaviour, so it can pass while
@@ -74,6 +74,48 @@ that reaches production unnoticed.
 | `BOT_STARTING_EQUITY` | `100000` | What the paper account is funded with, once. |
 | `BOT_UNLOCK_TARGET_EQUITY` | — | Required on first boot with the bot on. Immutable after. |
 | `MARKETDATA_PROVIDER` | `in-memory` | `in-memory` (fixtures), `csv` (backtesting), `schwab` (live). |
+| `MARKETDATA_CSV_DIR` | `data` | Where the csv provider looks for bar files. |
+
+## Backtesting
+
+The one thing that needs no credentials, so it works today.
+
+Drop bar files into `data/` named `TICKER_TIMEFRAME.csv`:
+
+```
+data/AAPL_D1.csv
+openTime,open,high,low,close,volume
+2026-01-02T00:00:00Z,100.00,101.00,99.00,100.00,1000
+```
+
+Set `MARKETDATA_PROVIDER=csv`, then:
+
+```bash
+curl -X POST http://127.0.0.1:8080/api/bot/backtest \
+     -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+     -d '{"ticker":"AAPL","timeframe":"D1","thresholdPercent":4,"slippageBps":10}'
+```
+
+It writes nothing — the runner holds no repository, so a replay cannot touch the
+account the live-trading gate reads.
+
+**Read `docs/BACKTEST-SPEC.md` before trusting a number from it.** Three things
+in particular:
+
+- **Entry is at the next bar's open**, never the signal bar's close. Entering at
+  the close is the classic lookahead bug and inflates any momentum rule.
+- **A bar containing both the stop and the target is scored as a loss.** OHLC
+  does not say which came first. The report counts these separately — if most of
+  your results rest on that assumption, the timeframe is too coarse to conclude
+  anything.
+- **Below 30 closed trades the report withholds win rate and expectancy.** A win
+  rate from eight trades is not an estimate of anything.
+
+**What it does not test.** Only the percentage-move and gap maths. The
+volume-to-open-interest and option-chart rules need option chains with open
+interest, which equity bar files do not contain and which are not freely
+available. Those thresholds remain untested guesses — a good equity backtest is
+not evidence about them.
 
 ## The live-trading gate
 
@@ -121,4 +163,5 @@ are being enforced.
 - **Nothing places a real broker order.** There is no live trading path.
 - **No market-stage gate.** `CLAUDE.md` specifies the exposure ceiling as a hard
   cap in the order path; it is documented but not yet enforced.
-- **No backtest results exist**, so the rule thresholds are untested guesses.
+- **No backtest results exist yet.** The harness exists; the thresholds stay
+  untested guesses until it is run over real history.
