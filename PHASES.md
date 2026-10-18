@@ -115,6 +115,33 @@ the gap maths — the two option rules need chains with open interest that bar
 files do not carry, so Phase 9's alternative-data work is what unblocks
 testing them.
 
+## Phase 0d — Alpaca paper trading ✅ DONE
+
+thinkorswim paperMoney has no API, so paper fills come from Alpaca instead.
+Landed: `bot/broker` with `BrokerPort`, `InMemoryBroker` (the default, and the
+test double), `AlpacaBroker` against the **paper host only**, `FillReconciler`,
+and `BotRunner` — a scheduled scan that does not exist as a bean unless
+`app.bot.enabled=true`. Plus an `alpaca` `MarketDataProvider`.
+
+Three decisions worth remembering:
+
+- **Order placement is not retried.** Reads are. Retrying an order whose
+  response was lost is how one intended position becomes two; the client order
+  id makes recovery possible instead.
+- **Reconciliation books deltas, not totals.** An order polled at 30% then 80%
+  books 30 then 50, and a repeat poll books nothing. Our `Account` feeds
+  `LiveTradingGate`, so a double-booked fill could arm the gate on money never
+  made. The booked-quantity map is in memory, which means a restart mid-fill
+  would re-book from zero — acceptable for paper, **not for live**, and the fix
+  is a broker-filled-quantity column on `Order`.
+- **No live URL exists anywhere**, and the keys are paper keys the live host
+  refuses. Two independent barriers, neither relying on the other.
+
+**Still outstanding:** the bot's stop is a placeholder (trigger less the
+threshold percentage) rather than a structural level — the signal bar's low or
+an ATR multiple. That arrives with setup detection. And the market-stage
+exposure ceiling is still not enforced.
+
 ## Phase 1 — Boot blockers and bug fixes ✅ DONE
 
 Landed: package-by-feature reorg; `@RestController` added where missing;

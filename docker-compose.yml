@@ -74,6 +74,18 @@ services:
       BOT_ENABLED: ${BOT_ENABLED:-false}
       BOT_OWNER_USERNAME: ${BOT_OWNER_USERNAME:-}
       BOT_STARTING_EQUITY: ${BOT_STARTING_EQUITY:-100000}
+
+      # in-memory by default, so nothing can reach a market by accident.
+      # alpaca-paper requires the PAPER key pair below.
+      BOT_BROKER: ${BOT_BROKER:-in-memory}
+      APCA_API_KEY_ID: ${APCA_API_KEY_ID:-}
+      APCA_API_SECRET_KEY: ${APCA_API_SECRET_KEY:-}
+
+      BOT_UNIVERSE: ${BOT_UNIVERSE:-}
+      BOT_RISK_PERCENT: ${BOT_RISK_PERCENT:-1}
+      BOT_THRESHOLD_PERCENT: ${BOT_THRESHOLD_PERCENT:-4}
+      BOT_SCAN_INTERVAL_MS: ${BOT_SCAN_INTERVAL_MS:-900000}
+      BOT_RECONCILE_INTERVAL_MS: ${BOT_RECONCILE_INTERVAL_MS:-60000}
       # Required on first boot with the bot enabled, and immutable afterwards.
       BOT_UNLOCK_TARGET_EQUITY: ${BOT_UNLOCK_TARGET_EQUITY:-}
 

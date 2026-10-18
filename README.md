@@ -50,11 +50,11 @@ DB_USER=... DB_PASS=... JWT_SECRET=... mvn spring-boot:run
 mvn test
 ```
 
-**244 tests. With Docker running, all 244 pass.** Without Docker one is skipped:
+**286 tests. With Docker running, all 286 pass.** Without Docker one is skipped:
 `SchemaMigrationTest` uses Testcontainers to apply the migrations to a real
 MySQL 8.0 and validate every entity against them. It is the authoritative check
-on the schema, so a run reporting `243 passed, 1 skipped` has **not** verified
-the schema. Prefer the number that says 244.
+on the schema, so a run reporting `285 passed, 1 skipped` has **not** verified
+the schema. Prefer the number that says 286.
 
 MySQL rather than H2 is deliberate: H2 does not reproduce MySQL's `ENUM`
 columns, foreign-key semantics or dialect behaviour, so it can pass while
@@ -73,7 +73,8 @@ that reaches production unnoticed.
 | `BOT_OWNER_USERNAME` | — | The account the bot acts as. Must already be registered. |
 | `BOT_STARTING_EQUITY` | `100000` | What the paper account is funded with, once. |
 | `BOT_UNLOCK_TARGET_EQUITY` | — | Required on first boot with the bot on. Immutable after. |
-| `MARKETDATA_PROVIDER` | `in-memory` | `in-memory` (fixtures), `csv` (backtesting), `schwab` (live). |
+| `MARKETDATA_PROVIDER` | `in-memory` | `in-memory` (fixtures), `csv` (backtesting), `alpaca` (IEX), `schwab` (live). |
+| `BOT_BROKER` | `in-memory` | `in-memory` or `alpaca-paper`. No live option exists. |
 | `MARKETDATA_CSV_DIR` | `data` | Where the csv provider looks for bar files. |
 
 ## Backtesting
@@ -116,6 +117,53 @@ volume-to-open-interest and option-chart rules need option chains with open
 interest, which equity bar files do not contain and which are not freely
 available. Those thresholds remain untested guesses — a good equity backtest is
 not evidence about them.
+
+## Paper trading
+
+**thinkorswim paperMoney has no API.** paperMoney lives inside the thinkorswim
+platform; Schwab's Trader API places only real orders on funded accounts, and
+its developer sandbox covers authentication and token refresh against synthetic
+data — there is no simulated-fill mode and no paper endpoint. So paper trading
+happens elsewhere.
+
+Two options, chosen with `BOT_BROKER`:
+
+| Value | What it does |
+|---|---|
+| `in-memory` (default) | Fills instantly at the intended price. No account needed. Right for testing plumbing, **useless for judging a strategy.** |
+| `alpaca-paper` | Alpaca's paper host, with simulated fills against real market data. |
+
+```bash
+BOT_BROKER=alpaca-paper
+APCA_API_KEY_ID=...          # PAPER keys only
+APCA_API_SECRET_KEY=...
+MARKETDATA_PROVIDER=alpaca
+BOT_UNIVERSE=AAPL,MSFT,NVDA
+BOT_ENABLED=true
+```
+
+**Paper keys only.** Alpaca issues separate key pairs for paper and live on
+separate hosts, so a paper key is refused by the live host. That separation is
+one of the two independent things keeping this bot away from real money — the
+other being `LiveTradingGate`. There is deliberately no live URL anywhere in
+this codebase.
+
+### Two limits of Alpaca's free tier
+
+- **The feed is IEX, a small share of consolidated volume.** Prices are fine, so
+  the percentage-move rule is fine. **Volume is not.** Any volume threshold
+  calibrated on IEX is calibrated against a few percent of what actually traded,
+  so the strategy's "volume confirms" condition and `VolumeOpenInterestRule`
+  cannot be validated on this feed. SIP is a paid subscription.
+- **Historical bars lag about 15 minutes.** Harmless for daily bars; it means
+  the bot runs on `D1` only, and the intraday timeframes stay backtest-only
+  until there is a SIP subscription.
+
+And as with any broker simulator, **Alpaca paper fills don't model market impact
+or realistic slippage.** The reconciler records intended price against actual
+fill on every order, which gives you measured slippage from your own order flow
+— the number that should eventually replace the guessed `slippageBps` default in
+the backtest's `CostModel`.
 
 ## The live-trading gate
 

@@ -202,6 +202,12 @@ if you find another `double` holding money, flag it before changing it.
   deduplication, and staged `TradePlan`s that never place an order.
 - A Schwab `MarketDataProvider` adapter with OAuth token handling, rate
   limiting, retry and circuit breaking.
+- A `BrokerPort` with an in-memory implementation and an Alpaca **paper**
+  adapter, an `alpaca` `MarketDataProvider`, a `FillReconciler` that books
+  broker fills into our own order state idempotently (polling is not idempotent
+  by nature — it books deltas, so a repeat poll books nothing), and a
+  `BotRunner` scheduled scan that is off unless `app.bot.enabled=true` and skips
+  a pass when the market is closed.
 - A `csv` `MarketDataProvider` and a backtest harness (`bot/backtest`) that
   replays bars through the real rules with no lookahead — the rule sees
   `bars[0..i]` and enters at bar `i+1`'s open — scores outcomes in R after
@@ -221,9 +227,23 @@ if you find another `double` holding money, flag it before changing it.
   it decides whether real money is reachable at all, not how much exposure the
   market stage permits. `OrderServiceImpl.placeOrder` is where both belong, and
   the ceiling must be built there before live trading is worth unlocking.
-- **No live broker adapter.** Nothing can place a real order even in `LIVE`
-  mode. The gate is the precondition for building one, not a switch that starts
-  live trading.
+- **No live broker adapter, and no live broker configuration.** `BrokerPort` has
+  two implementations: `InMemoryBroker` and `AlpacaBroker` against Alpaca's
+  **paper** host. There is no live URL anywhere in the codebase, not even
+  commented out, and the Alpaca keys we hold are paper keys, which the live host
+  refuses. Real money is therefore out of reach for two independent reasons.
+  Unlocking `LiveTradingGate` changes neither; building a live adapter is
+  separate, deliberate work.
+- **thinkorswim paperMoney is not reachable.** It lives inside the thinkorswim
+  platform, Schwab's Trader API places only real orders, and its sandbox covers
+  authentication against synthetic data, not fills. Paper trading happens via
+  Alpaca or the in-memory broker — not through Schwab.
+- **Volume-based rules are unvalidated on the free Alpaca tier.** Its feed is
+  IEX, a small share of consolidated volume, so a volume threshold tuned on it
+  is tuned against a few percent of what traded. The "volume confirms"
+  condition and `VolumeOpenInterestRule` need SIP before they mean anything.
+  Free historical bars also lag ~15 minutes, which is why the runner is `D1`
+  only.
 - **No backtest *results*.** The harness exists (`bot/backtest`, specified in
   `docs/BACKTEST-SPEC.md` with hand-computed numbers written before the code),
   and a `csv` provider feeds it without credentials. But nothing has been run

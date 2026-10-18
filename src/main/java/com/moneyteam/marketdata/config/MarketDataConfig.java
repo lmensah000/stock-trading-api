@@ -1,6 +1,8 @@
 package com.moneyteam.marketdata.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.moneyteam.bot.broker.alpaca.AlpacaHttpClient;
+import com.moneyteam.marketdata.provider.alpaca.AlpacaMarketDataProvider;
 import com.moneyteam.marketdata.provider.csv.CsvMarketDataProvider;
 import com.moneyteam.marketdata.provider.schwab.SchwabMarketDataProvider;
 import com.moneyteam.marketdata.provider.schwab.auth.OAuthTokenRepository;
@@ -68,6 +70,45 @@ public class MarketDataConfig {
     public MarketDataProvider csvMarketDataProvider(
             @Value("${app.marketdata.csv.directory:data}") String directory) {
         return new CsvMarketDataProvider(Path.of(directory));
+    }
+
+    // ---------------------------------------------------------------
+    //  Alpaca
+    // ---------------------------------------------------------------
+
+    /**
+     * Bars from Alpaca's data API, using its own host and its own credentials.
+     *
+     * Separate from the trading client in {@code BrokerConfig} because the two
+     * are different hosts: data lives on data.alpaca.markets while orders go to
+     * paper-api.alpaca.markets. The same key pair authenticates both.
+     *
+     * The free tier is IEX-only and delayed about fifteen minutes - usable for
+     * prices and daily bars, not for calibrating anything volume-based. See
+     * {@link AlpacaMarketDataProvider}.
+     */
+    @Bean
+    @ConditionalOnProperty(name = "app.marketdata.provider", havingValue = "alpaca")
+    public MarketDataProvider alpacaMarketDataProvider(
+            HttpClient httpClient,
+            ObjectMapper objectMapper,
+            @Value("${app.bot.alpaca.key-id:}") String keyId,
+            @Value("${app.bot.alpaca.secret-key:}") String secretKey,
+            @Value("${app.marketdata.alpaca.base-url:https://data.alpaca.markets}") String baseUrl,
+            @Value("${app.marketdata.alpaca.feed:iex}") String feed,
+            @Value("${app.marketdata.alpaca.request-timeout-seconds:20}") long timeoutSeconds) {
+
+        if (keyId == null || keyId.isBlank() || secretKey == null || secretKey.isBlank()) {
+            throw new IllegalStateException(
+                    "app.marketdata.provider=alpaca requires app.bot.alpaca.key-id and "
+                            + "app.bot.alpaca.secret-key (APCA_API_KEY_ID / APCA_API_SECRET_KEY). "
+                            + "Use PAPER keys.");
+        }
+
+        return new AlpacaMarketDataProvider(
+                new AlpacaHttpClient(httpClient, objectMapper, baseUrl, keyId, secretKey,
+                        Duration.ofSeconds(timeoutSeconds)),
+                feed);
     }
 
     // ---------------------------------------------------------------
