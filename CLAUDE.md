@@ -208,6 +208,15 @@ if you find another `double` holding money, flag it before changing it.
   by nature — it books deltas, so a repeat poll books nothing), and a
   `BotRunner` scheduled scan that is off unless `app.bot.enabled=true` and skips
   a pass when the market is closed.
+- A trade journal (`bot/journal`) recording manual fills with a
+  `ContextSnapshot` of the market at that instant, annotated chart screenshots,
+  and two analyses: `DisagreementAnalyzer`, which replays the encoded rules over
+  each recorded fill and reports the trades taken while every rule stayed
+  silent — the rules traded but never written down — and `RuleBook`, which
+  measures stated rules against actual fills and reports the contradictions.
+  A snapshot must round-trip to the *same signal* the live rules produced;
+  there is a test on that, because a lossy reconstruction would turn every
+  disagreement into an artefact that reads like a finding.
 - A `csv` `MarketDataProvider` and a backtest harness (`bot/backtest`) that
   replays bars through the real rules with no lookahead — the rule sees
   `bars[0..i]` and enters at bar `i+1`'s open — scores outcomes in R after
@@ -254,6 +263,21 @@ if you find another `double` holding money, flag it before changing it.
   evidence about those two.
 - **No indicator library** beyond the FVG detector, and no regime
   classification, setup detection, scale-out ladder or adaptive weighting.
+  This has a visible consequence in the journal: `SnapshotFeatures` can only
+  measure what exists, so a stated rule about the 21 EMA, ATR or relative
+  strength is reported **uncheckable** rather than passing. Phase 6 unblocks it.
+- **No learning layer.** The journal collects the evidence; nothing fits
+  anything to it yet. When that arrives it tunes **ranking weights only** —
+  never size, stop or the exposure ceiling, per the invariant above — and it
+  must be withheld below a sample floor. A personal option log is tens to low
+  hundreds of trades, where a rich feature vector overfits near-certainly, so
+  the realistic output is candidate rules a human judges.
+- **Journal caveats that bound what it can teach.** It contains only trades that
+  were *taken*, so it cannot show what was correctly avoided — the
+  `RULES_FIRED_YOU_PASSED` bucket is a partial window, covering only setups the
+  rules already flag. And outcome is kept separate from the trader's own
+  `Judgement` on purpose: a winning trade can be a bad decision, so anything
+  fitted to P&L alone learns to chase luck.
 - **No front end.** No `src/main/resources/static`, no dashboard.
 
 **Standing security note:** Schwab API credentials — a `client_id`, a

@@ -50,11 +50,11 @@ DB_USER=... DB_PASS=... JWT_SECRET=... mvn spring-boot:run
 mvn test
 ```
 
-**286 tests. With Docker running, all 286 pass.** Without Docker one is skipped:
+**332 tests. With Docker running, all 332 pass.** Without Docker one is skipped:
 `SchemaMigrationTest` uses Testcontainers to apply the migrations to a real
 MySQL 8.0 and validate every entity against them. It is the authoritative check
-on the schema, so a run reporting `285 passed, 1 skipped` has **not** verified
-the schema. Prefer the number that says 286.
+on the schema, so a run reporting `331 passed, 1 skipped` has **not** verified
+the schema. Prefer the number that says 332.
 
 MySQL rather than H2 is deliberate: H2 does not reproduce MySQL's `ENUM`
 columns, foreign-key semantics or dialect behaviour, so it can pass while
@@ -164,6 +164,43 @@ or realistic slippage.** The reconciler records intended price against actual
 fill on every order, which gives you measured slippage from your own order flow
 — the number that should eventually replace the guessed `slippageBps` default in
 the backtest's `CostModel`.
+
+## Trade journal — learning what you don't put into words
+
+Records each manual fill with a snapshot of the market at that instant, plus the
+marked-up chart you were looking at. Then it replays the bot's own rules over
+each snapshot and buckets the result:
+
+| Bucket | Meaning |
+|---|---|
+| `AGREED` | You took it and a rule fired. Confirms what's already encoded. |
+| `YOU_TOOK_RULES_SILENT` | **The articulation gap.** You traded it; no rule describes why. |
+| `RULES_FIRED_YOU_PASSED` | An unstated veto — something disqualified it. |
+
+The silent bucket is the output that matters: each entry is a decision made for
+a reason the system doesn't contain, and the chart attached to it is the
+shortest route to finding out what. `unexplainedWinners()` narrows it further —
+a profitable trade no rule describes is the strongest evidence something real is
+missing.
+
+The rule book is the mirror image. State a rule and it measures your fills
+against it:
+
+> "I never buy below the previous close" was contradicted by 2 of 3 fills (66.7%).
+> Either it's being broken, or it's not the rule actually being traded.
+
+**Three things that bound what this can tell you:**
+
+- **It only contains trades you took**, so it can't show what you correctly
+  avoided. The passed-over bucket is a partial window, covering only setups the
+  rules already flag.
+- **Outcome is stored separately from your own judgement**, deliberately. A
+  winning trade can be a bad decision; anything fitted to P&L alone learns to
+  chase luck.
+- **Rules naming an indicator can't be checked yet.** There's no indicator
+  library, so `close > ema21` is refused at parse time rather than silently
+  never evaluated. The checkable vocabulary is close/open/high/low/volume,
+  previousClose, changePercent, rangePercent, and the option chain fields.
 
 ## The live-trading gate
 

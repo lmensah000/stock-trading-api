@@ -142,6 +142,41 @@ threshold percentage) rather than a structural level — the signal bar's low or
 an ATR multiple. That arrives with setup detection. And the market-stage
 exposure ceiling is still not enforced.
 
+## Phase 0e — Trade journal and disagreement mining ✅ DONE
+
+Built to learn the rules that are traded but never written down, for a trader
+who describes setups visually rather than in words. Nothing in it asks for a
+setup to be described.
+
+Landed: `V6__trade_journal.sql`, `bot/journal` with `JournalEntry`,
+`ContextSnapshot`, `SnapshotCodec`, `AnnotationStore`, and `bot/journal/analysis`
+with `DisagreementAnalyzer`, `RuleBook`, `SnapshotFeatures` and `RuleExpression`.
+
+The idea: record the fill, the market at that instant, and the marked-up chart —
+then replay the encoded rules over each snapshot. Trades taken while every rule
+stayed silent are the articulation gap, located by comparison rather than by
+asking. No model, no sample size, no vendor; useful from the first few trades.
+
+Design points worth keeping:
+
+- **A snapshot must replay to the *same signal*.** Asserted on the signal's own
+  evidence, not on field equality. A lossy reconstruction would make every
+  disagreement an artefact that reads like a finding.
+- **Fidelity is a column.** An imported fill has no chain from its fill moment;
+  a live-captured one does. Analyses are scoped to one tier, and `RuleBook`
+  strips chain features from entries whose tier lacks them.
+- **Judgement is separate from R.** A winner the trader would not repeat is
+  exactly what a P&L-fitted model learns the wrong lesson from.
+- **Absence is never compliance.** A rule whose feature is missing is reported
+  uncheckable, not upheld.
+- **Uploads are untrusted.** Type from magic bytes, generated filenames, size
+  cap, root containment checked after normalisation.
+
+**Still outstanding:** EXIF is not stripped from uploaded screenshots — the fix
+needs an imaging dependency this project does not have. Feature extraction,
+candidate rules and ranking weights (plan Steps E and F) wait for data, which is
+the honest order rather than fitting a model to twenty trades.
+
 ## Phase 1 — Boot blockers and bug fixes ✅ DONE
 
 Landed: package-by-feature reorg; `@RestController` added where missing;
