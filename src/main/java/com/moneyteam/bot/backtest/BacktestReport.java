@@ -101,8 +101,11 @@ public record BacktestReport(
      */
     public String summary() {
         if (lowSample) {
-            return "%d trade(s) over %d bars, total %s R. Below the %d-trade floor, so win rate "
-                    + "and expectancy are withheld - this is not yet evidence of anything."
+            // Parenthesised deliberately: .formatted() binds tighter than +,
+            // so without these brackets it applies to the last literal alone
+            // and the first half prints its own placeholders verbatim.
+            return ("%d trade(s) over %d bars, total %s R. Below the %d-trade floor, so win rate "
+                    + "and expectancy are withheld - this is not yet evidence of anything.")
                     .formatted(trades.size(), barsReplayed, totalR, minimumTrades);
         }
         return "%d trades over %d bars: total %s R, expectancy %s R, win rate %s%s".formatted(

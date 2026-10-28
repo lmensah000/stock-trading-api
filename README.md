@@ -5,6 +5,21 @@ A momentum swing-trading API and bot. Spring Boot 2.6.6, Java 17, MySQL.
 See `CLAUDE.md` for the domain rules and invariants, and `PHASES.md` for what is
 built and what is next.
 
+## See it work
+
+```bash
+./scripts/demo.sh
+```
+
+Walks the analytical core end to end - bars, signals, gaps, sizing, backtest,
+broker, and the journal's articulation-gap analysis - using the real production
+classes. Needs no database, no credentials and no Docker. The bar series is
+generated, so its R figures show the machinery works and are **not** a backtest
+result; the runner says so in its own output.
+
+`docs/DEMO.md` has that plus the full `docker compose` walkthrough with curl
+commands.
+
 ## Run it
 
 ```bash
@@ -50,11 +65,11 @@ DB_USER=... DB_PASS=... JWT_SECRET=... mvn spring-boot:run
 mvn test
 ```
 
-**332 tests. With Docker running, all 332 pass.** Without Docker one is skipped:
+**333 tests. With Docker running, all 333 pass.** Without Docker one is skipped:
 `SchemaMigrationTest` uses Testcontainers to apply the migrations to a real
 MySQL 8.0 and validate every entity against them. It is the authoritative check
-on the schema, so a run reporting `331 passed, 1 skipped` has **not** verified
-the schema. Prefer the number that says 332.
+on the schema, so a run reporting `332 passed, 1 skipped` has **not** verified
+the schema. Prefer the number that says 333.
 
 MySQL rather than H2 is deliberate: H2 does not reproduce MySQL's `ENUM`
 columns, foreign-key semantics or dialect behaviour, so it can pass while

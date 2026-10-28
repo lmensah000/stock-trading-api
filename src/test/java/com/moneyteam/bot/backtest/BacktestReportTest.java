@@ -122,6 +122,25 @@ class BacktestReportTest {
     }
 
     @Test
+    @DisplayName("the low-sample summary substitutes its numbers rather than printing placeholders")
+    void lowSampleSummaryIsActuallyFormatted() {
+        String summary = BacktestReport.of(repeat("2.0", 3), 100, 3, 30, CostModel.free()).summary();
+
+        // This shipped broken: .formatted() binds tighter than +, so it applied
+        // to the last literal of a concatenation and the first half printed its
+        // own placeholders. The older assertion above passed throughout, because
+        // the word it checked for lived in the half that was never formatted -
+        // which is why this one asserts on the substituted values instead.
+        assertThat(summary)
+                .doesNotContain("%d")
+                .doesNotContain("%s")
+                .contains("3 trade(s)")
+                .contains("over 100 bars")
+                .contains("6.0000 R")
+                .contains("30-trade floor");
+    }
+
+    @Test
     @DisplayName("the cost model that produced the figures travels with them")
     void costModelIsPartOfTheReport() {
         CostModel costs = new CostModel(new BigDecimal("10"), new BigDecimal("0.005"));
