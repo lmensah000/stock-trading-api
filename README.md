@@ -5,6 +5,14 @@ A momentum swing-trading API and bot. Spring Boot 2.6.6, Java 17, MySQL.
 See `CLAUDE.md` for the domain rules and invariants, and `PHASES.md` for what is
 built and what is next.
 
+| Document | What it is for |
+|---|---|
+| `docs/PROJECT-OVERVIEW.md` | Every aspect of the system in one place, ending in an honest inventory of what is and is not built. Start here. |
+| `docs/WORK-LOG.md` | Every story and task completed, in order, with how it was done and the bugs found along the way. |
+| `docs/INDICATOR-SPEC.md` | The indicator maths, settled as specification before implementation. |
+| `docs/BACKTEST-SPEC.md` | What the harness measures and the three ways a backtest can quietly flatter itself. |
+| `docs/DEMO.md` | The runnable walkthrough and the `docker compose` stack. |
+
 ## See it work
 
 ```bash
